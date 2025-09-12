@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-light-bg text-light-text overflow-x-hidden;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Prevent zoom on input focus on iOS */
+  input, textarea, select {
+    font-size: 16px;
+  }
+}
+
+@layer components {
+  .mobile-container {
+    @apply max-w-md mx-auto min-h-screen bg-light-bg relative;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary-purple to-primary-pink text-white font-semibold py-4 px-8 rounded-4xl shadow-button transition-all duration-300 active:scale-95;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-primary-purple font-semibold py-3 px-6 rounded-3xl border-2 border-primary-purple/20 transition-all duration-300 active:scale-95;
+  }
+  
+  .card {
+    @apply bg-white rounded-4xl shadow-card p-6 border border-gray-100;
+  }
+  
+  .gradient-bg {
+    background: linear-gradient(135deg, #9D7CF3 0%, #FFB8C4 100%);
+  }
+  
+  .meditation-card {
+    @apply bg-white rounded-3xl p-4 shadow-md active:scale-95 transition-transform duration-200;
+  }
+  
+  .bottom-nav {
+    @apply fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-200 px-4 py-2 z-50;
+  }
+  
+  .nav-item {
+    @apply flex flex-col items-center justify-center p-2 rounded-2xl transition-colors duration-200;
+  }
+  
+  .nav-item.active {
+    @apply bg-primary-purple/10 text-primary-purple;
+  }
+  
+  .nav-item.inactive {
+    @apply text-gray-400;
+  }
+  
+  .mood-emoji {
+    @apply text-4xl p-4 rounded-3xl transition-all duration-200 active:scale-90;
+  }
+  
+  .mood-emoji.selected {
+    @apply bg-primary-purple/10 scale-110;
+  }
+  
+  .streak-card {
+    @apply bg-gradient-to-r from-primary-yellow to-primary-orange text-white rounded-3xl p-6 shadow-card;
+  }
+  
+  .input-field {
+    @apply w-full p-4 bg-gray-50 rounded-3xl border-2 border-gray-200 focus:border-primary-purple focus:outline-none focus:ring-2 focus:ring-primary-purple/20 transition-all duration-200;
+  }
+  
+  .meditation-timer {
+    @apply text-6xl font-bold text-center mb-8 font-mono tracking-wider;
+  }
+  
+  .progress-ring {
+    transform: rotate(-90deg);
+  }
+  
+  .chat-bubble-user {
+    @apply bg-primary-purple text-white rounded-3xl rounded-br-lg p-4 ml-8 mb-4;
+  }
+  
+  .chat-bubble-ai {
+    @apply bg-gray-100 text-gray-800 rounded-3xl rounded-bl-lg p-4 mr-8 mb-4;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .toast-enter {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      transform: translate(-50%, -100%);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+  }
+  
+  .duration-4000 {
+    transition-duration: 4000ms;
+  }
+}
