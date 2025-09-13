@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import type { Screen } from '../App'
 
 interface MindCoachScreenProps {
@@ -13,446 +13,162 @@ interface MindCoachScreenProps {
   }
 }
 
-interface ChatMessage {
-  id: string
-  type: 'user' | 'coach'
-  content: string
-  timestamp: Date
-  hasAudio?: boolean
-  isTyping?: boolean
-}
-
-type CoachMode = 'voice' | 'text'
-
-export default function MindCoachScreen({ onNavigate, user }: MindCoachScreenProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [inputText, setInputText] = useState('')
-  const [isCoachTyping, setIsCoachTyping] = useState(false)
-  const [coachMode, setCoachMode] = useState<CoachMode>('voice')
-  const [sessionTime, setSessionTime] = useState(0)
-  const [isCoachSpeaking, setIsCoachSpeaking] = useState(false)
-  
-  const chatScrollRef = useRef<HTMLDivElement>(null)
-  const sessionTimerRef = useRef<number | null>(null)
-  
-  // TODO: Heygen Avatar Integration Refs (uncomment when implementing)
-  // const heygenVideoRef = useRef<HTMLVideoElement>(null)
-  // const heygenIframeRef = useRef<HTMLIFrameElement>(null)
-  // const [isAvatarLoaded, setIsAvatarLoaded] = useState(false)
-  // const [avatarError, setAvatarError] = useState(false)
-
-  const quickSuggestions = [
-    "I feel stressed 😰",
-    "Need focus tips 🎯", 
-    "Help me relax 😌",
-    "I'm anxious 💭"
-  ]
-
-  const initialMessages: ChatMessage[] = [
-    {
-      id: '1',
-      type: 'coach',
-      content: `Hello ${user.name}! I'm your personal mind coach. I'm here to help you with stress, anxiety, focus, and emotional well-being. How are you feeling today?`,
-      timestamp: new Date(),
-      hasAudio: true
-    }
-  ]
+export default function MindCoachScreen({ onNavigate }: MindCoachScreenProps) {
+  const [isMuted, setIsMuted] = useState(false)
 
   useEffect(() => {
-    // Initialize with welcome message
-    setMessages(initialMessages)
-    
-    // Start session timer
-    sessionTimerRef.current = window.setInterval(() => {
-      setSessionTime(prev => prev + 1)
-    }, 1000)
+    // Initialize Heygen avatar with mobile-optimized positioning
+    const initializeHeygen = () => {
+      const script = document.createElement('script')
+      script.innerHTML = `
+        !function(window){
+          const host="https://labs.heygen.com",
+          url=host+"/guest/streaming-embed?share=eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJLYXR5YV9Qcm9mZXNzaW9uYWxMb29rMl9w%0D%0AdWJsaWMiLCJwcmV2aWV3SW1nIjoiaHR0cHM6Ly9maWxlczIuaGV5Z2VuLmFpL2F2YXRhci92My9k%0D%0ANTJmZmExYjQ0N2Q0ZjJmOGViMTY5MTdlN2VjMjIyYV81NTg3MC9wcmV2aWV3X3RhbGtfMS53ZWJw%0D%0AIiwibmVlZFJlbW92ZUJhY2tncm91bmQiOnRydWUsImtub3dsZWRnZUJhc2VJZCI6IjFhY2VmYjM2%0D%0AZmVhODQ2NWM4Y2NiMTVjZDVlODQxNTljIiwidXNlcm5hbWUiOiIzZjU3Zjc1MzRlMzc0ZjVhYTcz%0D%0AY2MwM2IzNjM1ZTJhNCJ9&inIFrame=1",
+          clientWidth=document.body.clientWidth,
+          wrapDiv=document.createElement("div");
+          wrapDiv.id="heygen-streaming-embed";
+          const container=document.createElement("div");
+          container.id="heygen-streaming-container";
+          const stylesheet=document.createElement("style");
+          stylesheet.innerHTML=\`
+            #heygen-streaming-embed {
+              z-index: 1;
+              position: fixed;
+              top: 100px;
+              left: 20px;
+              right: 20px;
+              bottom: 180px;
+              width: calc(100vw - 40px);
+              max-width: 400px;
+              margin: 0 auto;
+              border-radius: 24px;
+              border: 0;
+              box-shadow: 0px 8px 24px 0px rgba(0, 0, 0, 0.15);
+              overflow: hidden;
+              opacity: 1;
+              visibility: visible;
+              background: #4A5568;
+            }
+            #heygen-streaming-container {
+              width: 100%;
+              height: 100%;
+            }
+            #heygen-streaming-container iframe {
+              width: 100%;
+              height: 100%;
+              border: 0;
+              border-radius: 24px;
+            }
+          \`;
+          const iframe=document.createElement("iframe");
+          iframe.allowFullscreen=false;
+          iframe.title="Streaming Embed";
+          iframe.role="dialog";
+          iframe.allow="microphone";
+          iframe.src=url;
+          container.appendChild(iframe);
+          wrapDiv.appendChild(stylesheet);
+          wrapDiv.appendChild(container);
+          document.body.appendChild(wrapDiv);
+        }(globalThis);
+      `
+      document.head.appendChild(script)
+    }
 
-    // Simulate coach speaking for welcome message
-    setIsCoachSpeaking(true)
-    setTimeout(() => setIsCoachSpeaking(false), 3000)
+    initializeHeygen()
 
     return () => {
-      if (sessionTimerRef.current) {
-        clearInterval(sessionTimerRef.current)
+      // Cleanup Heygen embed on unmount
+      const embed = document.getElementById('heygen-streaming-embed')
+      if (embed) {
+        embed.remove()
       }
     }
-  }, [user.name])
+  }, [])
 
-  useEffect(() => {
-    // Auto-scroll to bottom when new messages arrive
-    if (chatScrollRef.current) {
-      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight
-    }
-  }, [messages, isCoachTyping])
-
-  const sendMessage = (content: string) => {
-    if (!content.trim()) return
-
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: content.trim(),
-      timestamp: new Date()
-    }
-
-    setMessages(prev => [...prev, userMessage])
-    setInputText('')
-    
-    // Show coach typing indicator
-    setIsCoachTyping(true)
-    
-    // Simulate coach response after delay
-    setTimeout(() => {
-      const coachResponse = generateCoachResponse(content.trim())
-      const coachMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'coach',
-        content: coachResponse,
-        timestamp: new Date(),
-        hasAudio: coachMode === 'voice'
-      }
-      
-      setMessages(prev => [...prev, coachMessage])
-      setIsCoachTyping(false)
-      
-      // TODO: Integrate with Heygen Avatar for voice responses
-      if (coachMode === 'voice') {
-        setIsCoachSpeaking(true)
-        // await speakWithAvatar(coachResponse) // Uncomment when implementing Heygen
-        setTimeout(() => setIsCoachSpeaking(false), 2000) // Remove when using real avatar
-      }
-    }, 1500 + Math.random() * 1000)
+  const handleEndCall = () => {
+    onNavigate('home')
   }
 
-  const generateCoachResponse = (userInput: string): string => {
-    const input = userInput.toLowerCase()
-    
-    if (input.includes('stress') || input.includes('stressed')) {
-      return "I understand you're feeling stressed. Let's start with a simple breathing exercise. Take a deep breath in for 4 counts, hold for 4, then exhale for 6. This activates your parasympathetic nervous system and helps reduce stress hormones."
-    }
-    
-    if (input.includes('focus') || input.includes('concentration')) {
-      return "Focus challenges are common in our busy world. Try the 25-minute Pomodoro technique: work intensely for 25 minutes, then take a 5-minute break. Also, minimize distractions and start with just one task at a time."
-    }
-    
-    if (input.includes('anxious') || input.includes('anxiety')) {
-      return "Anxiety can feel overwhelming, but remember - you're safe right now. Try the 5-4-3-2-1 grounding technique: name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, and 1 you taste. This brings you back to the present moment."
-    }
-    
-    if (input.includes('relax') || input.includes('calm')) {
-      return "Creating calm is a beautiful intention. Progressive muscle relaxation works wonders - tense each muscle group for 5 seconds, then release. Start with your toes and work up to your head. Feel the contrast between tension and relaxation."
-    }
-    
-    if (input.includes('sleep') || input.includes('tired')) {
-      return "Good sleep is foundational to mental health. Create a wind-down routine 1 hour before bed: dim lights, avoid screens, try gentle stretching or reading. Your bedroom should be cool, dark, and quiet for optimal rest."
-    }
-    
-    if (input.includes('motivation') || input.includes('motivated')) {
-      return "Motivation comes and goes, but systems create lasting change. Break your goals into tiny, manageable steps. Celebrate small wins - they compound into major transformations. What's one small step you could take today?"
-    }
-    
-    // Default responses
-    const defaultResponses = [
-      "That's a valuable insight. Tell me more about what you're experiencing - the more specific you can be, the better I can help guide you.",
-      "I hear you. These feelings are valid and normal. Let's explore some techniques that might help you feel more centered and balanced.",
-      "Thank you for sharing that with me. Building awareness of our thoughts and feelings is the first step toward positive change. What would feel most helpful right now?",
-      "It takes courage to reach out for support. You're taking an important step in your mental wellness journey. How would you like to work through this together?"
-    ]
-    
-    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)]
+  const toggleMute = () => {
+    setIsMuted(!isMuted)
   }
-
-  const formatSessionTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
-  const playAudioMessage = (messageId: string) => {
-    // Simulate audio playback
-    setIsCoachSpeaking(true)
-    setTimeout(() => setIsCoachSpeaking(false), 2000)
-    console.log('Playing audio for message:', messageId)
-  }
-
-  // TODO: Heygen Avatar Integration Helper Functions
-  // Uncomment and implement when integrating Heygen Avatar
-  
-  /*
-  const initializeHeygenAvatar = async () => {
-    try {
-      // Initialize Heygen Avatar
-      // setIsAvatarLoaded(true)
-      // setAvatarError(false)
-    } catch (error) {
-      console.error('Failed to initialize Heygen Avatar:', error)
-      // setAvatarError(true)
-    }
-  }
-
-  const speakWithAvatar = async (text: string) => {
-    try {
-      setIsCoachSpeaking(true)
-      // Send text to Heygen Avatar for speech
-      // await heygenAPI.speak(text)
-      // Monitor speaking completion
-    } catch (error) {
-      console.error('Avatar speaking error:', error)
-      setIsCoachSpeaking(false)
-    }
-  }
-
-  const handleAvatarLoadComplete = () => {
-    setIsAvatarLoaded(true)
-    setAvatarError(false)
-  }
-
-  const handleAvatarError = () => {
-    setIsAvatarLoaded(false)
-    setAvatarError(true)
-  }
-  */
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-10 left-10 w-20 h-20 bg-white/5 rounded-full animate-pulse"></div>
-        <div className="absolute top-40 right-10 w-16 h-16 bg-purple-400/10 rounded-full animate-bounce"></div>
-        <div className="absolute bottom-40 left-5 w-12 h-12 bg-pink-400/10 rounded-full animate-pulse"></div>
-      </div>
+    <div className="min-h-screen bg-white">
+      
 
       {/* Header */}
-      <div className="relative z-10 flex items-center justify-between p-6 pt-12">
-        <button 
-          onClick={() => onNavigate('home')}
-          className="text-white/80 hover:text-white transition-colors"
-        >
-          ← Back
-        </button>
-        <h1 className="text-xl font-bold">Mind Coach</h1>
-        <div className="flex items-center space-x-2">
-          <span className="text-orange-400">🔥</span>
-          <span className="text-sm font-medium">{user.streak}d</span>
-        </div>
+      <div className="text-center py-4 pb-6">
+        <h1 className="text-black text-lg font-semibold">Mind Coach</h1>
       </div>
 
-      {/* Avatar Video Section - Heygen Integration Ready */}
-      <div className="relative z-10 px-6 mb-4">
-        <div className="relative aspect-video bg-black/20 rounded-3xl overflow-hidden backdrop-blur-sm border border-white/10">
-          {/* Heygen Avatar Container - Ready for Integration */}
-          <div className="absolute inset-0 w-full h-full">
-            {/* 
-              TODO: Replace this placeholder with Heygen Avatar
-              
-              Integration Example:
-              <iframe 
-                src="YOUR_HEYGEN_AVATAR_URL"
-                className="w-full h-full"
-                frameBorder="0"
-                allow="microphone; camera"
-              />
-              
-              OR
-              
-              <video 
-                ref={heygenVideoRef}
-                className="w-full h-full object-cover"
-                autoPlay
-                muted={!isCoachSpeaking}
-              />
-            */}
-            
-            {/* Placeholder Content - Remove when integrating Heygen */}
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-800/50 to-pink-800/50">
-              <div className="text-center">
-                {/* Heygen Avatar Placeholder */}
-                <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full flex items-center justify-center border-2 border-white/20">
-                  <div className="text-3xl">🎭</div>
-                </div>
-                <div className="text-white/60 text-sm">Heygen Avatar Space</div>
-                <div className="text-white/40 text-xs mt-1">Ready for Integration</div>
+      {/* Main Video Area - Heygen Avatar will appear here */}
+      <div className="flex-1 px-5 pb-32">
+        <div className="relative mx-auto max-w-sm">
+          {/* Video Container - Heygen will inject here */}
+          <div className="relative aspect-[3/4] bg-gray-600 rounded-3xl overflow-hidden shadow-lg">
+            {/* Fallback content while Heygen loads */}
+            <div className="absolute inset-0 bg-gradient-to-b from-gray-500 to-gray-700 flex items-center justify-center">
+              <div className="text-white text-center">
+                <div className="text-4xl mb-2">👩‍💼</div>
+                <div className="text-sm opacity-80">Loading Mind Coach...</div>
               </div>
             </div>
-          </div>
 
-          {/* Coach Status Overlay */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-            <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full backdrop-blur-md border transition-all ${
-              isCoachSpeaking 
-                ? 'bg-green-500/20 border-green-400/40 text-green-300' 
-                : 'bg-black/30 border-white/20 text-white/80'
-            }`}>
-              <div className={`w-2 h-2 rounded-full ${isCoachSpeaking ? 'bg-green-400 animate-pulse' : 'bg-white/50'}`}></div>
-              <span className="text-sm font-medium">
-                {isCoachSpeaking ? 'Coach is speaking...' : 'Coach is listening'}
-              </span>
-            </div>
-          </div>
-
-          {/* Mode Toggle - Top Right */}
-          <div className="absolute top-4 right-4">
-            <div className="flex bg-black/30 rounded-full p-1 backdrop-blur-md border border-white/10">
-              <button
-                onClick={() => setCoachMode('voice')}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                  coachMode === 'voice' 
-                    ? 'bg-white text-purple-900 shadow-lg' 
-                    : 'text-white/70 hover:text-white'
-                }`}
-              >
-                🎵 Voice
+            {/* Top Right Controls */}
+            <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
+              <button className="w-8 h-8 bg-black/30 rounded-full flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
               </button>
-              <button
-                onClick={() => setCoachMode('text')}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                  coachMode === 'text' 
-                    ? 'bg-white text-purple-900 shadow-lg' 
-                    : 'text-white/70 hover:text-white'
-                }`}
-              >
-                💬 Text
+              <button className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                  <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
               </button>
-            </div>
-          </div>
-
-          {/* Session Timer - Top Left */}
-          <div className="absolute top-4 left-4">
-            <div className="bg-black/30 px-3 py-2 rounded-full backdrop-blur-md border border-white/10">
-              <span className="text-xs font-medium text-white">⏱️ {formatSessionTime(sessionTime)}</span>
-            </div>
-          </div>
-
-          {/* Heygen Integration Notes Overlay (Development Only) */}
-          <div className="absolute top-1/2 right-4 transform -translate-y-1/2">
-            <div className="bg-blue-500/10 border border-blue-400/20 rounded-lg p-2 backdrop-blur-sm max-w-xs">
-              <div className="text-blue-300 text-xs font-medium mb-1">🔧 Heygen Integration Notes:</div>
-              <ul className="text-blue-200/80 text-xs space-y-1">
-                <li>• Full container ready for iframe/video</li>
-                <li>• Aspect ratio: 16:9 optimized</li>
-                <li>• Status indicators integrated</li>
-                <li>• Audio sync with isCoachSpeaking</li>
-                <li>• Responsive design maintained</li>
-              </ul>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Chat Section */}
-      <div className="relative z-10 flex-1 flex flex-col">
-        {/* Messages */}
-        <div 
-          ref={chatScrollRef}
-          className="flex-1 px-6 pb-4 overflow-y-auto max-h-64 space-y-4"
-        >
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div className={`max-w-[75%] ${message.type === 'user' ? 'order-2' : 'order-1'}`}>
-                {message.type === 'coach' && (
-                  <div className="flex items-center space-x-2 mb-1">
-                    <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-                      <span className="text-xs">🧠</span>
-                    </div>
-                    <span className="text-xs text-white/60">Mind Coach</span>
-                  </div>
-                )}
-                
-                <div className={`p-4 rounded-2xl ${
-                  message.type === 'user'
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-br-lg'
-                    : 'bg-white/10 backdrop-blur-sm text-white border border-white/10 rounded-bl-lg'
-                }`}>
-                  <p className="text-sm leading-relaxed">{message.content}</p>
-                  
-                  {message.hasAudio && message.type === 'coach' && (
-                    <button
-                      onClick={() => playAudioMessage(message.id)}
-                      className="mt-2 flex items-center space-x-1 text-xs text-white/70 hover:text-white transition-colors"
-                    >
-                      <span>🔊</span>
-                      <span>Play audio</span>
-                    </button>
-                  )}
-                </div>
-                
-                <div className={`text-xs text-white/40 mt-1 ${
-                  message.type === 'user' ? 'text-right' : 'text-left'
-                }`}>
-                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </div>
-              </div>
+      {/* Bottom Controls */}
+      <div className="fixed bottom-24 left-0 right-0">
+        <div className="flex items-center justify-center space-x-8 px-8">
+          {/* Pause/Resume Button */}
+          <button className="w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center shadow-lg">
+            <div className="flex space-x-1">
+              <div className="w-1.5 h-5 bg-white rounded"></div>
+              <div className="w-1.5 h-5 bg-white rounded"></div>
             </div>
-          ))}
-          
-          {/* Typing Indicator */}
-          {isCoachTyping && (
-            <div className="flex justify-start">
-              <div className="max-w-[75%]">
-                <div className="flex items-center space-x-2 mb-1">
-                  <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-                    <span className="text-xs">🧠</span>
-                  </div>
-                  <span className="text-xs text-white/60">Mind Coach</span>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm border border-white/10 p-4 rounded-2xl rounded-bl-lg">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+          </button>
 
-        {/* Quick Suggestions */}
-        <div className="px-6 py-2">
-          <div className="flex space-x-2 overflow-x-auto pb-2">
-            {quickSuggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                onClick={() => sendMessage(suggestion)}
-                className="flex-shrink-0 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-sm text-white/80 hover:text-white hover:bg-white/20 transition-all"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        </div>
+          {/* Microphone Toggle */}
+          <button 
+            onClick={toggleMute}
+            className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg ${
+              isMuted ? 'bg-gray-600' : 'bg-gray-600'
+            }`}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+              {isMuted ? (
+                <path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z"/>
+              ) : (
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28C16.28 17.23 19 14.41 19 11h-1.7z"/>
+              )}
+            </svg>
+          </button>
 
-        {/* Input Area */}
-        <div className="px-6 pb-6">
-          <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full p-2">
-            <button className="p-2 text-white/60 hover:text-white transition-colors">
-              🎤
-            </button>
-            
-            <input
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage(inputText)}
-              placeholder="Type your message here..."
-              className="flex-1 bg-transparent text-white placeholder-white/50 text-sm focus:outline-none"
-            />
-            
-            <button
-              onClick={() => sendMessage(inputText)}
-              disabled={!inputText.trim()}
-              className={`p-2 rounded-full transition-all ${
-                inputText.trim()
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
-                  : 'text-white/40 cursor-not-allowed'
-              }`}
-            >
-              ➤
-            </button>
-          </div>
+          {/* End Call Button */}
+          <button 
+            onClick={handleEndCall}
+            className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center shadow-lg"
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+              <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.7l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85-.33-.16-.56-.51-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>

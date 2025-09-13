@@ -116,7 +116,7 @@ function App() {
     }
   }
 
-  const showBottomNav = isAuthenticated && currentScreen !== 'onboarding' && currentScreen !== 'timer' && currentScreen !== 'mindCoach'
+  const showBottomNav = isAuthenticated && currentScreen !== 'onboarding' && currentScreen !== 'timer' 
 
   return (
     <div className="mobile-container">

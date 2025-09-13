@@ -14,192 +14,213 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
   const moods = [
-    { emoji: '😌', label: 'Calm', value: 'calm' },
-    { emoji: '😴', label: 'Relax', value: 'relax' },
-    { emoji: '🎯', label: 'Focus', value: 'focus' },
-    { emoji: '😰', label: 'Anxious', value: 'anxious' },
+    { emoji: '/Homescreen/Moods/calm.png', label: 'Calm', value: 'calm' },
+    { emoji: '/Homescreen/Moods/relax.png', label: 'Relax', value: 'relax' },
+    { emoji: '/Homescreen/Moods/focus.png', label: 'Focus', value: 'focus' },
+    { emoji: '/Homescreen/Moods/Anxious.png', label: 'Anxious', value: 'anxious' },
   ]
 
   const aiCoachSessions = [
     {
       id: 1,
       title: 'Midnight & Relaxation',
-      duration: '15 min',
-      thumbnail: '🌙',
+      image: '/Homescreen/Ai coach/Midnightandrelaxation.png',
       category: 'Sleep'
     },
     {
       id: 2,
-      title: 'Jogging & Cycling',
-      duration: '10 min',
-      thumbnail: '🏃‍♂️',
+      title: 'Jogging and Cycling',
+      image: '/Homescreen/Ai coach/JoggingandCycling.png',
       category: 'Active'
     },
     {
       id: 3,
-      title: 'Morning Clarity',
-      duration: '20 min',
-      thumbnail: '🌅',
+      title: 'Midnight Launderette',
+      image: '/Homescreen/Ai coach/MidnightLaunderetee.png',
       category: 'Focus'
     },
     {
       id: 4,
-      title: 'Stress Relief',
-      duration: '12 min',
-      thumbnail: '💆‍♀️',
+      title: 'Jogging',
+      image: '/Homescreen/Ai coach/jogging.png',
       category: 'Calm'
     }
   ]
 
   return (
-    <div className="min-h-screen bg-light-bg pb-24">
+    <div className="min-h-screen bg-white pb-20">
       {/* Header with Greeting */}
-      <div className="gradient-bg px-6 pt-12 pb-8 rounded-b-5xl">
-        <div className="text-white">
-          <h1 className="text-2xl font-bold mb-2">
-            Hi {user.name}, How are you feeling today?
+      <div className="px-6 pt-12 pb-6">
+        <div className="text-gray-900">
+          <h1 className="text-2xl font-semibold mb-2">
+            Hi {user.name}
           </h1>
-          <p className="text-white/80 text-sm">Let's start your mindfulness journey</p>
+          <p className="text-gray-600 text-base">How are you feeling today?</p>
         </div>
       </div>
 
-      <div className="px-6 -mt-4">
+      <div className="px-6">
         {/* Mood Selector */}
-        <div className="card mb-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">Select your mood</h3>
-          <div className="grid grid-cols-4 gap-3">
+        <div className="mb-8">
+          <div className="flex justify-between items-center gap-4">
             {moods.map((mood) => (
               <button
                 key={mood.value}
-                className="mood-emoji flex flex-col items-center space-y-2 bg-gray-50 hover:bg-primary-purple/10"
+                className="flex flex-col items-center space-y-2 flex-1"
               >
-                <span className="text-3xl">{mood.emoji}</span>
-                <span className="text-xs font-medium text-gray-600">{mood.label}</span>
+                <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                  <img 
+                    src={mood.emoji} 
+                    alt={mood.label}
+                    className="w-12 h-12 object-contain"
+                  />
+                </div>
+                <span className="text-xs font-medium text-gray-700">{mood.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Wellness Activities */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">Wellness Activities</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {/* Meditation Card */}
-            <div 
-              className="card p-4 cursor-pointer transition-transform active:scale-95 relative"
-              onClick={() => onNavigate('meditation')}
-            >
-              <div className="absolute top-2 right-2">
-                <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full font-medium">
-                  Recommended
-                </span>
+        {/* Meditative Insights Card */}
+        <div className="mb-8">
+          <div 
+            className="relative rounded-3xl overflow-hidden cursor-pointer"
+            // clicking anywhere navigates to Ask Question, button also works
+            onClick={() => onNavigate('askQuestion')}
+          >
+            <img 
+              src="/Homescreen/Meditative Insights.png" 
+              alt="Meditative Insights"
+              className="w-full h-auto object-cover"
+            />
+            {/* overlay with CTA positioned exactly on image */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-full h-full flex items-center justify-center px-6">
+                <div className="relative w-full max-w-md">
+                  {/* keep pointer-events on button so click works */}
+                  
+                </div>
               </div>
-              <div className="text-3xl mb-3">🧘‍♀️</div>
-              <h4 className="font-semibold text-gray-800 mb-1">Meditation</h4>
-              <p className="text-xs text-gray-600 mb-2">Quick calm to deep focus sessions</p>
-              <p className="text-xs text-primary-purple font-medium">2–20 min sessions</p>
             </div>
-
-            {/* Journal Card */}
-            <div 
-              className="card p-4 cursor-pointer transition-transform active:scale-95 relative"
-              onClick={() => onNavigate('journal')}
-            >
-              <div className="absolute top-2 right-2">
-                <span className="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full font-medium">
-                  AI Powered
-                </span>
-              </div>
-              <div className="text-3xl mb-3">📖</div>
-              <h4 className="font-semibold text-gray-800 mb-1">Journal</h4>
-              <p className="text-xs text-gray-600 mb-2">Reflect with AI-generated prompts</p>
-              <p className="text-xs text-primary-purple font-medium">Smart prompts based on mood</p>
-            </div>
-
-            {/* Emotional Release Card */}
-            <div 
-              className="card p-4 cursor-pointer transition-transform active:scale-95"
-              onClick={() => onNavigate('emotionalRelease')}
-            >
-              <div className="text-3xl mb-3">🫁</div>
-              <h4 className="font-semibold text-gray-800 mb-1">Emotional Release</h4>
-              <p className="text-xs text-gray-600 mb-2">Guided breathing & relaxation</p>
-              <p className="text-xs text-primary-purple font-medium">1–10 min sessions</p>
-            </div>
-
-            {/* Progress Hub Card */}
-            <div 
-              className="card p-4 cursor-pointer transition-transform active:scale-95 relative"
-              onClick={() => onNavigate('streaks')}
-            >
-              <div className="absolute top-2 right-2">
-                <span className="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full font-medium">
-                  Level {user.level}
-                </span>
-              </div>
-              <div className="text-3xl mb-3">🏆</div>
-              <h4 className="font-semibold text-gray-800 mb-1">Progress Hub</h4>
-              <p className="text-xs text-gray-600 mb-2">XP, streaks & achievement badges</p>
-              <p className="text-xs text-primary-purple font-medium">0 badges earned</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Ask a Question Card */}
-        <div 
-          className="card mb-6 cursor-pointer transition-transform active:scale-95"
-          onClick={() => onNavigate('askQuestion')}
-        >
-          <div className="flex items-center space-x-4">
-            <div className="text-4xl">💭</div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-gray-800 mb-1">Ask a Question</h3>
-              <p className="text-sm text-gray-600">Got burning questions on your mind?</p>
-            </div>
-            <div className="text-primary-purple">→</div>
           </div>
         </div>
 
         {/* AI Coach Sessions */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">AI Coach</h3>
-            <button className="text-primary-purple text-sm font-medium">See All</button>
+            <h3 className="text-lg font-semibold text-gray-900">AI Coach</h3>
+            <button 
+              className="text-blue-600 text-sm font-medium flex items-center"
+              onClick={() => onNavigate('aiCoach')}
+            >
+              <span>Load More</span>
+              <span className="ml-1">→</span>
+            </button>
           </div>
           
-          <div className="space-y-3">
-            {aiCoachSessions.slice(0, 2).map((session) => (
+          <div className="grid grid-cols-2 gap-3">
+            {aiCoachSessions.map((session) => (
               <div 
                 key={session.id}
-                className="meditation-card flex items-center space-x-4"
+                className="relative rounded-2xl overflow-hidden cursor-pointer group"
                 onClick={() => onNavigate('aiCoach')}
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-primary-purple to-primary-pink rounded-2xl flex items-center justify-center text-2xl">
-                  {session.thumbnail}
+                <img 
+                  src={session.image} 
+                  alt={session.title}
+                  className="w-full h-32 sm:h-36 object-cover"
+                />
+
+                {/* subtle gradient to ensure text contrast */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-95"></div>
+
+                {/* Title text at top-left */}
+                <div className="absolute inset-0 p-4 flex flex-col justify-start">
+                  <h4 className="text-white text-sm font-semibold leading-tight drop-shadow-md">
+                    {session.title}
+                  </h4>
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-800">{session.title}</h4>
-                  <p className="text-sm text-gray-600">{session.category} • {session.duration}</p>
+
+                {/* centered play button */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onNavigate('aiCoach') }}
+                    className="pointer-events-auto bg-white/90 w-12 h-12 rounded-full flex items-center justify-center shadow-md transform transition group-hover:scale-105"
+                    aria-label={`Play ${session.title}`}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-purple-600">
+                      <path d="M8 5v14l11-7L8 5z" fill="#7C3AED"></path>
+                    </svg>
+                  </button>
                 </div>
-                <button className="w-10 h-10 bg-primary-purple/10 rounded-full flex items-center justify-center text-primary-purple">
-                  ▶️
-                </button>
               </div>
             ))}
           </div>
         </div>
 
         {/* Streak Widget */}
-        <div 
-          className="streak-card cursor-pointer transition-transform active:scale-95"
-          onClick={() => onNavigate('streaks')}
-        >
-          <div className="flex items-center justify-between">
+        <div className="bg-gradient-to-r from-orange-400 to-pink-400 rounded-2xl p-4 mb-6">
+          <div className="flex items-center justify-between text-white">
             <div>
-              <h3 className="text-xl font-bold mb-1">Streak: {user.streak} day</h3>
+              <div className="flex items-center space-x-2 mb-1">
+                <span className="text-2xl">🔥</span>
+                <h3 className="text-lg font-semibold">Streak: {user.streak} day</h3>
+              </div>
               <p className="text-white/90 text-sm">Miracle moment in 2 days!</p>
             </div>
-            <div className="text-4xl">🔥</div>
+            <button 
+              className="text-white/80 hover:text-white"
+              onClick={() => onNavigate('streaks')}
+            >
+              →
+            </button>
+          </div>
+        </div>
+
+        {/* Wellness Activities Cards */}
+        <div className="grid grid-cols-1 gap-4 mb-6">
+          {/* Journal Card */}
+          <div 
+            className="bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl p-5 cursor-pointer transform transition-transform active:scale-95"
+            onClick={() => onNavigate('journal')}
+          >
+            <div className="flex items-center justify-between text-white">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">📖</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-1">AI Journal</h3>
+                  <p className="text-white/90 text-sm">Reflect with personalized prompts</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end">
+                <button className="text-white/80 hover:text-white text-xl">→</button>
+                <span className="text-xs text-white/70 mt-1">+50 XP</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Emotional Release Card */}
+          <div 
+            className="bg-gradient-to-r from-green-400 to-teal-500 rounded-2xl p-5 cursor-pointer transform transition-transform active:scale-95"
+            onClick={() => onNavigate('emotionalRelease')}
+          >
+            <div className="flex items-center justify-between text-white">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🫁</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-1">Emotional Release</h3>
+                  <p className="text-white/90 text-sm">Guided breathing & relaxation</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end">
+                <button className="text-white/80 hover:text-white text-xl">→</button>
+                <span className="text-xs text-white/70 mt-1">+30 XP</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
