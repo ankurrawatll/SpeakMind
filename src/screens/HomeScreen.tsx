@@ -108,7 +108,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
         {/* AI Coach Sessions */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">AI Coach</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Meditation & Relaxation</h3>
             <button 
               className="text-blue-600 text-sm font-medium flex items-center"
               onClick={() => onNavigate('aiCoach')}
@@ -201,27 +201,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
             </div>
           </div>
 
-          {/* Emotional Release Card */}
-          <div 
-            className="bg-gradient-to-r from-green-400 to-teal-500 rounded-2xl p-5 cursor-pointer transform transition-transform active:scale-95"
-            onClick={() => onNavigate('emotionalRelease')}
-          >
-            <div className="flex items-center justify-between text-white">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <span className="text-2xl">🫁</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">Emotional Release</h3>
-                  <p className="text-white/90 text-sm">Guided breathing & relaxation</p>
-                </div>
-              </div>
-              <div className="flex flex-col items-end">
-                <button className="text-white/80 hover:text-white text-xl">→</button>
-                <span className="text-xs text-white/70 mt-1">+30 XP</span>
-              </div>
-            </div>
-          </div>
+          
         </div>
       </div>
     </div>

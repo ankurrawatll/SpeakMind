@@ -28,7 +28,7 @@ export default function ProfileScreen({ user }: ProfileScreenProps) {
           <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
             👤
           </div>
-          <h1 className="text-2xl font-bold">{user.name} Rawat</h1>
+          <h1 className="text-2xl font-bold">{user.name} </h1>
           <p className="text-white/80">Level {user.level} Meditator</p>
         </div>
       </div>

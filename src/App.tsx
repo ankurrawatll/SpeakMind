@@ -33,7 +33,7 @@ function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('onboarding')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user] = useState({
-    name: 'Ankur',
+    name: 'User',
     streak: 1,
     level: 3,
     timemeditated: 45,
@@ -116,7 +116,7 @@ function App() {
     }
   }
 
-  const showBottomNav = isAuthenticated && currentScreen !== 'onboarding' && currentScreen !== 'timer' 
+  const showBottomNav = isAuthenticated && currentScreen !== 'onboarding' && currentScreen !== 'timer' && currentScreen !== 'conversation'
 
   return (
     <div className="mobile-container">
