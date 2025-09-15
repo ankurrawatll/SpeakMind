@@ -1,3 +1,4 @@
+﻿import { useState } from 'react'
 import type { Screen } from '../App'
 
 interface MeditationScreenProps {
@@ -5,195 +6,90 @@ interface MeditationScreenProps {
 }
 
 export default function MeditationScreen({ onNavigate }: MeditationScreenProps) {
-  const meditationCategories = [
-    {
-      id: 'quick-calm',
-      title: 'Quick Calm',
-      description: 'Short sessions for instant relief',
-      duration: '2–5 min sessions',
-      videoCount: 12,
-      languages: ['Hindi', 'English'],
-      icon: '🌸',
-      gradient: 'from-blue-400 to-blue-600',
-      // TODO: YouTube API integration - playlistId: 'PLxxxxx'
-    },
-    {
-      id: 'deep-focus',
-      title: 'Deep Focus',
-      description: 'Enhanced concentration and clarity',
-      duration: '5–15 min sessions',
-      videoCount: 18,
-      languages: ['Hindi', 'English'],
-      icon: '🎯',
-      gradient: 'from-purple-400 to-purple-600',
-      // TODO: YouTube API integration - playlistId: 'PLyyyyy'
-    },
-    {
-      id: 'sleep-relaxation',
-      title: 'Sleep Relaxation',
-      description: 'Peaceful rest and recovery',
-      duration: '10–20 min sessions',
-      videoCount: 15,
-      languages: ['Hindi', 'English'],
-      icon: '🌙',
-      gradient: 'from-indigo-400 to-indigo-600',
-      // TODO: YouTube API integration - playlistId: 'PLzzzzz'
-    },
-    {
-      id: 'subconscious-reprogramming',
-      title: 'Subconscious Reprogramming',
-      description: 'Transform limiting beliefs',
-      duration: '8–15 min sessions',
-      videoCount: 9,
-      languages: ['Hindi', 'English'],
-      icon: '🧠',
-      gradient: 'from-emerald-400 to-emerald-600',
-      // TODO: YouTube API integration - playlistId: 'PLwwwww'
-    }
-  ]
+  const [selectedMinutes, setSelectedMinutes] = useState(20)
+  
+  const timeOptions = [3, 5, 10, 20, 30, 40, 50]
 
-  // TODO: AI Recommendations - This would come from backend analysis of user's mood patterns
-  const aiRecommendedCategory = meditationCategories[Math.floor(Math.random() * meditationCategories.length)]
+  const handleTimeSelect = (minutes: number) => {
+    setSelectedMinutes(minutes)
+  }
 
-  const handleCategoryClick = (_categoryId: string) => {
-    // TODO: Navigate to video list or start session
-    // For now, navigate to timer for demo
+  const handleStartMeditation = () => {
     onNavigate('timer')
   }
 
   return (
-    <div className="min-h-screen bg-light-bg pb-24">
+    <div className="min-h-screen bg-gray-50 flex flex-col pb-24">
       {/* Header */}
-      <div className="gradient-bg px-6 pt-12 pb-8 rounded-b-5xl">
-        <div className="text-white">
-          <h1 className="text-2xl font-bold mb-2">Meditation</h1>
-          <p className="text-white/80 text-sm">AI-powered recommendations based on your mood and goals</p>
+      <div className="text-center pt-16 pb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Meditation</h1>
+        
+        {/* Sun/Moon Illustration */}
+        <div className="mx-auto mb-6 px-6">
+          <img 
+            src="/AppClip.png" 
+            alt="Meditation illustration" 
+            className="w-full max-w-xs mx-auto rounded-2xl shadow-lg"
+          />
         </div>
       </div>
 
-      <div className="px-6 -mt-4">
-        {/* AI Recommendations Section */}
-        <div className="card mb-6">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="text-2xl">🤖</div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800">AI Recommendations</h3>
-              <p className="text-sm text-gray-600">Personalized for you today</p>
+      {/* Content */}
+      <div className="flex-1 px-6">
+        <div className="max-w-sm mx-auto">
+          <h3 className="text-lg font-medium text-gray-700 mb-6 text-center">Select mins</h3>
+          
+          {/* Time Options */}
+          <div className="flex justify-center gap-3 mb-8 flex-wrap">
+            {timeOptions.map((minutes) => (
+              <button
+                key={minutes}
+                onClick={() => handleTimeSelect(minutes)}
+                className={`w-12 h-12 rounded-full text-lg font-semibold transition-all duration-200 ${
+                  selectedMinutes === minutes
+                    ? 'bg-gradient-to-b from-purple-400 to-purple-600 text-white shadow-lg transform scale-110'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                {minutes}
+              </button>
+            ))}
+          </div>
+
+          {/* Modern Slider */}
+          <div className="relative mb-16 px-4">
+            <div className="w-full h-3 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full">
+              <div 
+                className="h-3 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full relative transition-all duration-300"
+                style={{ width: `${(selectedMinutes / 50) * 100}%` }}
+              >
+                <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-gradient-to-b from-purple-400 to-purple-600 rounded-full border-3 border-white shadow-xl flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Time indicator */}
+            <div className="flex justify-center mt-4">
+              <div className="bg-white px-4 py-2 rounded-full shadow-md border border-gray-100">
+                <span className="text-purple-600 font-semibold">{selectedMinutes} min</span>
+              </div>
             </div>
           </div>
-          
-          <div 
-            className={`bg-gradient-to-r ${aiRecommendedCategory.gradient} rounded-3xl p-4 text-white cursor-pointer transition-transform active:scale-95`}
-            onClick={() => handleCategoryClick(aiRecommendedCategory.id)}
+        </div>
+      </div>
+
+      {/* Let's Go Button - Fixed at bottom with padding for navbar */}
+      <div className="px-6 pb-6">
+        <div className="max-w-sm mx-auto">
+          <button
+            onClick={handleStartMeditation}
+            className="w-full bg-gradient-to-r from-[#A78BFA] to-[#C4B5FD] text-white text-lg font-semibold py-4 rounded-2xl hover:from-purple-600 hover:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            <div className="flex items-center space-x-4">
-              <div className="text-3xl">{aiRecommendedCategory.icon}</div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-lg">{aiRecommendedCategory.title}</h4>
-                <p className="text-white/90 text-sm mb-2">{aiRecommendedCategory.description}</p>
-                <div className="flex items-center space-x-4 text-xs text-white/80">
-                  <span>{aiRecommendedCategory.duration}</span>
-                  <span>•</span>
-                  <span>{aiRecommendedCategory.videoCount} videos</span>
-                </div>
-              </div>
-              <div className="text-xl">▶️</div>
-            </div>
-          </div>
-          
-          <div className="mt-3 text-xs text-gray-500 text-center">
-            {/* TODO: This text would be dynamic based on actual AI analysis */}
-            Our AI analyzed your recent mood patterns and suggests this session for optimal wellness.
-          </div>
-        </div>
-
-        {/* Meditation Categories */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-800 px-2">Explore Categories</h3>
-          
-          {meditationCategories.map((category) => (
-            <div 
-              key={category.id}
-              className="card cursor-pointer transition-transform active:scale-95"
-              onClick={() => handleCategoryClick(category.id)}
-            >
-              <div className="flex items-center space-x-4">
-                <div className={`w-16 h-16 bg-gradient-to-br ${category.gradient} rounded-3xl flex items-center justify-center text-2xl`}>
-                  {category.icon}
-                </div>
-                
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-800 text-lg mb-1">{category.title}</h4>
-                  <p className="text-gray-600 text-sm mb-2">{category.description}</p>
-                  
-                  <div className="flex items-center space-x-4 text-xs text-gray-500">
-                    <span className="font-medium">{category.duration}</span>
-                    <span>•</span>
-                    <span className="font-medium text-primary-purple">
-                      [{category.videoCount} videos]
-                      {/* TODO: This count would come from YouTube API response */}
-                    </span>
-                    <span>•</span>
-                    <span>({category.languages.join(', ')})</span>
-                  </div>
-                </div>
-                
-                <div className="text-primary-purple text-xl">
-                  ▶️
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* How AI Recommendations Work */}
-        <div className="card mt-6 bg-gradient-to-r from-primary-purple/5 to-primary-pink/5 border-primary-purple/20">
-          <div className="text-center">
-            <div className="text-3xl mb-3">✨</div>
-            <h3 className="font-semibold text-gray-800 mb-2">AI Recommendations</h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Our AI analyzes your mood patterns, session history, and preferences to suggest 
-              the most relevant meditations for your current state of mind and wellness goals.
-            </p>
-            {/* TODO: Add actual analytics and mood correlation insights */}
-          </div>
+            Let's Go
+          </button>
         </div>
       </div>
     </div>
   )
 }
-
-/* 
-TODO: YouTube API Integration Plan
-
-1. Setup YouTube Data API v3:
-   - Get API key from Google Cloud Console
-   - Enable YouTube Data API v3
-
-2. Fetch playlist data:
-   const fetchPlaylistVideos = async (playlistId) => {
-     const response = await fetch(
-       `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${API_KEY}`
-     )
-     return response.json()
-   }
-
-3. Update video counts dynamically:
-   - Replace hardcoded videoCount with API response
-   - Cache responses for better performance
-
-4. Video player integration:
-   - Create modal with YouTube iframe
-   - Handle play/pause events
-   - Track session completion
-
-5. AI Backend Integration:
-   - Send user mood data to backend
-   - Receive recommended playlist IDs
-   - Update UI with personalized suggestions
-
-6. Session tracking:
-   - Store completed sessions in localStorage/backend
-   - Show progress and achievements
-   - Integrate with streak system
-*/

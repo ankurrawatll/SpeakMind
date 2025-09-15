@@ -34,7 +34,7 @@ export default function MindCoachScreen({ onNavigate }: MindCoachScreenProps) {
             #heygen-streaming-embed {
               z-index: 1;
               position: fixed;
-              top: 100px;
+              top: 80px;
               left: 20px;
               right: 20px;
               bottom: 180px;
@@ -47,7 +47,7 @@ export default function MindCoachScreen({ onNavigate }: MindCoachScreenProps) {
               overflow: hidden;
               opacity: 1;
               visibility: visible;
-              background: #4A5568;
+              background: linear-gradient(135deg, #4A5568 0%, #2D3748 50%, #1A202C 100%);
             }
             #heygen-streaming-container {
               width: 100%;
@@ -107,10 +107,10 @@ export default function MindCoachScreen({ onNavigate }: MindCoachScreenProps) {
       <div className="flex-1 px-5 pb-32">
         <div className="relative mx-auto max-w-sm">
           {/* Video Container - Heygen will inject here */}
-          <div className="relative aspect-[3/4] bg-gray-600 rounded-3xl overflow-hidden shadow-lg">
+          <div className="relative aspect-[3/4] bg-white rounded-3xl overflow-hidden ">
             {/* Fallback content while Heygen loads */}
-            <div className="absolute inset-0 bg-gradient-to-b from-gray-500 to-gray-700 flex items-center justify-center">
-              <div className="text-white text-center">
+            <div className="absolute inset-0 bg-white flex items-center justify-center">
+              <div className="text-black text-center">
                 <div className="text-4xl mb-2">👩‍💼</div>
                 <div className="text-sm opacity-80">Loading Mind Coach...</div>
               </div>
