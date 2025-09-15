@@ -30,7 +30,7 @@ interface OnlineUser {
   status: 'available' | 'in-chat'
 }
 
-export default function SharingScreen({ onNavigate }: SharingScreenProps) {
+export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [currentUserId] = useState(() => {
     let userId = localStorage.getItem('speakmind_user_id')
