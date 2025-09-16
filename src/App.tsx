@@ -9,7 +9,7 @@ import StreaksScreen from './screens/StreaksScreen'
 import MeditationTimerScreen from './screens/MeditationTimerScreen'
 import AICoachScreen from './screens/AICoachScreen'
 import ProfileScreen from './screens/ProfileScreen'
-import CommunityScreen from './screens/CommunityScreen'
+import SharingScreen from './screens/SharingScreen'
 import MindCoachScreen from './screens/MindCoachScreen'
 import ConversationScreen from './screens/ConversationScreen'
 import BottomNavigation from './components/BottomNavigation'
@@ -25,7 +25,7 @@ export type Screen =
   | 'timer'
   | 'aiCoach'
   | 'profile'
-  | 'community'
+  | 'sharing'
   | 'mindCoach'
   | 'conversation'
 
@@ -105,8 +105,8 @@ function App() {
         return <AICoachScreen onNavigate={navigateToScreen} />
       case 'profile':
         return <ProfileScreen onNavigate={navigateToScreen} user={user} />
-      case 'community':
-        return <CommunityScreen onNavigate={navigateToScreen} />
+      case 'sharing':
+        return <SharingScreen onNavigate={navigateToScreen} />
       case 'mindCoach':
         return <MindCoachScreen onNavigate={navigateToScreen} user={user} />
       case 'conversation':
