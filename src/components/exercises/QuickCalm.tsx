@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 // Mock the exercise progress functionality
 const useExerciseProgress = () => {
@@ -18,7 +18,7 @@ const useExerciseProgress = () => {
   return { markExerciseComplete };
 };
 
-export const QuickCalm = ({ onNavigate }: { onNavigate: () => void }) => {
+export const QuickCalm = ({ onNavigate }: { onNavigate?: () => void }) => {
   const backgroundImage = 'https://images.pexels.com/photos/2097628/pexels-photo-2097628.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2';
   const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60); // 1 minute timer
@@ -26,10 +26,10 @@ export const QuickCalm = ({ onNavigate }: { onNavigate: () => void }) => {
   const { markExerciseComplete } = useExerciseProgress();
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
     
     if (isActive && timeLeft > 0) {
-      timer = setInterval(() => {
+      timer = setTimeout(() => {
         setTimeLeft(prev => prev - 1);
       }, 1000);
     } else if (timeLeft === 0) {
@@ -51,7 +51,7 @@ export const QuickCalm = ({ onNavigate }: { onNavigate: () => void }) => {
     }, 4000); // 4-second cycle (inhale, hold, exhale, rest)
 
     return () => {
-      clearInterval(timer);
+      clearTimeout(timer);
       clearInterval(breathingTimer);
     };
   }, [isActive, timeLeft, markExerciseComplete]);

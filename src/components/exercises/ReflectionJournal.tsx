@@ -17,7 +17,7 @@ const MOODS = [
   { emoji: '😔', label: 'Down' },
 ];
 
-const ReflectionJournal = ({ onNavigate }: { onNavigate: () => void }) => {
+const ReflectionJournal = ({ onNavigate }: { onNavigate?: () => void }) => {
   const { completeExercise } = useExerciseProgress();
   const [entry, setEntry] = useState('');
   const [selectedMood, setSelectedMood] = useState<string>('');

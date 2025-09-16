@@ -41,7 +41,7 @@ const STRETCHES: StretchStep[] = [
   },
 ];
 
-const StretchAndFocus = ({ onNavigate }: { onNavigate: () => void }) => {
+const StretchAndFocus = () => {
   const { completeExercise } = useExerciseProgress();
   const [currentStep, setCurrentStep] = useState(0);
   const [timeLeft, setTimeLeft] = useState(STRETCHES[0].duration);
@@ -52,7 +52,7 @@ const StretchAndFocus = ({ onNavigate }: { onNavigate: () => void }) => {
   const currentStretch = STRETCHES[currentStep];
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isActive && timeLeft > 0) {
       interval = setInterval(() => {

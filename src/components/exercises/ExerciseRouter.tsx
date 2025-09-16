@@ -23,21 +23,24 @@ export const ExerciseRouter = ({ onNavigate }: { onNavigate: () => void }) => {
     onNavigate();
   };
 
-  // Wrapper components to handle the onBack prop with proper typing
+    // Wrapper components to handle the onBack prop with proper typing
   const QuickCalmWrapper = () => (
     <QuickCalm onNavigate={handleBack} />
   );
 
+  // StretchAndFocus doesn't use onNavigate, so we don't pass it
   const StretchAndFocusWrapper = () => (
-    <StretchAndFocus onNavigate={handleBack} />
+    <StretchAndFocus />
   );
 
+  // MindBodySync doesn't use onNavigate, so we don't pass it
   const MindBodySyncWrapper = () => (
-    <MindBodySync onNavigate={handleBack} />
+    <MindBodySync />
   );
 
+  // ReflectionJournal doesn't use onNavigate, so we don't pass it
   const ReflectionJournalWrapper = () => (
-    <ReflectionJournal onNavigate={handleBack} />
+    <ReflectionJournal />
   );
 
   // Get the current exercise ID from the URL

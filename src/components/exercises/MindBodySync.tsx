@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ExerciseLayout } from './ExerciseLayout';
 
@@ -22,34 +22,34 @@ const useExerciseProgress = () => {
 const TARGET_RHYTHM = 1000; // 1 second interval in ms
 const TOTAL_ROUNDS = 10;
 
-export const MindBodySync = ({ onNavigate }: { onNavigate: () => void }) => {
+export const MindBodySync = ({ onNavigate }: { onNavigate?: () => void }) => {
   const { completeExercise } = useExerciseProgress();
   const [isActive, setIsActive] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [showReward, setShowReward] = useState(false);
   const [round, setRound] = useState(0);
-  const [score, setScore] = useState(0);
-  const [lastTap, setLastTap] = useState(0);
-  const [feedback, setFeedback] = useState('');
+  const [score, setScore] = useState<number>(0);
+  const [lastTap, setLastTap] = useState<number>(0);
+  const [feedback, setFeedback] = useState<string>('');
   const [showFeedback, setShowFeedback] = useState(false);
   const [pulse, setPulse] = useState(false);
-  const pulseInterval = useRef<NodeJS.Timeout>();
+  let timer: ReturnType<typeof setTimeout> | null = null;
 
   // Start the pulsing animation when active
   useEffect(() => {
     if (isActive && !isComplete) {
-      pulseInterval.current = setInterval(() => {
+      timer = setTimeout(() => {
         setPulse((prev) => !prev);
       }, TARGET_RHYTHM);
     } else {
-      if (pulseInterval.current) {
-        clearInterval(pulseInterval.current);
+      if (timer) {
+        clearTimeout(timer);
       }
     }
 
     return () => {
-      if (pulseInterval.current) {
-        clearInterval(pulseInterval.current);
+      if (timer) {
+        clearTimeout(timer);
       }
     };
   }, [isActive, isComplete]);
