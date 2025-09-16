@@ -34,14 +34,7 @@ interface ForumPost {
   isLiked: boolean
 }
 
-interface ForumReply {
-  id: string
-  content: string
-  author: string
-  timestamp: string
-  likes: number
-  isLiked: boolean
-}
+
 
 // Mock data for chat conversations
 const MOCK_CONVERSATIONS: ChatConversation[] = [
