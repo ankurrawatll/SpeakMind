@@ -22,6 +22,15 @@ interface ChatConversation {
   messages: ChatMessage[]
 }
 
+interface ForumReply {
+  id: string
+  content: string
+  author: string
+  timestamp: string
+  likes: number
+  isLiked: boolean
+}
+
 interface ForumPost {
   id: string
   title: string
