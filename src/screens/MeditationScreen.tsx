@@ -2,11 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import type { Screen } from '../App';
-
-interface MeditationScreenProps {
-  onNavigate: (screen: Screen, params?: Record<string, any>) => void;
-}
 
 interface Exercise {
   id: string;
@@ -62,7 +57,7 @@ const exercises: Exercise[] = [
   },
 ];
 
-const MeditationScreen = ({ onNavigate }: MeditationScreenProps) => {
+const MeditationScreen = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
 
