@@ -7,7 +7,7 @@
       "config": {
         "distDir": "dist",
         "installCommand": "npm install --legacy-peer-deps",
-        "buildCommand": "npm run build"
+        "buildCommand": "vite build"
       }
     }
   ],
@@ -29,6 +29,6 @@
     }
   },
   "env": {
-    "NODE_VERSION": "20"
+    "NODE_VERSION": "18.x"
   }
 }
