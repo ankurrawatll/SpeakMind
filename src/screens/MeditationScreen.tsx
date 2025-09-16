@@ -1,95 +1,171 @@
-﻿import { useState } from 'react'
-import type { Screen } from '../App'
+// src/screens/MeditationScreen.tsx
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import type { Screen } from '../App';
 
 interface MeditationScreenProps {
-  onNavigate: (screen: Screen) => void
+  onNavigate: (screen: Screen, params?: Record<string, any>) => void;
 }
 
-export default function MeditationScreen({ onNavigate }: MeditationScreenProps) {
-  const [selectedMinutes, setSelectedMinutes] = useState(20)
-  
-  const timeOptions = [3, 5, 10, 20, 30, 40, 50]
+interface Exercise {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  duration: number;
+  image: string;
+  color: string;
+  icon: string;
+}
 
-  const handleTimeSelect = (minutes: number) => {
-    setSelectedMinutes(minutes)
-  }
+const exercises: Exercise[] = [
+  {
+    id: 'quick-calm',
+    title: 'Quick Calm',
+    description: '5-minute breathing exercise',
+    category: 'breathing',
+    duration: 5,
+    image: 'https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+    color: 'from-teal-500/90 to-emerald-600/90',
+    icon: '🧘‍♂️',
+  },
+  {
+    id: 'stretch-focus',
+    title: 'Stretch & Focus',
+    description: 'Gentle stretching with mindfulness',
+    category: 'movement',
+    duration: 10,
+    image: 'https://images.pexels.com/photos/3768918/pexels-photo-3768918.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+    color: 'from-amber-500/90 to-orange-600/90',
+    icon: '🧘‍♀️',
+  },
+  {
+    id: 'mind-body-sync',
+    title: 'Mind Body Sync',
+    description: 'Connect your mind and body',
+    category: 'mindfulness',
+    duration: 15,
+    image: 'https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+    color: 'from-indigo-500/90 to-violet-600/90',
+    icon: '🎯',
+  },
+  {
+    id: 'reflection-journal',
+    title: 'Reflection Journal',
+    description: 'Write one thought to clear your mind',
+    category: 'reflection',
+    duration: 3,
+    image: 'https://images.pexels.com/photos/6621339/pexels-photo-6621339.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+    color: 'from-rose-500/90 to-pink-600/90',
+    icon: '📝',
+  },
+];
 
-  const handleStartMeditation = () => {
-    onNavigate('timer')
-  }
+const MeditationScreen = ({ onNavigate }: MeditationScreenProps) => {
+  const navigate = useNavigate();
+  const [progress, setProgress] = useState(0);
+
+  // Load progress from localStorage
+  useEffect(() => {
+    const savedProgress = localStorage.getItem('dailyExerciseProgress');
+    if (savedProgress) {
+      const { completed } = JSON.parse(savedProgress);
+      setProgress(completed.length);
+    }
+  }, []);
+
+  const handleExercisePress = (exerciseId: string) => {
+    // Navigate to the exercise route using react-router
+    navigate(`/exercises/${exerciseId}`);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col pb-24">
-      {/* Header */}
-      <div className="text-center pt-16 pb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Meditation</h1>
-        
-        {/* Sun/Moon Illustration */}
-        <div className="mx-auto mb-6 px-6">
-          <img 
-            src="/AppClip.png" 
-            alt="Meditation illustration" 
-            className="w-full max-w-xs mx-auto rounded-2xl shadow-lg"
-          />
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-teal-50 relative overflow-hidden">
+      {/* Removed back button to save space */}
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&dpr=2" 
+          alt="Peaceful meditation background"
+          className="w-full h-full object-cover opacity-20"
+        />
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-6">
-        <div className="max-w-sm mx-auto">
-          <h3 className="text-lg font-medium text-gray-700 mb-6 text-center">Select mins</h3>
-          
-          {/* Time Options */}
-          <div className="flex justify-center gap-3 mb-8 flex-wrap">
-            {timeOptions.map((minutes) => (
-              <button
-                key={minutes}
-                onClick={() => handleTimeSelect(minutes)}
-                className={`w-12 h-12 rounded-full text-lg font-semibold transition-all duration-200 ${
-                  selectedMinutes === minutes
-                    ? 'bg-gradient-to-b from-purple-400 to-purple-600 text-white shadow-lg transform scale-110'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                {minutes}
-              </button>
-            ))}
-          </div>
+      <div className="relative z-10">
+        {/* Simple Header */}
+        <div className="px-6 pt-6 pb-2">
+          <h1 className="text-2xl font-bold text-gray-800">Mindful Moments</h1>
+          <p className="text-gray-600 mt-1">Find your calm, one breath at a time</p>
+        </div>
 
-          {/* Modern Slider */}
-          <div className="relative mb-16 px-4">
-            <div className="w-full h-3 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full">
-              <div 
-                className="h-3 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full relative transition-all duration-300"
-                style={{ width: `${(selectedMinutes / 50) * 100}%` }}
-              >
-                <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-7 h-7 bg-gradient-to-b from-purple-400 to-purple-600 rounded-full border-3 border-white shadow-xl flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                </div>
-              </div>
+        {/* Progress Container - Dark Glassmorphism */}
+        <div className="px-6 py-4">
+          <div className="bg-black/20 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/10">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium text-white/90">Daily Progress</span>
+              <span className="text-sm font-semibold text-white">{progress} of 4</span>
             </div>
-            
-            {/* Time indicator */}
-            <div className="flex justify-center mt-4">
-              <div className="bg-white px-4 py-2 rounded-full shadow-md border border-gray-100">
-                <span className="text-purple-600 font-semibold">{selectedMinutes} min</span>
-              </div>
+            <div className="w-full bg-white/20 rounded-full h-2.5 mb-2">
+              <div 
+                className="bg-gradient-to-r from-emerald-400 to-teal-500 h-2.5 rounded-full transition-all duration-500" 
+                style={{ width: `${(progress / 4) * 100}%` }}
+              />
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-white/70">
+                Complete {4 - progress} more to complete today's goal
+              </span>
+              <span className="text-sm font-medium text-white">
+                {Math.round((progress / 4) * 100)}%
+              </span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Let's Go Button - Fixed at bottom with padding for navbar */}
-      <div className="px-6 pb-6">
-        <div className="max-w-sm mx-auto">
-          <button
-            onClick={handleStartMeditation}
-            className="w-full bg-gradient-to-r from-[#A78BFA] to-[#C4B5FD] text-white text-lg font-semibold py-4 rounded-2xl hover:from-purple-600 hover:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            Let's Go
-          </button>
+        {/* Exercise Grid */}
+        <div className="px-6 py-4 grid grid-cols-1 gap-4">
+          {exercises.map((exercise) => (
+            <motion.div
+              key={exercise.id}
+              onClick={() => handleExercisePress(exercise.id)}
+              whileTap={{ scale: 0.98 }}
+              className="relative rounded-2xl overflow-hidden h-40 flex items-end p-4 cursor-pointer transform transition-all hover:scale-[1.02]"
+            >
+              {/* Background Image with Gradient Overlay */}
+              <div className="absolute inset-0 z-0">
+                <img
+                  src={exercise.image}
+                  alt={exercise.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className={`absolute inset-0 ${exercise.color.replace('from-', 'bg-gradient-to-t from-').replace('to-', ' to-')} opacity-80`} />
+              </div>
+
+              {/* Content */}
+              <div className="relative z-10 w-full">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-white text-lg font-semibold">{exercise.title}</h3>
+                    <p className="text-white/80 text-sm">{exercise.description}</p>
+                  </div>
+                  <span className="text-3xl">{exercise.icon}</span>
+                </div>
+                <div className="mt-2 flex items-center text-xs text-white/80">
+                  <span className="bg-white/20 backdrop-blur px-2 py-1 rounded-full">
+                    {exercise.duration} min
+                  </span>
+                  <span className="mx-2">•</span>
+                  <span className="capitalize">{exercise.category}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </div>
   )
 }
+
+export default MeditationScreen
