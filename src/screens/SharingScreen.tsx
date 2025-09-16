@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { io, Socket } from 'socket.io-client'
 import type { Screen } from '../App'
 
 interface SharingScreenProps {
@@ -12,7 +11,6 @@ interface Message {
   sender: string
   timestamp: number
   isOwn: boolean
-  pending?: boolean // Add pending status for sent messages
 }
 
 interface ChatSession {
@@ -25,13 +23,19 @@ interface ChatSession {
 interface OnlineUser {
   userId: string
   userName: string
-  joinedAt: string
-  currentChat: string | null
   status: 'available' | 'in-chat'
 }
 
+// Mock users for demonstration purposes
+const MOCK_USERS: OnlineUser[] = [
+  { userId: 'user_1', userName: 'Alex', status: 'available' },
+  { userId: 'user_2', userName: 'Jordan', status: 'available' },
+  { userId: 'user_3', userName: 'Casey', status: 'available' },
+  { userId: 'user_4', userName: 'Sam', status: 'in-chat' },
+  { userId: 'user_5', userName: 'Riley', status: 'available' },
+]
+
 export default function SharingScreen({ onNavigate }: SharingScreenProps) {
-  const [socket, setSocket] = useState<Socket | null>(null)
   const [currentUserId] = useState(() => {
     let userId = localStorage.getItem('speakmind_user_id')
     if (!userId) {
@@ -41,8 +45,7 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
     return userId
   })
   const [activeChatSession, setActiveChatSession] = useState<ChatSession | null>(null)
-  const [isConnected, setIsConnected] = useState(false)
-  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([])
+  const [onlineUsers] = useState<OnlineUser[]>(MOCK_USERS)
   const [showOnlineUsers, setShowOnlineUsers] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
