@@ -1,348 +1,246 @@
-import { useState, useEffect, useRef } from 'react'
-import { io, Socket } from 'socket.io-client'
+import { useState } from 'react'
 import type { Screen } from '../App'
 
 interface SharingScreenProps {
   onNavigate: (screen: Screen) => void
 }
 
-interface Message {
+interface ChatMessage {
   id: string
-  text: string
   sender: string
-  timestamp: number
+  message: string
+  timestamp: string
   isOwn: boolean
-  pending?: boolean // Add pending status for sent messages
 }
 
-interface ChatSession {
-  friendId: number
-  friendName: string
-  messages: Message[]
-  isActive: boolean
+interface ChatConversation {
+  id: string
+  participant: string
+  lastMessage: string
+  timestamp: string
+  unread: number
+  messages: ChatMessage[]
 }
 
-interface OnlineUser {
-  userId: string
-  userName: string
-  joinedAt: string
-  currentChat: string | null
-  status: 'available' | 'in-chat'
+interface ForumPost {
+  id: string
+  title: string
+  content: string
+  author: string
+  timestamp: string
+  tags: string[]
+  likes: number
+  replies: ForumReply[]
+  isLiked: boolean
 }
+
+
+
+// Mock data for chat conversations
+const MOCK_CONVERSATIONS: ChatConversation[] = [
+  {
+    id: '1',
+    participant: 'Alex',
+    lastMessage: 'Thanks for sharing your experience with meditation...',
+    timestamp: '2 min ago',
+    unread: 1,
+    messages: [
+      { id: '1', sender: 'Alex', message: 'Hi! I saw your post about anxiety management. I\'ve been struggling with similar issues.', timestamp: '10:30 AM', isOwn: false },
+      { id: '2', sender: 'You', message: 'Hey Alex! I\'m glad you reached out. What techniques have you tried so far?', timestamp: '10:32 AM', isOwn: true },
+      { id: '3', sender: 'Alex', message: 'I\'ve tried breathing exercises but find it hard to stay consistent. Any tips?', timestamp: '10:35 AM', isOwn: false },
+      { id: '4', sender: 'You', message: 'I found that setting a daily reminder really helped. Start with just 5 minutes.', timestamp: '10:37 AM', isOwn: true },
+      { id: '5', sender: 'Alex', message: 'Thanks for sharing your experience with meditation...', timestamp: '10:40 AM', isOwn: false },
+    ]
+  },
+  {
+    id: '2',
+    participant: 'Jordan',
+    lastMessage: 'That\'s a great perspective on self-care',
+    timestamp: '1 hour ago',
+    unread: 0,
+    messages: [
+      { id: '1', sender: 'Jordan', message: 'Your journal entry about self-compassion really resonated with me.', timestamp: '9:15 AM', isOwn: false },
+      { id: '2', sender: 'You', message: 'Thank you! It took me a while to learn to be kinder to myself.', timestamp: '9:20 AM', isOwn: true },
+      { id: '3', sender: 'Jordan', message: 'That\'s a great perspective on self-care', timestamp: '9:25 AM', isOwn: false },
+    ]
+  },
+  {
+    id: '3',
+    participant: 'Sam',
+    lastMessage: 'How do you handle work stress?',
+    timestamp: '3 hours ago',
+    unread: 2,
+    messages: [
+      { id: '1', sender: 'Sam', message: 'I noticed you mentioned work-life balance. How do you handle work stress?', timestamp: '7:30 AM', isOwn: false },
+    ]
+  }
+]
+
+// Mock data for forum posts
+const MOCK_POSTS: ForumPost[] = [
+  {
+    id: '1',
+    title: 'Dealing with Sunday anxiety - anyone else?',
+    content: 'Does anyone else get really anxious on Sunday nights thinking about the upcoming work week? I\'ve been trying different strategies but would love to hear what works for others.',
+    author: 'MindfulMike',
+    timestamp: '2 hours ago',
+    tags: ['anxiety', 'work-stress', 'sunday-scaries'],
+    likes: 24,
+    isLiked: false,
+    replies: [
+      {
+        id: '1',
+        content: 'Yes! I call it the "Sunday scaries". What helps me is planning something fun for Sunday evening - like watching a good movie or video calling a friend.',
+        author: 'ZenSeeker',
+        timestamp: '1 hour ago',
+        likes: 8,
+        isLiked: true
+      },
+      {
+        id: '2',
+        content: 'I prepare for Monday on Friday so I don\'t have to think about work over the weekend. Game changer!',
+        author: 'CalmCollector',
+        timestamp: '45 min ago',
+        likes: 12,
+        isLiked: false
+      },
+      {
+        id: '3',
+        content: 'Try a Sunday wind-down routine - tea, gentle music, maybe some journaling about what you\'re grateful for from the week.',
+        author: 'PeacefulPath',
+        timestamp: '30 min ago',
+        likes: 6,
+        isLiked: false
+      }
+    ]
+  },
+  {
+    id: '2',
+    title: 'Small wins in my mental health journey 🌱',
+    content: 'Been working on my mental health for 6 months now. Today I managed to do my morning meditation even though I didn\'t feel like it. Celebrating these small victories!',
+    author: 'GrowingDaily',
+    timestamp: '5 hours ago',
+    tags: ['progress', 'meditation', 'self-care', 'motivation'],
+    likes: 47,
+    isLiked: true,
+    replies: [
+      {
+        id: '1',
+        content: 'This is so inspiring! Those small consistent actions really add up over time. Proud of you! 💪',
+        author: 'SupportiveSoul',
+        timestamp: '4 hours ago',
+        likes: 15,
+        isLiked: false
+      },
+      {
+        id: '2',
+        content: 'Yes! I\'ve learned that showing up even when you don\'t feel like it is actually the most important time to do it.',
+        author: 'WisdomSeeker',
+        timestamp: '3 hours ago',
+        likes: 9,
+        isLiked: true
+      }
+    ]
+  },
+  {
+    id: '3',
+    title: 'Therapist recommendations for social anxiety?',
+    content: 'I\'m finally ready to seek professional help for my social anxiety. Does anyone have recommendations for finding the right therapist? What should I look for?',
+    author: 'TakingSteps',
+    timestamp: '1 day ago',
+    tags: ['therapy', 'social-anxiety', 'professional-help'],
+    likes: 18,
+    isLiked: false,
+    replies: [
+      {
+        id: '1',
+        content: 'Psychology Today has a great therapist finder. Look for someone who specializes in anxiety disorders and uses CBT or exposure therapy.',
+        author: 'TherapyAdvocate',
+        timestamp: '1 day ago',
+        likes: 22,
+        isLiked: false
+      },
+      {
+        id: '2',
+        content: 'Don\'t be afraid to schedule consultations with a few different therapists. The therapeutic relationship is so important!',
+        author: 'HealingJourney',
+        timestamp: '20 hours ago',
+        likes: 14,
+        isLiked: false
+      }
+    ]
+  }
+]
 
 export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
-  const [socket, setSocket] = useState<Socket | null>(null)
-  const [currentUserId] = useState(() => {
-    let userId = localStorage.getItem('speakmind_user_id')
-    if (!userId) {
-      userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      localStorage.setItem('speakmind_user_id', userId)
-    }
-    return userId
-  })
-  const [activeChatSession, setActiveChatSession] = useState<ChatSession | null>(null)
-  const [isConnected, setIsConnected] = useState(false)
-  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([])
-  const [showOnlineUsers, setShowOnlineUsers] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [activeTab, setActiveTab] = useState<'chat' | 'forum'>('forum')
+  const [selectedChat, setSelectedChat] = useState<ChatConversation | null>(null)
+  const [showNewPost, setShowNewPost] = useState(false)
+  const [newPostTitle, setNewPostTitle] = useState('')
+  const [newPostContent, setNewPostContent] = useState('')
+  const [newPostTags, setNewPostTags] = useState('')
 
-  // Initialize Socket.IO connection
-  useEffect(() => {
-    const connectSocket = () => {
-      try {
-        // Connect to Socket.IO server
-        const newSocket = io('http://localhost:8080', {
-          transports: ['websocket'],
-          upgrade: true
-        })
-        
-        newSocket.on('connect', () => {
-          console.log('Connected to chat server')
-          setIsConnected(true)
-          setSocket(newSocket)
-          
-          // Register user with server
-          newSocket.emit('register', {
-            userId: currentUserId,
-            userName: `User${currentUserId.slice(-4)}`
-          })
-        })
+  const [conversations] = useState<ChatConversation[]>(MOCK_CONVERSATIONS)
+  const [forumPosts, setForumPosts] = useState<ForumPost[]>(MOCK_POSTS)
 
-        newSocket.on('registration_success', (data) => {
-          console.log('Registration successful:', data)
-        })
+  const handleLikePost = (postId: string) => {
+    setForumPosts(posts => 
+      posts.map(post => 
+        post.id === postId 
+          ? { ...post, isLiked: !post.isLiked, likes: post.isLiked ? post.likes - 1 : post.likes + 1 }
+          : post
+      )
+    )
+  }
 
-        newSocket.on('message', (data) => {
-          handleSocketMessage(data)
-        })
-
-        newSocket.on('user_joined', (data) => {
-          console.log(`${data.userName} joined the chat`)
-        })
-
-        newSocket.on('user_left', (data) => {
-          console.log(`${data.userName} left the chat`)
-        })
-
-        newSocket.on('online_users_update', (data) => {
-          console.log('Online users updated:', data)
-          setOnlineUsers(data.users.filter((user: OnlineUser) => user.userId !== currentUserId))
-        })
-
-        newSocket.on('user_count_update', (data) => {
-          console.log('User count updated:', data.count)
-        })
-
-        newSocket.on('chat_history', (data) => {
-          console.log('Received chat history:', data)
-          // Update the active chat session if it matches
-          setActiveChatSession(prev => {
-            if (prev) {
-              const expectedChatId = generateChatId(prev.friendId, currentUserId)
-              if (data.chatId === expectedChatId) {
-                const serverMessages = data.messages.map((msg: any) => ({
-                  id: msg.messageId,
-                  text: msg.text,
-                  sender: msg.sender,
-                  timestamp: msg.timestamp,
-                  isOwn: msg.sender === currentUserId,
-                  pending: false // Server messages are confirmed
-                }))
-
-                return { ...prev, messages: serverMessages }
-              }
-            }
-            return prev
-          })
-        })
-
-        newSocket.on('disconnect', () => {
-          console.log('Disconnected from chat server')
-          setIsConnected(false)
-          setSocket(null)
-          
-          // Try to reconnect after 3 seconds
-          setTimeout(connectSocket, 3000)
-        })
-
-        newSocket.on('connect_error', (error) => {
-          console.error('Socket.IO connection error:', error)
-          setIsConnected(false)
-        })
-
-        newSocket.on('error', (error) => {
-          console.error('Socket.IO error:', error)
-        })
-
-        newSocket.on('chat_joined', (data) => {
-          console.log('Successfully joined chat:', data)
-        })
-
-      } catch (error) {
-        console.error('Failed to connect to Socket.IO server:', error)
-        // Fallback to localStorage-only mode
-        setIsConnected(false)
-      }
-    }
-
-    connectSocket()
-
-    return () => {
-      if (socket) {
-        socket.disconnect()
-      }
-    }
-  }, [currentUserId])
-
-  const handleSocketMessage = (data: any) => {
-    console.log('Received message:', data)
-    
-    if (data.type === 'message') {
-      // Find which chat session this message belongs to
-      setActiveChatSession(prev => {
-        if (prev) {
-          const expectedChatId = generateChatId(prev.friendId, currentUserId)
-          console.log('Expected chatId:', expectedChatId, 'Received chatId:', data.chatId)
-          
-          if (data.chatId === expectedChatId) {
-            // Check if this is our own message coming back from server
-            if (data.sender === currentUserId) {
-              // Find and update the pending message
-              const updatedMessages = prev.messages.map(msg => 
-                msg.id === data.messageId 
-                  ? { ...msg, pending: false } 
-                  : msg
+  const handleLikeReply = (postId: string, replyId: string) => {
+    setForumPosts(posts =>
+      posts.map(post =>
+        post.id === postId
+          ? {
+              ...post,
+              replies: post.replies.map(reply =>
+                reply.id === replyId
+                  ? { ...reply, isLiked: !reply.isLiked, likes: reply.isLiked ? reply.likes - 1 : reply.likes + 1 }
+                  : reply
               )
-              
-              // If message not found, it means we didn't send it (shouldn't happen)
-              const messageExists = prev.messages.some(msg => msg.id === data.messageId)
-              if (!messageExists) {
-                console.warn('Received our own message that we did not send:', data)
-              }
-              
-              const updatedSession = { ...prev, messages: updatedMessages }
-              saveChatToLocalStorage(updatedSession)
-              return updatedSession
-            } else {
-              // This is a message from another user
-              const newMessage: Message = {
-                id: data.messageId,
-                text: data.text,
-                sender: data.sender,
-                timestamp: data.timestamp,
-                isOwn: false,
-                pending: false
-              }
-              
-              // Check if message already exists (prevent duplicates)
-              const messageExists = prev.messages.some(msg => msg.id === data.messageId)
-              if (!messageExists) {
-                console.log('Adding new message from other user:', newMessage)
-                
-                const updatedSession = {
-                  ...prev,
-                  messages: [...prev.messages, newMessage]
-                }
-                saveChatToLocalStorage(updatedSession)
-                return updatedSession
-              } else {
-                console.log('Message already exists, skipping duplicate:', data.messageId)
-              }
             }
-          }
-        }
-        return prev
-      })
-    }
+          : post
+      )
+    )
   }
 
-  const saveChatToLocalStorage = (chatSession: ChatSession) => {
-    const chatKey = `chat_${chatSession.friendId}`
-    localStorage.setItem(chatKey, JSON.stringify(chatSession))
-  }
-
-  const loadChatFromLocalStorage = (friendId: number): ChatSession | null => {
-    const chatKey = `chat_${friendId}`
-    const savedChat = localStorage.getItem(chatKey)
-    return savedChat ? JSON.parse(savedChat) : null
-  }
-
-  const generateChatId = (friendId: number, userId: string): string => {
-    // Extract numeric part from userId or use friendId if extraction fails
-    const userNumericId = parseInt(userId.split('_')[1]) || friendId + 1000
-    const sortedIds = [friendId, userNumericId].sort((a, b) => a - b)
-    return `${sortedIds[0]}:${sortedIds[1]}`
-  }
-
-  const startChatWithUser = (user: OnlineUser) => {
-    // Extract numeric ID from user's userId for chat room creation
-    const friendId = parseInt(user.userId.split('_')[1]) || Math.floor(Math.random() * 1000)
-    
-    // Load existing chat or create new one
-    let chatSession = loadChatFromLocalStorage(friendId)
-    
-    if (!chatSession) {
-      chatSession = {
-        friendId: friendId,
-        friendName: user.userName,
-        messages: [],
-        isActive: true
+  const handleCreatePost = () => {
+    if (newPostTitle.trim() && newPostContent.trim()) {
+      const newPost: ForumPost = {
+        id: String(Date.now()),
+        title: newPostTitle.trim(),
+        content: newPostContent.trim(),
+        author: 'You',
+        timestamp: 'Just now',
+        tags: newPostTags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        likes: 0,
+        isLiked: false,
+        replies: []
       }
-    } else {
-      chatSession.isActive = true
-    }
-
-    setActiveChatSession(chatSession)
-
-    // Join chat room via Socket.IO if connected
-    if (socket && isConnected) {
-      const chatId = generateChatId(friendId, currentUserId)
-      console.log('Starting chat with ID:', chatId)
       
-      socket.emit('join_chat', {
-        chatId,
-        userId: currentUserId,
-        targetUserId: user.userId
-      })
+      setForumPosts([newPost, ...forumPosts])
+      setNewPostTitle('')
+      setNewPostContent('')
+      setNewPostTags('')
+      setShowNewPost(false)
     }
   }
 
-  const sendMessage = (text: string) => {
-    if (!activeChatSession || !text.trim()) return
-
-    const message: Message = {
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      text: text.trim(),
-      sender: currentUserId,
-      timestamp: Date.now(),
-      isOwn: true,
-      pending: isConnected // Mark as pending if connected to server
-    }
-
-    // Always add to local state for immediate UI feedback
-    const updatedSession = {
-      ...activeChatSession,
-      messages: [...activeChatSession.messages, message]
-    }
-    
-    setActiveChatSession(updatedSession)
-    saveChatToLocalStorage(updatedSession)
-
-    // Send via Socket.IO if connected
-    if (socket && isConnected) {
-      const chatId = generateChatId(activeChatSession.friendId, currentUserId)
-      console.log('Sending message to chatId:', chatId)
-      
-      socket.emit('send_message', {
-        chatId,
-        messageId: message.id,
-        text: message.text,
-        sender: currentUserId,
-        timestamp: message.timestamp
-      })
-    }
-  }
-
-  const closeChat = () => {
-    if (activeChatSession) {
-      const updatedSession = { ...activeChatSession, isActive: false }
-      saveChatToLocalStorage(updatedSession)
-      setActiveChatSession(null)
-      
-      // Leave chat room
-      if (socket && isConnected) {
-        const chatId = generateChatId(activeChatSession.friendId, currentUserId)
-        socket.emit('leave_chat', {
-          chatId,
-          userId: currentUserId
-        })
-      }
-    }
-  }
-
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [activeChatSession?.messages])
-
-  const [messageInput, setMessageInput] = useState('')
-
-  const handleSendMessage = () => {
-    if (messageInput.trim()) {
-      sendMessage(messageInput)
-      setMessageInput('') // Clear input immediately after sending
-    }
-  }
-
-  // If in active chat, show chat interface
-  if (activeChatSession) {
+  // Chat interface
+  if (selectedChat) {
     return (
       <div className="min-h-screen bg-light-bg pb-24 flex flex-col">
         {/* Chat Header */}
         <div className="gradient-bg px-6 pt-12 pb-4 rounded-b-5xl">
           <div className="flex items-center space-x-4 text-white">
             <button 
-              onClick={closeChat}
+              onClick={() => setSelectedChat(null)}
               className="text-white hover:text-white/80"
             >
               ← Back
@@ -352,51 +250,35 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
                 👤
               </div>
               <div>
-                <h2 className="font-semibold">{activeChatSession.friendName}</h2>
-                <p className="text-sm text-white/80">
-                  {isConnected ? 'Online' : 'Offline (messages saved locally)'}
-                </p>
+                <h2 className="font-semibold">{selectedChat.participant}</h2>
+                <p className="text-sm text-white/80">Available for support</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Messages Area */}
+        {/* Messages */}
         <div className="flex-1 px-6 py-4 overflow-y-auto">
           <div className="space-y-4">
-            {activeChatSession.messages.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">Start a conversation with {activeChatSession.friendName}</p>
-              </div>
-            ) : (
-              activeChatSession.messages.map((message) => (
+            {selectedChat.messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
+              >
                 <div
-                  key={message.id}
-                  className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
+                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                    message.isOwn
+                      ? 'bg-primary-purple text-white'
+                      : 'bg-gray-200 text-gray-800'
+                  }`}
                 >
-                  <div
-                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-                      message.isOwn
-                        ? `bg-primary-purple text-white ${message.pending ? 'opacity-70' : ''}`
-                        : 'bg-gray-200 text-gray-800'
-                    }`}
-                  >
-                    <p className="text-sm">{message.text}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <p className={`text-xs ${message.isOwn ? 'text-white/70' : 'text-gray-500'}`}>
-                        {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                      {message.isOwn && (
-                        <span className={`text-xs ml-2 ${message.pending ? 'text-white/50' : 'text-white/70'}`}>
-                          {message.pending ? '⏱️' : '✓'}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  <p className="text-sm">{message.message}</p>
+                  <p className={`text-xs mt-1 ${message.isOwn ? 'text-white/70' : 'text-gray-500'}`}>
+                    {message.timestamp}
+                  </p>
                 </div>
-              ))
-            )}
-            <div ref={messagesEndRef} />
+              </div>
+            ))}
           </div>
         </div>
 
@@ -405,24 +287,16 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
           <div className="flex space-x-3">
             <input
               type="text"
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && messageInput.trim()) {
-                  handleSendMessage()
-                }
-              }}
-              placeholder="Type a message..."
+              placeholder="Type a supportive message..."
               className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-primary-purple"
             />
-            <button
-              onClick={handleSendMessage}
-              disabled={!messageInput.trim()}
-              className="px-6 py-2 bg-primary-purple text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-purple/90 transition-colors"
-            >
+            <button className="px-6 py-2 bg-primary-purple text-white rounded-full hover:bg-primary-purple/90 transition-colors">
               Send
             </button>
           </div>
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            💡 This is a prototype - messages are for demonstration only
+          </p>
         </div>
       </div>
     )
@@ -433,105 +307,226 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
       {/* Header */}
       <div className="gradient-bg px-6 pt-12 pb-8 rounded-b-5xl">
         <div className="text-white">
-          <h1 className="text-2xl font-bold mb-2">Support Community</h1>
+          <h1 className="text-2xl font-bold mb-2">Community</h1>
           <p className="text-white/80 text-sm">
-            Connect with others on similar journeys
-            {!isConnected && ' (Offline mode - messages saved locally)'}
+            Connect, share, and support each other
           </p>
         </div>
       </div>
 
       <div className="px-6 -mt-4">
-        {/* Connection Status */}
-        {!isConnected && (
-          <div className="card mb-4 bg-yellow-50 border border-yellow-200">
-            <div className="flex items-center space-x-2 text-yellow-800">
-              <span>⚠️</span>
-              <p className="text-sm">
-                Unable to connect to chat server. Messages will be saved locally.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Online Users Toggle */}
-        {isConnected && (
-          <div className="card mb-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Online Users ({onlineUsers.length})
-              </h3>
-              <button
-                onClick={() => setShowOnlineUsers(!showOnlineUsers)}
-                className="text-primary-purple hover:text-primary-purple/80 text-sm font-medium"
-              >
-                {showOnlineUsers ? 'Hide' : 'Show'} Online
-              </button>
-            </div>
-            
-            {showOnlineUsers && (
-              <div className="mt-4 space-y-2">
-                {onlineUsers.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No other users online</p>
-                ) : (
-                  onlineUsers.map((user) => (
-                    <div key={user.userId} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-                      <div className="relative">
-                        <div className="w-8 h-8 bg-primary-purple/20 rounded-full flex items-center justify-center text-sm">
-                          👤
-                        </div>
-                        <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-white ${
-                          user.status === 'available' ? 'bg-green-500' : 'bg-yellow-500'
-                        }`}></div>
-                      </div>
-                      
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-800 text-sm">{user.userName}</h4>
-                        <p className="text-xs text-gray-500">
-                          {user.status === 'available' ? 'Available' : 'In chat'}
-                        </p>
-                      </div>
-                      
-                      <button 
-                        onClick={() => startChatWithUser(user)}
-                        className="px-3 py-1 bg-primary-purple text-white rounded-full text-xs font-medium hover:bg-primary-purple/90 transition-colors"
-                      >
-                        Chat
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* How it Works Section */}
-        <div className="card mt-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">How Anonymous Chat Works</h3>
-          <div className="space-y-3 text-sm text-gray-600">
-            <div className="flex items-start space-x-3">
-              <span className="text-green-500">🔒</span>
-              <p>Your identity remains anonymous - only display names are shown</p>
-            </div>
-            <div className="flex items-start space-x-3">
-              <span className="text-blue-500">💬</span>
-              <p>Real-time messaging when both users are online</p>
-            </div>
-            <div className="flex items-start space-x-3">
-              <span className="text-purple-500">💾</span>
-              <p>Messages saved locally for your reference</p>
-            </div>
-            <div className="flex items-start space-x-3">
-              <span className="text-orange-500">🤝</span>
-              <p>Connect with others facing similar challenges</p>
-            </div>
-            <div className="flex items-start space-x-3">
-              <span className="text-cyan-500">👥</span>
-              <p>See who's online and available to chat right now</p>
-            </div>
+        {/* Tab Navigation */}
+        <div className="card mb-4">
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('forum')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'forum'
+                  ? 'bg-white text-primary-purple shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Forum
+            </button>
+            <button
+              onClick={() => setActiveTab('chat')}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'chat'
+                  ? 'bg-white text-primary-purple shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Support Chat
+            </button>
           </div>
         </div>
+
+        {/* Forum Tab */}
+        {activeTab === 'forum' && (
+          <div>
+            {/* New Post Button */}
+            <div className="card mb-4">
+              <button
+                onClick={() => setShowNewPost(true)}
+                className="w-full flex items-center justify-center space-x-2 py-3 bg-primary-purple text-white rounded-lg hover:bg-primary-purple/90 transition-colors"
+              >
+                <span>✏️</span>
+                <span className="font-medium">Share Your Experience</span>
+              </button>
+            </div>
+
+            {/* New Post Modal */}
+            {showNewPost && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl w-full max-w-md p-6">
+                  <h3 className="text-lg font-semibold mb-4">Create New Post</h3>
+                  
+                  <input
+                    type="text"
+                    placeholder="Post title..."
+                    value={newPostTitle}
+                    onChange={(e) => setNewPostTitle(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:border-primary-purple"
+                  />
+                  
+                  <textarea
+                    placeholder="Share your thoughts, experiences, or questions..."
+                    value={newPostContent}
+                    onChange={(e) => setNewPostContent(e.target.value)}
+                    rows={4}
+                    className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:border-primary-purple resize-none"
+                  />
+                  
+                  <input
+                    type="text"
+                    placeholder="Tags (separate with commas)"
+                    value={newPostTags}
+                    onChange={(e) => setNewPostTags(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-primary-purple"
+                  />
+                  
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setShowNewPost(false)}
+                      className="flex-1 py-2 px-4 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCreatePost}
+                      className="flex-1 py-2 px-4 bg-primary-purple text-white rounded-lg hover:bg-primary-purple/90 transition-colors"
+                    >
+                      Post
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Forum Posts */}
+            <div className="space-y-4">
+              {forumPosts.map((post) => (
+                <div key={post.id} className="card">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 rounded-full bg-primary-purple/20 flex items-center justify-center text-sm">
+                        👤
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-800">{post.author}</span>
+                        <span className="text-gray-500 text-sm ml-2">{post.timestamp}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleLikePost(post.id)}
+                      className={`flex items-center space-x-1 px-2 py-1 rounded-full text-sm ${
+                        post.isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
+                      }`}
+                    >
+                      <span>{post.isLiked ? '❤️' : '🤍'}</span>
+                      <span>{post.likes}</span>
+                    </button>
+                  </div>
+                  
+                  <h3 className="font-semibold text-gray-900 mb-2">{post.title}</h3>
+                  <p className="text-gray-700 mb-3">{post.content}</p>
+                  
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 bg-primary-purple/10 text-primary-purple text-xs rounded-full"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  {/* Replies */}
+                  {post.replies.length > 0 && (
+                    <div className="border-t pt-4 space-y-3">
+                      {post.replies.map((reply) => (
+                        <div key={reply.id} className="bg-gray-50 p-3 rounded-lg">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-6 h-6 rounded-full bg-primary-purple/20 flex items-center justify-center text-xs">
+                                👤
+                              </div>
+                              <span className="font-medium text-gray-800 text-sm">{reply.author}</span>
+                              <span className="text-gray-500 text-xs">{reply.timestamp}</span>
+                            </div>
+                            <button
+                              onClick={() => handleLikeReply(post.id, reply.id)}
+                              className={`flex items-center space-x-1 text-xs ${
+                                reply.isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
+                              }`}
+                            >
+                              <span>{reply.isLiked ? '❤️' : '🤍'}</span>
+                              <span>{reply.likes}</span>
+                            </button>
+                          </div>
+                          <p className="text-gray-700 text-sm">{reply.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Chat Tab */}
+        {activeTab === 'chat' && (
+          <div>
+            <div className="card mb-4">
+              <h3 className="text-lg font-semibold mb-2 text-gray-800">Support Conversations</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Connect one-on-one with others who understand your journey
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {conversations.map((conversation) => (
+                <div
+                  key={conversation.id}
+                  onClick={() => setSelectedChat(conversation)}
+                  className="card hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-full bg-primary-purple/20 flex items-center justify-center text-lg">
+                        👤
+                      </div>
+                      {conversation.unread > 0 && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                          {conversation.unread}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium text-gray-900">{conversation.participant}</h4>
+                        <span className="text-xs text-gray-500">{conversation.timestamp}</span>
+                      </div>
+                      <p className="text-sm text-gray-600 truncate">{conversation.lastMessage}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="card mt-6">
+              <h3 className="text-sm font-semibold mb-2 text-gray-800">💡 About Support Chat</h3>
+              <div className="space-y-2 text-xs text-gray-600">
+                <p>• Anonymous conversations with others facing similar challenges</p>
+                <p>• Share experiences and coping strategies</p>
+                <p>• This is a prototype - real implementation would include matching algorithms</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

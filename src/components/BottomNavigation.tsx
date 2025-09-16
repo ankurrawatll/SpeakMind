@@ -27,7 +27,7 @@ export default function BottomNavigation({ currentScreen, onNavigate }: BottomNa
     },
     { 
       id: 'sharing' as const, 
-      label: 'Sharing', 
+      label: 'Community', 
       icon: '👥',
       activeIcon: '👥'
     },
