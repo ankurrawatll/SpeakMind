@@ -26,7 +26,9 @@ export const QuickCalm = ({ onNavigate }: { onNavigate?: () => void }) => {
   const { markExerciseComplete } = useExerciseProgress();
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
+
+    let timer: number;
+
     
     if (isActive && timeLeft > 0) {
       timer = setTimeout(() => {

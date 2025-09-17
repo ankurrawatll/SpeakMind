@@ -1,6 +1,5 @@
 // src/screens/MeditationScreen.tsx
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 interface Exercise {
@@ -57,8 +56,12 @@ const exercises: Exercise[] = [
   },
 ];
 
-const MeditationScreen = () => {
-  const navigate = useNavigate();
+
+interface MeditationScreenProps {
+  onNavigate?: (screen: any) => void;
+}
+
+const MeditationScreen = ({ onNavigate }: MeditationScreenProps = {}) => {
   const [progress, setProgress] = useState(0);
 
   // Load progress from localStorage
@@ -71,8 +74,24 @@ const MeditationScreen = () => {
   }, []);
 
   const handleExercisePress = (exerciseId: string) => {
-    // Navigate to the exercise route using react-router
-    navigate(`/exercises/${exerciseId}`);
+    if (onNavigate) {
+      // Map exercise IDs to screen names
+      const exerciseScreenMap: Record<string, string> = {
+        'quick-calm': 'exercise-quick-calm',
+        'stretch-focus': 'exercise-stretch-focus',
+        'mind-body-sync': 'exercise-mind-body-sync',
+        'reflection-journal': 'exercise-reflection-journal'
+      };
+      
+      const screenName = exerciseScreenMap[exerciseId];
+      if (screenName) {
+        onNavigate(screenName);
+      } else {
+        console.log('Exercise not found:', exerciseId);
+      }
+    } else {
+      console.log('Navigate to exercise:', exerciseId);
+    }
   };
 
   return (
@@ -145,7 +164,21 @@ const MeditationScreen = () => {
                     <h3 className="text-white text-lg font-semibold">{exercise.title}</h3>
                     <p className="text-white/80 text-sm">{exercise.description}</p>
                   </div>
-                  <span className="text-3xl">{exercise.icon}</span>
+                  {/* Play Button */}
+                  <div className="bg-white/90 backdrop-blur-sm rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-white transition-colors">
+                    <svg 
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      className="text-gray-700 ml-0.5"
+                    >
+                      <path 
+                        d="M8 5v14l11-7z" 
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </div>
                 </div>
                 <div className="mt-2 flex items-center text-xs text-white/80">
                   <span className="bg-white/20 backdrop-blur px-2 py-1 rounded-full">

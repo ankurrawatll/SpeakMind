@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
 type ExerciseLayoutProps = {
@@ -8,7 +7,7 @@ type ExerciseLayoutProps = {
   subtitle?: string;
   backgroundImage: string;
   overlayColor: string;
-  onBack?: () => void;
+  onBack: () => void; // Make this required since we're not using react-router
 };
 
 export const ExerciseLayout = ({
@@ -19,20 +18,11 @@ export const ExerciseLayout = ({
   overlayColor,
   onBack,
 }: ExerciseLayoutProps) => {
-  const navigate = useNavigate();
 
   const handleBack = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    // Always call onBack if it's provided
-    if (onBack) {
-      onBack();
-      return; // Exit early to prevent default navigation
-    }
-    
-    // Fallback to default navigation if no onBack handler
-    navigate(-1);
+    onBack();
   };
 
   return (
