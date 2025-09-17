@@ -56,6 +56,7 @@ const exercises: Exercise[] = [
   },
 ];
 
+
 interface MeditationScreenProps {
   onNavigate?: (screen: any) => void;
 }

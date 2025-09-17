@@ -17,6 +17,7 @@ const MOODS = [
   { emoji: '😔', label: 'Down' },
 ];
 
+
 const ReflectionJournal = () => {
   const { completeExercise } = useExerciseProgress();
   const [entry, setEntry] = useState('');

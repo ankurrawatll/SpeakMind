@@ -1,3 +1,4 @@
+import { useAuth } from '../contexts/AuthContext'
 import type { Screen } from '../App'
 
 interface ProfileScreenProps {
@@ -13,12 +14,38 @@ interface ProfileScreenProps {
 }
 
 export default function ProfileScreen({ user }: ProfileScreenProps) {
+  const { currentUser, logout } = useAuth()
+  
+  // Get stored user data
+  const getUserData = () => {
+    if (currentUser) {
+      const storedData = localStorage.getItem(`speakmind_user_data_${currentUser.uid}`)
+      return storedData ? JSON.parse(storedData) : null
+    }
+    return null
+  }
+
+  const userData = getUserData()
+  
   const achievements = [
     { id: 1, title: 'Dark Night', icon: '🌙', earned: true },
     { id: 2, title: 'The Big Bang', icon: '💥', earned: true },
     { id: 3, title: 'Zen Master', icon: '🧘‍♀️', earned: false },
     { id: 4, title: 'Mindful Warrior', icon: '⚔️', earned: false },
   ]
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      // Clear user-specific data
+      if (currentUser) {
+        localStorage.removeItem(`speakmind_user_onboarding_${currentUser.uid}`)
+        localStorage.removeItem(`speakmind_user_data_${currentUser.uid}`)
+      }
+    } catch (error) {
+      console.error('Failed to log out:', error)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-light-bg pb-24">
@@ -28,7 +55,7 @@ export default function ProfileScreen({ user }: ProfileScreenProps) {
           <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
             👤
           </div>
-          <h1 className="text-2xl font-bold">{user.name} </h1>
+          <h1 className="text-2xl font-bold">{currentUser?.displayName || currentUser?.email || user.name}</h1>
           <p className="text-white/80">Level {user.level} Meditator</p>
         </div>
       </div>
@@ -84,7 +111,7 @@ export default function ProfileScreen({ user }: ProfileScreenProps) {
         </div>
 
         {/* Achievements */}
-        <div className="card">
+        <div className="card mb-6">
           <h3 className="text-lg font-semibold mb-4 text-gray-800">Achievements</h3>
           <div className="grid grid-cols-2 gap-3">
             {achievements.map((achievement) => (
@@ -106,6 +133,36 @@ export default function ProfileScreen({ user }: ProfileScreenProps) {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Account Actions */}
+        <div className="card">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Account</h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between py-2">
+              <span className="text-gray-600">Email</span>
+              <span className="text-gray-800 text-sm">{currentUser?.email}</span>
+            </div>
+            {userData && (
+              <>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-gray-600">Age</span>
+                  <span className="text-gray-800 text-sm">{userData.age}</span>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-gray-600">Gender</span>
+                  <span className="text-gray-800 text-sm">{userData.sex}</span>
+                </div>
+              </>
+            )}
+            <hr className="border-gray-200" />
+            <button
+              onClick={handleLogout}
+              className="w-full bg-red-500 text-white py-3 rounded-xl font-semibold hover:bg-red-600 transition-colors"
+            >
+              Sign Out
+            </button>
           </div>
         </div>
       </div>
