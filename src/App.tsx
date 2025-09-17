@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
-import OnboardingScreen from './screens/OnboardingScreen'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
+import AuthScreen from './screens/AuthScreen'
+import UserOnboardingScreen from './screens/UserOnboardingScreen'
 import HomeScreen from './screens/HomeScreen'
 import MeditationScreen from './screens/MeditationScreen'
 import JournalScreen from './screens/JournalScreen'
@@ -15,7 +17,8 @@ import ConversationScreen from './screens/ConversationScreen'
 import BottomNavigation from './components/BottomNavigation'
 
 export type Screen = 
-  | 'onboarding'
+  | 'auth'
+  | 'userOnboarding'
   | 'home'
   | 'meditation'
   | 'journal'
@@ -29,9 +32,10 @@ export type Screen =
   | 'mindCoach'
   | 'conversation'
 
-function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('onboarding')
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+const AppContent = () => {
+  const { currentUser } = useAuth()
+  const [currentScreen, setCurrentScreen] = useState<Screen>('auth')
+  const [isNewUser, setIsNewUser] = useState(false)
   const [user] = useState({
     name: 'User',
     streak: 1,
@@ -42,41 +46,39 @@ function App() {
   })
 
   useEffect(() => {
-    // Force clear any existing auth for testing onboarding
-    // TODO: Remove these lines when onboarding is working properly
-    localStorage.removeItem('speakmind_auth')
-    localStorage.removeItem('speakmind_onboarding_complete')
-    
-    // Check if user has completed onboarding and is authenticated
-    const savedAuth = localStorage.getItem('speakmind_auth')
-    const completedOnboarding = localStorage.getItem('speakmind_onboarding_complete')
-    
-    // Development helper: Add global function to reset onboarding
-    if (typeof window !== 'undefined') {
-      (window as any).resetOnboarding = () => {
-        localStorage.removeItem('speakmind_auth')
-        localStorage.removeItem('speakmind_onboarding_complete')
-        setIsAuthenticated(false)
-        setCurrentScreen('onboarding')
-        console.log('Onboarding reset! Refresh the page to see onboarding screen.')
-      }
+    // Only handle the case when user logs out or app first loads
+    if (currentUser === null && currentScreen !== 'userOnboarding') {
+      setCurrentScreen('auth')
     }
-    
-    if (savedAuth && completedOnboarding) {
-      setIsAuthenticated(true)
-      setCurrentScreen('home')
-    } else {
-      // Always start with onboarding for new users or if onboarding wasn't completed
-      setCurrentScreen('onboarding')
-      setIsAuthenticated(false)
-    }
-  }, [])
+    // For login/signup, we handle navigation immediately in handleAuthComplete
+    // to avoid delays from Firebase auth state changes
+  }, [currentUser])
 
-  const handleAuth = () => {
-    setIsAuthenticated(true)
-    setCurrentScreen('home')
-    localStorage.setItem('speakmind_auth', 'true')
-    localStorage.setItem('speakmind_onboarding_complete', 'true')
+  const handleAuthComplete = (wasSignup: boolean = false, user?: any) => {
+    setIsNewUser(wasSignup)
+    
+    // Immediately navigate based on signup status to avoid delay
+    if (wasSignup) {
+      // New user - check if they need onboarding
+      const completedUserOnboarding = user ? localStorage.getItem(`speakmind_user_onboarding_${user.uid}`) : null
+      if (!completedUserOnboarding) {
+        setCurrentScreen('userOnboarding')
+      } else {
+        setCurrentScreen('home')
+      }
+    } else {
+      // Existing user - go directly to home
+      setCurrentScreen('home')
+    }
+  }
+
+  const handleUserOnboardingComplete = (userData: { age: number; sex: string }) => {
+    // Store user data in localStorage (in a real app, you'd store this in Firebase)
+    if (currentUser) {
+      localStorage.setItem(`speakmind_user_data_${currentUser.uid}`, JSON.stringify(userData))
+      localStorage.setItem(`speakmind_user_onboarding_${currentUser.uid}`, 'true')
+      setCurrentScreen('home')
+    }
   }
 
   const navigateToScreen = (screen: Screen) => {
@@ -85,8 +87,10 @@ function App() {
 
   const renderScreen = () => {
     switch (currentScreen) {
-      case 'onboarding':
-        return <OnboardingScreen onAuth={handleAuth} />
+      case 'auth':
+        return <AuthScreen onAuth={handleAuthComplete} />
+      case 'userOnboarding':
+        return <UserOnboardingScreen onComplete={handleUserOnboardingComplete} />
       case 'home':
         return <HomeScreen onNavigate={navigateToScreen} user={user} />
       case 'meditation':
@@ -116,7 +120,7 @@ function App() {
     }
   }
 
-  const showBottomNav = isAuthenticated && currentScreen !== 'onboarding' && currentScreen !== 'timer' && currentScreen !== 'conversation'
+  const showBottomNav = currentUser && currentScreen !== 'auth' && currentScreen !== 'userOnboarding' && currentScreen !== 'timer' && currentScreen !== 'conversation'
 
   return (
     <div className="mobile-container">
@@ -128,6 +132,14 @@ function App() {
         />
       )}
     </div>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 
