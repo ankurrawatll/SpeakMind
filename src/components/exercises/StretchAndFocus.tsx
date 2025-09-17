@@ -52,7 +52,7 @@ const StretchAndFocus = () => {
   const currentStretch = STRETCHES[currentStep];
 
   useEffect(() => {
-    let interval: number;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isActive && timeLeft > 0) {
       interval = setInterval(() => {
@@ -127,6 +127,7 @@ const StretchAndFocus = () => {
       subtitle="Gentle stretching with mindfulness"
       backgroundImage={backgroundImage}
       overlayColor="bg-black/60"
+      onBack={() => {}}
     >
       <div className="flex flex-col h-full">
         {/* Progress Dots */}

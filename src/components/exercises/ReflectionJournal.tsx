@@ -82,6 +82,7 @@ const ReflectionJournal = () => {
       subtitle="Express your thoughts"
       backgroundImage="https://images.pexels.com/photos/6621339/pexels-photo-6621339.jpeg"
       overlayColor="bg-linen/70"
+      onBack={() => {}}
     >
       <div className="flex flex-col h-full">
         {showPrompt && !isSubmitted && (

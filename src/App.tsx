@@ -13,6 +13,12 @@ import SharingScreen from './screens/SharingScreen'
 import MindCoachScreen from './screens/MindCoachScreen'
 import ConversationScreen from './screens/ConversationScreen'
 import BottomNavigation from './components/BottomNavigation'
+// Exercise components
+import QuickCalm from './components/exercises/QuickCalm'
+import StretchAndFocus from './components/exercises/StretchAndFocus'
+import MindBodySync from './components/exercises/MindBodySync'
+import ReflectionJournal from './components/exercises/ReflectionJournal'
+import { ExerciseLayout } from './components/exercises/ExerciseLayout'
 
 export type Screen = 
   | 'onboarding'
@@ -28,6 +34,10 @@ export type Screen =
   | 'sharing'
   | 'mindCoach'
   | 'conversation'
+  | 'exercise-quick-calm'
+  | 'exercise-stretch-focus'
+  | 'exercise-mind-body-sync'
+  | 'exercise-reflection-journal'
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('onboarding')
@@ -40,6 +50,34 @@ function App() {
     meditations: 12,
     points: 850
   })
+
+  // Exercise data for proper routing
+  const exerciseData = {
+    'exercise-quick-calm': {
+      title: 'Quick Calm',
+      subtitle: '5-minute breathing exercise',
+      backgroundImage: 'https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+      overlayColor: 'from-teal-500/90 to-emerald-600/90'
+    },
+    'exercise-stretch-focus': {
+      title: 'Stretch & Focus',
+      subtitle: 'Gentle stretching with mindfulness',
+      backgroundImage: 'https://images.pexels.com/photos/3768918/pexels-photo-3768918.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+      overlayColor: 'from-amber-500/90 to-orange-600/90'
+    },
+    'exercise-mind-body-sync': {
+      title: 'Mind Body Sync',
+      subtitle: 'Connect your mind and body',
+      backgroundImage: 'https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+      overlayColor: 'from-indigo-500/90 to-violet-600/90'
+    },
+    'exercise-reflection-journal': {
+      title: 'Reflection Journal',
+      subtitle: 'Write one thought to clear your mind',
+      backgroundImage: 'https://images.pexels.com/photos/5273009/pexels-photo-5273009.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+      overlayColor: 'from-rose-500/90 to-pink-600/90'
+    }
+  }
 
   useEffect(() => {
     // Force clear any existing auth for testing onboarding
@@ -90,7 +128,7 @@ function App() {
       case 'home':
         return <HomeScreen onNavigate={navigateToScreen} user={user} />
       case 'meditation':
-        return <MeditationScreen />
+        return <MeditationScreen onNavigate={navigateToScreen} />
       case 'journal':
         return <JournalScreen onNavigate={navigateToScreen} user={user} />
       case 'emotionalRelease':
@@ -111,6 +149,42 @@ function App() {
         return <MindCoachScreen onNavigate={navigateToScreen} user={user} />
       case 'conversation':
         return <ConversationScreen onNavigate={navigateToScreen} />
+      case 'exercise-quick-calm':
+        return (
+          <ExerciseLayout 
+            {...exerciseData['exercise-quick-calm']}
+            onBack={() => navigateToScreen('meditation')}
+          >
+            <QuickCalm onNavigate={() => navigateToScreen('meditation')} />
+          </ExerciseLayout>
+        )
+      case 'exercise-stretch-focus':
+        return (
+          <ExerciseLayout 
+            {...exerciseData['exercise-stretch-focus']}
+            onBack={() => navigateToScreen('meditation')}
+          >
+            <StretchAndFocus />
+          </ExerciseLayout>
+        )
+      case 'exercise-mind-body-sync':
+        return (
+          <ExerciseLayout 
+            {...exerciseData['exercise-mind-body-sync']}
+            onBack={() => navigateToScreen('meditation')}
+          >
+            <MindBodySync onNavigate={() => navigateToScreen('meditation')} />
+          </ExerciseLayout>
+        )
+      case 'exercise-reflection-journal':
+        return (
+          <ExerciseLayout 
+            {...exerciseData['exercise-reflection-journal']}
+            onBack={() => navigateToScreen('meditation')}
+          >
+            <ReflectionJournal />
+          </ExerciseLayout>
+        )
       default:
         return <HomeScreen onNavigate={navigateToScreen} user={user} />
     }
