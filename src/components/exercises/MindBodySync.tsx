@@ -33,7 +33,7 @@ export const MindBodySync = ({ onNavigate }: { onNavigate: () => void }) => {
   const [feedback, setFeedback] = useState('');
   const [showFeedback, setShowFeedback] = useState(false);
   const [pulse, setPulse] = useState(false);
-  const pulseInterval = useRef<NodeJS.Timeout>();
+  const pulseInterval = useRef<number | null>(null);
 
   // Start the pulsing animation when active
   useEffect(() => {

@@ -90,7 +90,7 @@ function App() {
       case 'home':
         return <HomeScreen onNavigate={navigateToScreen} user={user} />
       case 'meditation':
-        return <MeditationScreen onNavigate={navigateToScreen} />
+        return <MeditationScreen />
       case 'journal':
         return <JournalScreen onNavigate={navigateToScreen} user={user} />
       case 'emotionalRelease':

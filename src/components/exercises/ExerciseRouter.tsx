@@ -29,7 +29,7 @@ export const ExerciseRouter = ({ onNavigate }: { onNavigate: () => void }) => {
   );
 
   const StretchAndFocusWrapper = () => (
-    <StretchAndFocus onNavigate={handleBack} />
+    <StretchAndFocus />
   );
 
   const MindBodySyncWrapper = () => (
@@ -37,7 +37,7 @@ export const ExerciseRouter = ({ onNavigate }: { onNavigate: () => void }) => {
   );
 
   const ReflectionJournalWrapper = () => (
-    <ReflectionJournal onNavigate={handleBack} />
+    <ReflectionJournal />
   );
 
   // Get the current exercise ID from the URL

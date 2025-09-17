@@ -1,12 +1,6 @@
 // src/screens/MeditationScreen.tsx
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import type { Screen } from '../App';
-
-interface MeditationScreenProps {
-  onNavigate: (screen: Screen, params?: Record<string, any>) => void;
-}
 
 interface Exercise {
   id: string;
@@ -62,8 +56,7 @@ const exercises: Exercise[] = [
   },
 ];
 
-const MeditationScreen = ({ onNavigate }: MeditationScreenProps) => {
-  const navigate = useNavigate();
+const MeditationScreen = () => {
   const [progress, setProgress] = useState(0);
 
   // Load progress from localStorage
@@ -76,8 +69,10 @@ const MeditationScreen = ({ onNavigate }: MeditationScreenProps) => {
   }, []);
 
   const handleExercisePress = (exerciseId: string) => {
-    // Navigate to the exercise route using react-router
-    navigate(`/exercises/${exerciseId}`);
+    // TODO: Implement exercise navigation
+    console.log('Navigate to exercise:', exerciseId);
+    // This would typically navigate to a detailed exercise view
+    // For now, we'll just log the exercise selection
   };
 
   return (

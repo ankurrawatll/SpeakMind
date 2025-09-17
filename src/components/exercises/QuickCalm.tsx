@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 // Mock the exercise progress functionality
 const useExerciseProgress = () => {
@@ -26,7 +26,7 @@ export const QuickCalm = ({ onNavigate }: { onNavigate: () => void }) => {
   const { markExerciseComplete } = useExerciseProgress();
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: number;
     
     if (isActive && timeLeft > 0) {
       timer = setInterval(() => {
