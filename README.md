@@ -98,19 +98,48 @@ A comprehensive mobile-first meditation and mindfulness application built with R
    npm install
    ```
 
-2. **Start development server:**
+2. **Firebase Setup:**
+   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+   - Enable Authentication with Email/Password and Google providers
+   - Copy `.env.example` to `.env` and fill in your Firebase config values
+   - Get your config from Project Settings > General > Your apps
+
+3. **Start development server:**
    ```bash
    npm run dev
    ```
 
-3. **Open in browser:**
+4. **Open in browser:**
    - Navigate to `http://localhost:5174`
    - Best viewed in mobile viewport (375px width)
 
-4. **Build for production:**
+5. **Build for production:**
    ```bash
    npm run build
    ```
+
+## 🔐 Firebase Authentication Setup
+
+### **Required Firebase Services:**
+- **Authentication**: Email/Password and Google Sign-In
+- **Firestore Database**: User data and meditation progress (optional)
+
+### **Environment Variables:**
+Create a `.env` file in the root directory:
+```env
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=your-app-id
+```
+
+### **Firebase Console Setup:**
+1. Go to Authentication > Sign-in method
+2. Enable Email/Password provider
+3. Enable Google provider (add your domain)
+4. Add authorized domains for production
 
 ## 📱 App Flow & Navigation
 
