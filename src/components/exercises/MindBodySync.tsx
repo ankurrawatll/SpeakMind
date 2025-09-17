@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ExerciseLayout } from './ExerciseLayout';
+import type { Screen } from '../../App';
+
+interface MindBodySyncProps {
+  onNavigate: (screen: Screen) => void;
+}
 
 // Mock the exercise progress functionality
 const useExerciseProgress = () => {
@@ -22,7 +27,7 @@ const useExerciseProgress = () => {
 const TARGET_RHYTHM = 1000; // 1 second interval in ms
 const TOTAL_ROUNDS = 10;
 
-export const MindBodySync = ({ onNavigate }: { onNavigate?: () => void }) => {
+export const MindBodySync = ({ onNavigate }: MindBodySyncProps) => {
   const { completeExercise } = useExerciseProgress();
   const [isActive, setIsActive] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
@@ -109,9 +114,17 @@ export const MindBodySync = ({ onNavigate }: { onNavigate?: () => void }) => {
 
   const handleComplete = () => {
     setIsActive(false);
-    setIsComplete(true);
     completeExercise('mind-body-sync');
+    setIsComplete(true);
     setShowReward(true);
+    // Auto-navigate back after showing reward
+    setTimeout(() => {
+      onNavigate('meditation');
+    }, 2000);
+  };
+
+  const handleBack = () => {
+    onNavigate('meditation');
   };
 
   const resetExercise = () => {
@@ -139,7 +152,7 @@ export const MindBodySync = ({ onNavigate }: { onNavigate?: () => void }) => {
         subtitle="Find your rhythm"
         backgroundImage="https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg"
         overlayColor="bg-serenity/60"
-        onBack={onNavigate}
+        onBack={handleBack}
       >
         <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
           {!isActive && !isComplete ? (

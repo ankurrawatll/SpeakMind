@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useExerciseProgress } from '../../hooks/useExerciseProgress';
 import { ExerciseLayout } from './ExerciseLayout';
+import type { Screen } from '../../App';
+
+interface ReflectionJournalProps {
+  onNavigate: (screen: Screen) => void;
+}
 
 type JournalEntry = {
   id: string;
@@ -17,8 +22,7 @@ const MOODS = [
   { emoji: '😔', label: 'Down' },
 ];
 
-
-const ReflectionJournal = () => {
+const ReflectionJournal = ({ onNavigate }: ReflectionJournalProps) => {
   const { completeExercise } = useExerciseProgress();
   const [entry, setEntry] = useState('');
   const [selectedMood, setSelectedMood] = useState<string>('');
@@ -57,10 +61,20 @@ const ReflectionJournal = () => {
     setSavedEntries((prev) => [newEntry, ...prev]);
     setEntry('');
     setSelectedMood('');
-    setIsSubmitted(true);
-    completeExercise('reflection-journal');
-    setShowReward(true);
-    setShowPrompt(false);
+    const handleComplete = () => {
+      completeExercise('reflection-journal');
+      setIsSubmitted(true);
+      setShowReward(true);
+      // Auto-navigate back after showing reward
+      setTimeout(() => {
+        onNavigate('meditation');
+      }, 2000);
+    };
+    handleComplete();
+  };
+
+  const handleBack = () => {
+    onNavigate('meditation');
   };
 
   const startNewEntry = () => {
@@ -83,7 +97,7 @@ const ReflectionJournal = () => {
       subtitle="Express your thoughts"
       backgroundImage="https://images.pexels.com/photos/6621339/pexels-photo-6621339.jpeg"
       overlayColor="bg-linen/70"
-      onBack={() => {}}
+      onBack={handleBack}
     >
       <div className="flex flex-col h-full">
         {showPrompt && !isSubmitted && (

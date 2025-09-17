@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import type { Screen } from '../../App';
+
+interface QuickCalmProps {
+  onNavigate: (screen: Screen) => void;
+}
 
 // Mock the exercise progress functionality
 const useExerciseProgress = () => {
@@ -18,7 +23,7 @@ const useExerciseProgress = () => {
   return { markExerciseComplete };
 };
 
-export const QuickCalm = ({ onNavigate }: { onNavigate?: () => void }) => {
+export const QuickCalm = ({ onNavigate }: QuickCalmProps) => {
   const backgroundImage = 'https://images.pexels.com/photos/2097628/pexels-photo-2097628.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2';
   const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60); // 1 minute timer
@@ -142,7 +147,7 @@ export const QuickCalm = ({ onNavigate }: { onNavigate?: () => void }) => {
             </button>
           )}
           <button
-            onClick={onNavigate}
+            onClick={() => onNavigate('meditation')}
             className="px-6 py-3 bg-white/90 text-slate-700 rounded-full font-medium hover:bg-white transition-colors"
           >
             Back

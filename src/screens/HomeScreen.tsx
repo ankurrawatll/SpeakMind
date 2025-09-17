@@ -22,46 +22,57 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
 
   const aiCoachSessions = [
     {
-      id: 1,
+      id: 'midnight-relax',
       title: 'Midnight & Relaxation',
       image: '/Homescreen/Ai coach/Midnightandrelaxation.png',
-      category: 'Sleep'
+      category: 'Sleep',
+      onClick: () => onNavigate('aiCoach')
     },
     {
-      id: 2,
-      title: 'Jogging and Cycling',
-      image: '/Homescreen/Ai coach/JoggingandCycling.png',
-      category: 'Active'
+      id: 'vedic-calm',
+      title: 'Vedic Calm',
+      image: 'https://images.pexels.com/photos/15327651/pexels-photo-15327651.jpeg',
+      category: 'Philosophy',
+      onClick: () => onNavigate('vedicCalm')
     },
     {
-      id: 3,
+      id: 'midnight-launderette',
       title: 'Midnight Launderette',
       image: '/Homescreen/Ai coach/MidnightLaunderetee.png',
-      category: 'Focus'
+      category: 'Focus',
+      onClick: () => onNavigate('aiCoach')
     },
     {
-      id: 4,
-      title: 'Jogging',
-      image: '/Homescreen/Ai coach/jogging.png',
-      category: 'Calm'
+      id: 'wisdom-gita',
+      title: 'Wisdom of the Gita',
+      image: 'https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg',
+      category: 'Insights',
+      onClick: () => onNavigate('wisdomGita')
     }
   ]
 
   return (
-    <div className="min-h-screen bg-white pb-20">
+    <div className="min-h-screen relative pb-24">
+      {/* Background */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="https://images.pexels.com/photos/3543912/pexels-photo-3543912.jpeg"
+          alt="Calm background"
+          className="w-full h-full object-cover"/>
+        <div className="absolute inset-0 bg-white/40"/>
+      </div>
+
       {/* Header with Greeting */}
-      <div className="px-6 pt-12 pb-6">
+      <div className="relative z-10 px-6 pt-12 pb-6">
         <div className="text-gray-900">
-          <h1 className="text-2xl font-semibold mb-2">
-            Hi {user.name}
-          </h1>
-          <p className="text-gray-600 text-base">How are you feeling today?</p>
+          <h1 className="text-2xl font-semibold mb-2">Hi {user.name}</h1>
+          <p className="text-gray-700 text-base">How are you feeling today?</p>
         </div>
       </div>
 
-      <div className="px-6">
+      <div className="relative z-10 px-6">
         {/* Mood Selector */}
-        <div className="mb-8">
+        <div className="mb-8 bg-white/40 backdrop-blur-md border border-white/30 rounded-2xl p-4 shadow">
           <div className="flex justify-between items-center gap-4">
             {moods.map((mood) => (
               <button
@@ -84,7 +95,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
         {/* Meditative Insights Card */}
         <div className="mb-8">
           <div 
-            className="relative rounded-3xl overflow-hidden cursor-pointer"
+            className="relative rounded-3xl overflow-hidden cursor-pointer border border-white/30 bg-white/30 backdrop-blur-md"
             // clicking anywhere navigates to Ask Question, button also works
             onClick={() => onNavigate('askQuestion')}
           >
@@ -93,7 +104,9 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
               alt="Meditative Insights"
               className="w-full h-auto object-cover"
             />
-            {/* overlay with CTA positioned exactly on image */}
+            {/* subtle gradient for contrast */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"/>
+            {/* overlay container */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="w-full h-full flex items-center justify-center px-6">
                 <div className="relative w-full max-w-md">
@@ -106,7 +119,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
         </div>
 
         {/* AI Coach Sessions */}
-        <div className="mb-6">
+        <div className="mb-6 bg-white/40 backdrop-blur-md border border-white/30 rounded-2xl p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Meditation & Relaxation</h3>
             <button 
@@ -123,16 +136,15 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
               <div 
                 key={session.id}
                 className="relative rounded-2xl overflow-hidden cursor-pointer group"
-                onClick={() => onNavigate('aiCoach')}
+                onClick={session.onClick}
               >
                 <img 
                   src={session.image} 
                   alt={session.title}
                   className="w-full h-32 sm:h-36 object-cover"
                 />
-
                 {/* subtle gradient to ensure text contrast */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-95"></div>
+                <div className="absolute inset-0 bg-black/20"/>
 
                 {/* Title text at top-left */}
                 <div className="absolute inset-0 p-4 flex flex-col justify-start">
@@ -141,25 +153,14 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                   </h4>
                 </div>
 
-                {/* centered play button */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onNavigate('aiCoach') }}
-                    className="pointer-events-auto bg-white/90 w-12 h-12 rounded-full flex items-center justify-center shadow-md transform transition group-hover:scale-105"
-                    aria-label={`Play ${session.title}`}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-purple-600">
-                      <path d="M8 5v14l11-7L8 5z" fill="#7C3AED"></path>
-                    </svg>
-                  </button>
-                </div>
+                {/* No play button to avoid overlap */}
               </div>
             ))}
           </div>
         </div>
 
         {/* Streak Widget */}
-        <div className="bg-gradient-to-r from-orange-400 to-pink-400 rounded-2xl p-4 mb-6">
+        <div className="bg-gradient-to-r from-orange-400 to-pink-400 rounded-2xl p-4 mb-6 border border-white/40 backdrop-blur-md">
           <div className="flex items-center justify-between text-white">
             <div>
               <div className="flex items-center space-x-2 mb-1">
@@ -181,7 +182,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
         <div className="grid grid-cols-1 gap-4 mb-6">
           {/* Journal Card */}
           <div 
-            className="bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl p-5 cursor-pointer transform transition-transform active:scale-95"
+            className="bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl p-5 cursor-pointer transform transition-transform active:scale-95 border border-white/40 backdrop-blur-sm"
             onClick={() => onNavigate('journal')}
           >
             <div className="flex items-center justify-between text-white">

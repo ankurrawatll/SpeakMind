@@ -15,32 +15,36 @@ const LoadingFallback = () => (
   </div>
 );
 
-export const ExerciseRouter = ({ onNavigate }: { onNavigate: () => void }) => {
+import type { Screen } from '../../App';
+
+interface ExerciseRouterProps {
+  onNavigate: (screen?: Screen) => void;
+}
+
+export const ExerciseRouter = ({ onNavigate }: ExerciseRouterProps) => {
   const location = useLocation();
 
   // Handle back navigation to the exercises screen
   const handleBack = () => {
-    onNavigate();
+    onNavigate('meditation');
   };
 
-    // Wrapper components to handle the onBack prop with proper typing
+  // Wrapper components with onNavigate prop
   const QuickCalmWrapper = () => (
     <QuickCalm onNavigate={handleBack} />
   );
 
-  // StretchAndFocus doesn't use onNavigate, so we don't pass it
+  // Wrapper components with onNavigate prop
   const StretchAndFocusWrapper = () => (
-    <StretchAndFocus />
+    <StretchAndFocus onNavigate={onNavigate} />
   );
 
-  // MindBodySync doesn't use onNavigate, so we don't pass it
   const MindBodySyncWrapper = () => (
-    <MindBodySync />
+    <MindBodySync onNavigate={onNavigate} />
   );
 
-  // ReflectionJournal doesn't use onNavigate, so we don't pass it
   const ReflectionJournalWrapper = () => (
-    <ReflectionJournal />
+    <ReflectionJournal onNavigate={onNavigate} />
   );
 
   // Get the current exercise ID from the URL

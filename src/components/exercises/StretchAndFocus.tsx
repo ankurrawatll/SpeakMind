@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useExerciseProgress } from '../../hooks/useExerciseProgress';
 import { ExerciseLayout } from './ExerciseLayout';
+import type { Screen } from '../../App';
+
+interface StretchAndFocusProps {
+  onNavigate: (screen: Screen) => void;
+}
 
 type StretchStep = {
   id: number;
@@ -41,7 +46,7 @@ const STRETCHES: StretchStep[] = [
   },
 ];
 
-const StretchAndFocus = () => {
+const StretchAndFocus = ({ onNavigate }: StretchAndFocusProps) => {
   const { completeExercise } = useExerciseProgress();
   const [currentStep, setCurrentStep] = useState(0);
   const [timeLeft, setTimeLeft] = useState(STRETCHES[0].duration);
@@ -90,9 +95,17 @@ const StretchAndFocus = () => {
 
   const handleComplete = () => {
     setIsActive(false);
-    setIsComplete(true);
     completeExercise('stretch-focus');
+    setIsComplete(true);
     setShowReward(true);
+    // Auto-navigate back after showing reward
+    setTimeout(() => {
+      onNavigate('meditation');
+    }, 2000);
+  };
+
+  const handleBack = () => {
+    onNavigate('meditation');
   };
 
   const handleNext = () => {
@@ -127,7 +140,7 @@ const StretchAndFocus = () => {
       subtitle="Gentle stretching with mindfulness"
       backgroundImage={backgroundImage}
       overlayColor="bg-black/60"
-      onBack={() => {}}
+      onBack={handleBack}
     >
       <div className="flex flex-col h-full">
         {/* Progress Dots */}

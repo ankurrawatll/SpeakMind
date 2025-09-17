@@ -7,7 +7,7 @@ type ExerciseLayoutProps = {
   subtitle?: string;
   backgroundImage: string;
   overlayColor: string;
-  onBack: () => void; // Make this required since we're not using react-router
+  onBack?: () => void;
 };
 
 export const ExerciseLayout = ({
@@ -18,11 +18,14 @@ export const ExerciseLayout = ({
   overlayColor,
   onBack,
 }: ExerciseLayoutProps) => {
-
   const handleBack = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onBack();
+    
+    // Call onBack if provided
+    if (onBack) {
+      onBack();
+    }
   };
 
   return (
