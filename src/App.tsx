@@ -10,6 +10,7 @@ import AskQuestionScreen from './screens/AskQuestionScreen'
 import StreaksScreen from './screens/StreaksScreen'
 import MeditationTimerScreen from './screens/MeditationTimerScreen'
 import AICoachScreen from './screens/AICoachScreen'
+import MidnightRelaxationScreen from './screens/MidnightRelaxationScreen'
 import ProfileScreen from './screens/ProfileScreen'
 import SharingScreen from './screens/SharingScreen'
 import MindCoachScreen from './screens/MindCoachScreen'
@@ -43,6 +44,7 @@ export type Screen =
   | 'exercise-stretch-focus'
   | 'exercise-mind-body-sync'
   | 'exercise-reflection-journal'
+  | 'midnightRelaxation'
   | 'vedicCalm'
   | 'wisdomGita'
 
@@ -149,6 +151,8 @@ const AppContent = () => {
         return <MeditationTimerScreen onNavigate={navigateToScreen} />
       case 'aiCoach':
         return <AICoachScreen onNavigate={navigateToScreen} />
+      case 'midnightRelaxation':
+        return <MidnightRelaxationScreen onNavigate={navigateToScreen} />
       case 'profile':
         return <ProfileScreen onNavigate={navigateToScreen} user={user} />
       case 'sharing':

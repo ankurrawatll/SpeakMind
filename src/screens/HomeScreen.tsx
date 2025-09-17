@@ -26,7 +26,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
       title: 'Midnight & Relaxation',
       image: '/Homescreen/Ai%20coach/Midnightandrelaxation.png',
       category: 'Sleep',
-      onClick: () => onNavigate('aiCoach')
+      onClick: () => onNavigate('midnightRelaxation')
     },
     {
       id: 'vedic-calm',
