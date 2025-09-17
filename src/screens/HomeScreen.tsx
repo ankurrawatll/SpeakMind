@@ -1,5 +1,12 @@
 import type { Screen } from '../App'
 
+// Import mood images from public folder
+import calmImg from '/Homescreen/Moods/calm.png'
+import relaxImg from '/Homescreen/Moods/relax.png'
+import focusImg from '/Homescreen/Moods/focus.png'
+import anxiousImg from '/Homescreen/Moods/Anxious.png'
+import meditativeInsightsImg from '/Homescreen/Meditative Insights.png'
+
 interface HomeScreenProps {
   onNavigate: (screen: Screen) => void
   user: {
@@ -14,10 +21,10 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
   const moods = [
-    { emoji: '/Homescreen/Moods/calm.png', label: 'Calm', value: 'calm' },
-    { emoji: '/Homescreen/Moods/relax.png', label: 'Relax', value: 'relax' },
-    { emoji: '/Homescreen/Moods/focus.png', label: 'Focus', value: 'focus' },
-    { emoji: '/Homescreen/Moods/Anxious.png', label: 'Anxious', value: 'anxious' },
+    { emoji: calmImg, label: 'Calm', value: 'calm' },
+    { emoji: relaxImg, label: 'Relax', value: 'relax' },
+    { emoji: focusImg, label: 'Focus', value: 'focus' },
+    { emoji: anxiousImg, label: 'Anxious', value: 'anxious' },
   ]
 
   const aiCoachSessions = [
@@ -100,7 +107,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
             onClick={() => onNavigate('askQuestion')}
           >
             <img 
-              src="/Homescreen/Meditative Insights.png" 
+              src={meditativeInsightsImg} 
               alt="Meditative Insights"
               className="w-full h-auto object-cover"
             />
