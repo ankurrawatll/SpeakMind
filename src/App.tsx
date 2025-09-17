@@ -13,6 +13,8 @@ import AICoachScreen from './screens/AICoachScreen'
 import ProfileScreen from './screens/ProfileScreen'
 import SharingScreen from './screens/SharingScreen'
 import MindCoachScreen from './screens/MindCoachScreen'
+import VedicCalmScreen from './screens/VedicCalmScreen'
+import WisdomGitaScreen from './screens/WisdomGitaScreen'
 import ConversationScreen from './screens/ConversationScreen'
 import BottomNavigation from './components/BottomNavigation'
 // Exercise components
@@ -41,6 +43,8 @@ export type Screen =
   | 'exercise-stretch-focus'
   | 'exercise-mind-body-sync'
   | 'exercise-reflection-journal'
+  | 'vedicCalm'
+  | 'wisdomGita'
 
 const AppContent = () => {
   const { currentUser } = useAuth()
@@ -189,6 +193,10 @@ const AppContent = () => {
             <ReflectionJournal />
           </ExerciseLayout>
         )
+      case 'vedicCalm':
+        return <VedicCalmScreen onNavigate={navigateToScreen} />
+      case 'wisdomGita':
+        return <WisdomGitaScreen onNavigate={navigateToScreen} />
       default:
         return <HomeScreen onNavigate={navigateToScreen} user={user} />
     }
