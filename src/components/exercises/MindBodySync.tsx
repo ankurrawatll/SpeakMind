@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ExerciseLayout } from './ExerciseLayout';
 import type { Screen } from '../../App';
@@ -38,24 +38,24 @@ export const MindBodySync = ({ onNavigate }: MindBodySyncProps) => {
   const [feedback, setFeedback] = useState<string>('');
   const [showFeedback, setShowFeedback] = useState(false);
   const [pulse, setPulse] = useState(false);
-  const pulseInterval = useRef<number | null>(null);
+  const pulseInterval = useRef<NodeJS.Timeout | null>(null);
 
 
   // Start the pulsing animation when active
   useEffect(() => {
     if (isActive && !isComplete) {
-      timer = setTimeout(() => {
+      pulseInterval.current = setTimeout(() => {
         setPulse((prev) => !prev);
       }, TARGET_RHYTHM);
     } else {
-      if (timer) {
-        clearTimeout(timer);
+      if (pulseInterval.current) {
+        clearTimeout(pulseInterval.current);
       }
     }
 
     return () => {
-      if (timer) {
-        clearTimeout(timer);
+      if (pulseInterval.current) {
+        clearTimeout(pulseInterval.current);
       }
     };
   }, [isActive, isComplete]);
