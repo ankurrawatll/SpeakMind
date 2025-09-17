@@ -52,7 +52,7 @@
   }
   
   .bottom-nav {
-    @apply fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-black/30 backdrop-blur-md border-t border-white/20 px-4 py-2 z-50;
+    @apply fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-black/50 backdrop-blur-lg border-t border-white/30 px-4 py-2 z-50 shadow-[0_-8px_24px_rgba(0,0,0,0.35)];
   }
   
   .nav-item {
@@ -60,11 +60,11 @@
   }
   
   .nav-item.active {
-    @apply bg-white/10 text-white;
+    @apply bg-white/15 text-white;
   }
   
   .nav-item.inactive {
-    @apply text-white/70;
+    @apply text-white/60;
   }
   
   .mood-emoji {
