@@ -24,7 +24,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
     {
       id: 'midnight-relax',
       title: 'Midnight & Relaxation',
-      image: '/Homescreen/Ai%20coach/Midnightandrelaxation.png',
+      image: 'https://images.pexels.com/photos/18554368/pexels-photo-18554368.jpeg',
       category: 'Sleep',
       onClick: () => onNavigate('midnightRelaxation')
     },
@@ -38,7 +38,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
     {
       id: 'midnight-launderette',
       title: 'Midnight Launderette',
-      image: '/Homescreen/Ai%20coach/MidnightLaunderetee.png',
+      image: 'https://images.pexels.com/photos/3125171/pexels-photo-3125171.jpeg',
       category: 'Focus',
       onClick: () => onNavigate('aiCoach')
     },
