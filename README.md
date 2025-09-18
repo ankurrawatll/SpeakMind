@@ -1,4 +1,10 @@
-# SpeakMind - Mobile Meditation & Mindfulness App
+# SpeakMind - Mob### 💬 **Ask Questions**
+- **AI-Powered Wellness Coach**: Get personalized advice from Gemini AI
+- **Beautiful, Responsive UI**: Glassmorphism design with gradient backgrounds
+- **FAQ Section**: Expandable frequently asked questions
+- **Smart Responses**: Context-aware mental wellness guidance
+- **Loading States**: Smooth loading animations during AI processing
+- **Error Handling**: Graceful fallbacks for API connectivity issuesMeditation & Mindfulness App
 
 A comprehensive mobile-first meditation and mindfulness application built with React, TypeScript, Vite, and Tailwind CSS. SpeakMind connects users with AI-powered meditation coaching, community features, and personalized mindfulness journeys.
 
@@ -125,15 +131,33 @@ A comprehensive mobile-first meditation and mindfulness application built with R
 - **Firestore Database**: User data and meditation progress (optional)
 
 ### **Environment Variables:**
-Create a `.env` file in the root directory:
+Create a `.env.local` file in the root directory:
 ```env
+# Firebase Configuration
 VITE_FIREBASE_API_KEY=your-api-key
 VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your-project-id
 VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
 VITE_FIREBASE_APP_ID=your-app-id
+
+# Gemini AI API Configuration
+VITE_GEMINI_API_KEY=your-gemini-api-key
 ```
+
+### **Getting API Keys:**
+
+#### **Firebase Setup:**
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project or select existing
+3. Go to Project Settings > General > Your apps
+4. Copy the config values to your `.env.local` file
+
+#### **Gemini AI Setup:**
+1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Create a new API key for Gemini Pro
+3. Add the key to your `.env.local` file as `VITE_GEMINI_API_KEY`
+4. The AI coach feature will provide personalized meditation guidance
 
 ### **Firebase Console Setup:**
 1. Go to Authentication > Sign-in method
