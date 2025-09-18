@@ -139,52 +139,74 @@ export default function JournalScreen({ onNavigate, user: _user }: JournalScreen
   }
 
   return (
-    <div className="min-h-screen bg-light-bg pb-24">
+    <div className="min-h-screen relative pb-24">
+      {/* Background */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="https://images.pexels.com/photos/6787202/pexels-photo-6787202.jpeg"
+          alt="Peaceful journaling background"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-white/50" />
+      </div>
+
       {/* Header */}
-      <div className="gradient-bg px-6 pt-12 pb-6 rounded-b-5xl">
-        <div className="flex items-center justify-between mb-4">
+      <div className="relative z-10 px-6 pt-12 pb-6">
+        <div className="flex items-center space-x-4 text-gray-900">
           <button 
             onClick={() => onNavigate('home')}
-            className="text-white/80 hover:text-white"
+            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-gray-700 hover:bg-white/30 transition-all duration-200"
           >
-            ← Back
+            ←
           </button>
-          <h1 className="text-xl font-bold text-white">AI Journal</h1>
-          <div></div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">AI Journal</h1>
+            <p className="text-gray-600 text-sm">Reflect and grow with mindful writing</p>
+          </div>
         </div>
       </div>
 
-      <div className="px-6 -mt-4">
+      <div className="relative z-10 px-6 space-y-6">
         {/* AI Prompt Card */}
-        <div className="card mb-6">
+        <div className="bg-white/70 backdrop-blur-md border border-white/30 rounded-3xl p-6 shadow-lg hover:bg-white/80 transition-all duration-300">
           <div className="flex items-start space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-purple to-primary-pink rounded-full flex items-center justify-center text-white font-bold text-sm">
-              AI
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-purple to-primary-pink rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg animate-pulse">
+              🤖
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-800 mb-2">Today's Reflection Prompt</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">{aiPrompt}</p>
+              <h3 className="font-semibold text-gray-900 mb-2 flex items-center space-x-2">
+                <span>Today's Reflection Prompt</span>
+                <span className="text-primary-purple animate-bounce">✨</span>
+              </h3>
+              <p className="text-gray-700 text-sm leading-relaxed">{aiPrompt}</p>
             </div>
           </div>
         </div>
 
         {/* Journal Entry Form */}
-        <div className="card mb-6">
-          <h3 className="font-semibold text-gray-800 mb-4">Write Your Entry</h3>
+        <div className="bg-white/70 backdrop-blur-md border border-white/30 rounded-3xl p-6 shadow-lg hover:bg-white/80 transition-all duration-300">
+          <h3 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+            <span>✍️</span>
+            <span>Write Your Entry</span>
+          </h3>
           
           <textarea
             value={currentEntry}
             onChange={(e) => setCurrentEntry(e.target.value)}
             placeholder="Start writing your thoughts here..."
-            className="w-full h-32 p-3 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-purple/20 focus:border-primary-purple"
+            className="w-full h-32 p-4 bg-white/50 backdrop-blur-sm border border-white/40 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-purple/40 focus:border-primary-purple/40 focus:bg-white/70 transition-all duration-200 resize-none"
           />
           
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 bg-white/40 px-3 py-1 rounded-full border border-white/30">
                 {wordCount} word{wordCount !== 1 ? 's' : ''}
               </span>
-              <span className={`text-sm font-medium ${wordCount >= 20 ? 'text-green-600' : 'text-yellow-600'}`}>
+              <span className={`text-sm font-medium px-3 py-1 rounded-full border ${
+                wordCount >= 20 
+                  ? 'text-green-700 bg-green-100/60 border-green-200/50' 
+                  : 'text-yellow-700 bg-yellow-100/60 border-yellow-200/50'
+              }`}>
                 +{calculateXP(wordCount)} XP
               </span>
             </div>
@@ -192,24 +214,41 @@ export default function JournalScreen({ onNavigate, user: _user }: JournalScreen
             <button
               onClick={handleSubmit}
               disabled={currentEntry.trim().length === 0 || isSubmitting}
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`font-semibold py-3 px-6 rounded-2xl transition-all duration-300 active:scale-95 flex items-center space-x-2 ${
+                currentEntry.trim().length > 0 && !isSubmitting
+                  ? 'bg-gradient-to-r from-primary-purple to-primary-pink text-white shadow-lg'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
             >
-              {isSubmitting ? 'Saving...' : 'Save Entry'}
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <span>Save Entry</span>
+                  <span>💾</span>
+                </>
+              )}
             </button>
           </div>
         </div>
 
         {/* Recent Entries */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Entries</h3>
+        <div className="bg-white/70 backdrop-blur-md border border-white/30 rounded-3xl p-6 shadow-lg hover:bg-white/80 transition-all duration-300">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+            <span>📚</span>
+            <span>Recent Entries</span>
+          </h3>
           <div className="space-y-3">
             {recentEntries.map((entry) => (
-              <div key={entry.id} className="card">
+              <div key={entry.id} className="bg-white/50 backdrop-blur-sm border border-white/40 rounded-2xl p-4 hover:bg-white/70 hover:scale-[1.02] transition-all duration-200 cursor-pointer">
                 <div className="flex items-start justify-between mb-2">
-                  <span className="text-sm text-gray-500">{formatDate(entry.date)}</span>
+                  <span className="text-sm text-gray-500 bg-white/40 px-2 py-1 rounded-full">{formatDate(entry.date)}</span>
                   <div className="flex items-center space-x-2">
-                    <span className="text-xs text-gray-500">{entry.wordCount} words</span>
-                    <span className="text-xs font-medium text-green-600">+{entry.xpEarned} XP</span>
+                    <span className="text-xs text-gray-500 bg-white/40 px-2 py-1 rounded-full">{entry.wordCount} words</span>
+                    <span className="text-xs font-medium text-green-600 bg-green-100/60 px-2 py-1 rounded-full">+{entry.xpEarned} XP</span>
                   </div>
                 </div>
                 <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
@@ -221,12 +260,17 @@ export default function JournalScreen({ onNavigate, user: _user }: JournalScreen
         </div>
 
         {/* Writing Tips */}
-        <div className="card">
-          <h3 className="font-semibold text-gray-800 mb-4">💭 Writing Tips</h3>
-          <div className="space-y-2">
+        <div className="bg-white/70 backdrop-blur-md border border-white/30 rounded-3xl p-6 shadow-lg">
+          <h3 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+            <span>💭</span>
+            <span>Writing Tips</span>
+          </h3>
+          <div className="space-y-3">
             {writingTips.map((tip, index) => (
-              <div key={index} className="text-sm text-gray-600 leading-relaxed">
-                {tip}
+              <div key={index} className="bg-white/40 backdrop-blur-sm border border-white/30 rounded-2xl p-3">
+                <div className="text-sm text-gray-700 leading-relaxed">
+                  {tip}
+                </div>
               </div>
             ))}
           </div>
@@ -235,7 +279,7 @@ export default function JournalScreen({ onNavigate, user: _user }: JournalScreen
 
       {/* Success Toast */}
       {showToast && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 toast-enter">
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-green-500 to-green-400 text-white px-6 py-3 rounded-2xl shadow-lg z-50 toast-enter backdrop-blur-md border border-white/20">
           <div className="flex items-center space-x-2">
             <span>🎉</span>
             <span className="font-medium">{toastMessage}</span>
