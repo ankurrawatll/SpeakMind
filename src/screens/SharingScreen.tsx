@@ -244,102 +244,127 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
   // Chat interface
   if (selectedChat) {
     return (
-      <div className="min-h-screen relative pb-24 flex flex-col overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 z-0">
-          <img src="https://images.pexels.com/photos/18071149/pexels-photo-18071149.jpeg" alt="Community background" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/40" />
-        </div>
+      <div className="min-h-screen bg-white relative pb-32 flex flex-col">
         {/* Chat Header */}
-        <div className="relative z-10 px-6 pt-12 pb-4">
-          <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl px-4 py-3 flex items-center space-x-4 text-white">
+        <div className="px-4 pt-12 pb-4 border-b border-gray-100">
+          <div className="flex items-center space-x-4">
             <button 
               onClick={() => setSelectedChat(null)}
-              className="text-white hover:text-white/80"
+              className="text-gray-600 hover:text-gray-800"
             >
-              ← Back
+              ← 
             </button>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-lg">
                 👤
               </div>
               <div>
-                <h2 className="font-semibold">{selectedChat.participant}</h2>
-                <p className="text-sm text-white/80">Available for support</p>
+                <h2 className="font-semibold text-gray-900">Conversation</h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">Available for support</span>
+                  <button className="text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Messages */}
-        <div className="relative z-10 flex-1 px-6 py-4 overflow-y-auto">
+        <div className="flex-1 px-4 py-4 overflow-y-auto">
           <div className="space-y-4">
             {selectedChat.messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
               >
+                {!message.isOwn && (
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm mr-3 mt-1 flex-shrink-0">
+                    👤
+                  </div>
+                )}
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${message.isOwn ? 'bg-primary-purple text-white' : 'bg-white/30 backdrop-blur text-white'}`}
+                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                    message.isOwn 
+                      ? 'bg-purple-500 text-white' 
+                      : 'bg-purple-50 text-gray-800'
+                  }`}
                 >
                   <p className="text-sm">{message.message}</p>
-                  <p className={`text-xs mt-1 ${message.isOwn ? 'text-white/70' : 'text-white/70'}`}>
+                  <p className={`text-xs mt-1 ${message.isOwn ? 'text-white/70' : 'text-gray-500'}`}>
                     {message.timestamp}
                   </p>
                 </div>
+                {message.isOwn && (
+                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm ml-3 mt-1 flex-shrink-0">
+                    👤
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
 
         {/* Message Input */}
-        <div className="relative z-10 px-6 py-4">
-          <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-full flex items-center px-3 py-2">
+        <div className="px-4 py-4 border-t border-gray-100">
+          <div className="bg-gray-50 rounded-full flex items-center px-4 py-2">
             <input
               type="text"
-              placeholder="Type a supportive message..."
-              className="flex-1 px-3 py-2 bg-transparent text-white placeholder-white/70 focus:outline-none"
+              placeholder="Ask anything"
+              className="flex-1 px-2 py-2 bg-transparent text-gray-800 placeholder-gray-500 focus:outline-none"
             />
-            <button className="px-4 py-2 bg-primary-purple text-white rounded-full hover:bg-primary-purple/90 transition-colors">
-              Send
+            <button className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
             </button>
           </div>
-          <p className="text-xs text-white/70 mt-2 text-center">
-            💡 This is a prototype - messages are for demonstration only
-          </p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen relative pb-24 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 z-0">
-        <img src="https://images.pexels.com/photos/18071149/pexels-photo-18071149.jpeg" alt="Community background" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/35" />
-      </div>
+    <div className="min-h-screen bg-white relative pb-32">
       {/* Header */}
-      <div className="relative z-10 px-6 pt-12 pb-4">
-        <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-5 text-white">
-          <h1 className="text-2xl font-bold mb-1">Community</h1>
-          <p className="text-white/80 text-sm">Connect, share, and support each other</p>
+      <div className="px-4 pt-12 pb-6">
+        <div className="flex items-center space-x-4 mb-4">
+          <button className="text-gray-600">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        </div>
+        <div className="text-center">
+          <h1 className="text-xl font-semibold text-gray-900 mb-1">Community</h1>
+          <p className="text-gray-500 text-sm">Connect, share and support each other</p>
         </div>
       </div>
 
-      <div className="relative z-10 px-6 -mt-2">
+      <div className="px-4">
         {/* Tab Navigation */}
-        <div className="mb-4">
-          <div className="flex bg-white/15 backdrop-blur-xl border border-white/20 rounded-full p-1">
+        <div className="mb-6">
+          <div className="flex bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setActiveTab('forum')}
-              className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-colors ${activeTab === 'forum' ? 'bg-white text-gray-900 shadow' : 'text-white/80 hover:text-white'}`}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'forum' 
+                  ? 'bg-white text-gray-900 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
               Forum
             </button>
             <button
               onClick={() => setActiveTab('chat')}
-              className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-colors ${activeTab === 'chat' ? 'bg-white text-gray-900 shadow' : 'text-white/80 hover:text-white'}`}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'chat' 
+                  ? 'bg-white text-gray-900 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
               Support Chat
             </button>
@@ -349,133 +374,75 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
         {/* Forum Tab */}
         {activeTab === 'forum' && (
           <div>
-            {/* New Post Button */}
-            <div className="mb-4 bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
-              <div className="flex items-center justify-between">
-                <button
-                  onClick={() => setShowNewPost(true)}
-                  className="px-4 py-2 bg-primary-purple text-white rounded-full hover:bg-primary-purple/90 transition-colors"
-                >
-                  ✏️ Share Your Experience
-                </button>
-                <div className="text-white/80 text-sm">
-                  <button className="px-3 py-1 rounded-full hover:bg-white/10">Top</button>
-                  <button className="px-3 py-1 rounded-full hover:bg-white/10">Latest</button>
-                </div>
-              </div>
-            </div>
-
-            {/* New Post Modal */}
-            {showNewPost && (
-              <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-                <div className="bg-white/95 rounded-2xl w-full max-w-md p-6 backdrop-blur-md">
-                  <h3 className="text-lg font-semibold mb-4">Create New Post</h3>
-                  
-                  <input
-                    type="text"
-                    placeholder="Post title..."
-                    value={newPostTitle}
-                    onChange={(e) => setNewPostTitle(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:border-primary-purple"
-                  />
-                  
-                  <textarea
-                    placeholder="Share your thoughts, experiences, or questions..."
-                    value={newPostContent}
-                    onChange={(e) => setNewPostContent(e.target.value)}
-                    rows={4}
-                    className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:border-primary-purple resize-none"
-                  />
-                  
-                  <input
-                    type="text"
-                    placeholder="Tags (separate with commas)"
-                    value={newPostTags}
-                    onChange={(e) => setNewPostTags(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-primary-purple"
-                  />
-                  
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => setShowNewPost(false)}
-                      className="flex-1 py-2 px-4 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleCreatePost}
-                      className="flex-1 py-2 px-4 bg-primary-purple text-white rounded-lg hover:bg-primary-purple/90 transition-colors"
-                    >
-                      Post
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Forum Posts */}
             <div className="space-y-4">
               {forumPosts.map((post) => (
-                <div key={post.id} className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-5 text-white">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm">
-                        👤
-                      </div>
-                      <div>
-                        <span className="font-medium">{post.author}</span>
-                        <span className="text-white/70 text-sm ml-2">{post.timestamp}</span>
+                <div key={post.id} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-start space-x-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-sm flex-shrink-0">
+                      👤
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-medium text-gray-900">{post.author}</span>
+                          <span className="text-gray-500 text-sm ml-2">{post.timestamp}</span>
+                        </div>
+                        <button
+                          onClick={() => handleLikePost(post.id)}
+                          className={`flex items-center space-x-1 px-2 py-1 rounded-full text-sm ${
+                            post.isLiked ? 'text-rose-500' : 'text-gray-400 hover:text-rose-400'
+                          }`}
+                        >
+                          <span>{post.isLiked ? '❤️' : '🤍'}</span>
+                          <span>{post.likes}</span>
+                        </button>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleLikePost(post.id)}
-                      className={`flex items-center space-x-1 px-2 py-1 rounded-full text-sm ${
-                        post.isLiked ? 'text-rose-400' : 'text-white/70 hover:text-rose-300'
-                      }`}
-                    >
-                      <span>{post.isLiked ? '❤️' : '🤍'}</span>
-                      <span>{post.likes}</span>
-                    </button>
                   </div>
                   
-                  <h3 className="font-semibold text-white mb-2 text-lg">{post.title}</h3>
-                  <p className="text-white/90 mb-3">{post.content}</p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {post.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-1 bg-white/15 text-white text-xs rounded-full"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
+                  <div className="ml-13">
+                    <h3 className="font-medium text-gray-900 mb-2">{post.title}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{post.content}</p>
                   </div>
+                  
+                  {post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3 ml-13">
+                      {post.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   
                   {/* Replies */}
                   {post.replies.length > 0 && (
-                    <div className="border-t border-white/20 pt-4 space-y-3">
+                    <div className="border-t border-gray-100 mt-4 pt-4 space-y-3">
                       {post.replies.map((reply) => (
-                        <div key={reply.id} className="bg-white/10 p-3 rounded-lg">
+                        <div key={reply.id} className="bg-gray-50 p-3 rounded-xl ml-13">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center space-x-2">
-                              <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">
+                              <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
                                 👤
                               </div>
-                              <span className="font-medium text-white text-sm">{reply.author}</span>
-                              <span className="text-white/70 text-xs">{reply.timestamp}</span>
+                              <span className="font-medium text-gray-900 text-sm">{reply.author}</span>
+                              <span className="text-gray-500 text-xs">{reply.timestamp}</span>
                             </div>
                             <button
                               onClick={() => handleLikeReply(post.id, reply.id)}
                               className={`flex items-center space-x-1 text-xs ${
-                                reply.isLiked ? 'text-rose-300' : 'text-white/70 hover:text-rose-300'
+                                reply.isLiked ? 'text-rose-400' : 'text-gray-400 hover:text-rose-400'
                               }`}
                             >
                               <span>{reply.isLiked ? '❤️' : '🤍'}</span>
                               <span>{reply.likes}</span>
                             </button>
                           </div>
-                          <p className="text-white/90 text-sm">{reply.content}</p>
+                          <p className="text-gray-600 text-sm">{reply.content}</p>
                         </div>
                       ))}
                     </div>
@@ -483,54 +450,98 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
                 </div>
               ))}
             </div>
+
+            {/* Share Experience Button */}
+            <div className="mt-8 pb-6">
+              <button
+                onClick={() => setShowNewPost(true)}
+                className="w-full py-4 bg-purple-500 text-white rounded-2xl font-medium shadow-lg hover:bg-purple-600 transition-colors"
+              >
+                Share your Experience
+              </button>
+            </div>
           </div>
         )}
 
         {/* Chat Tab */}
         {activeTab === 'chat' && (
-          <div>
-            <div className="mb-4 bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-4 text-white">
-              <h3 className="text-lg font-semibold mb-1">Support Conversations</h3>
-              <p className="text-sm text-white/80">Connect one-on-one with others who understand your journey</p>
-            </div>
-
+          <div className="pb-6">
             <div className="space-y-3">
               {conversations.map((conversation) => (
                 <div
                   key={conversation.id}
                   onClick={() => setSelectedChat(conversation)}
-                  className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-4 cursor-pointer transition-colors hover:bg-white/20"
+                  className="bg-white border border-gray-100 rounded-2xl p-4 cursor-pointer hover:shadow-sm transition-shadow"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="relative">
-                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-lg text-white">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-lg">
                         👤
                       </div>
                       {conversation.unread > 0 && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 text-white text-xs rounded-full flex items-center justify-center">
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-purple-500 text-white text-xs rounded-full flex items-center justify-center">
                           {conversation.unread}
                         </div>
                       )}
                     </div>
                     
-                    <div className="flex-1 min-w-0 text-white">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-medium">{conversation.participant}</h4>
-                        <span className="text-xs text-white/70">{conversation.timestamp}</span>
+                        <h4 className="font-medium text-gray-900">{conversation.participant}</h4>
+                        <span className="text-xs text-gray-500">{conversation.timestamp}</span>
                       </div>
-                      <p className="text-sm text-white/80 truncate">{conversation.lastMessage}</p>
+                      <p className="text-sm text-gray-600 truncate">{conversation.lastMessage}</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
+          </div>
+        )}
 
-            <div className="mt-6 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 text-white">
-              <h3 className="text-sm font-semibold mb-2">💡 About Support Chat</h3>
-              <div className="space-y-2 text-xs text-white/80">
-                <p>• Anonymous conversations with others facing similar challenges</p>
-                <p>• Share experiences and coping strategies</p>
-                <p>• This is a prototype - real implementation would include matching algorithms</p>
+        {/* New Post Modal */}
+        {showNewPost && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-md p-6">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900">Create New Post</h3>
+              
+              <input
+                type="text"
+                placeholder="Post title..."
+                value={newPostTitle}
+                onChange={(e) => setNewPostTitle(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:border-purple-500"
+              />
+              
+              <textarea
+                placeholder="Share your thoughts, experiences, or questions..."
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+                rows={4}
+                className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:border-purple-500 resize-none"
+              />
+              
+              <input
+                type="text"
+                placeholder="Tags (separate with commas)"
+                value={newPostTags}
+                onChange={(e) => setNewPostTags(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-purple-500"
+              />
+              
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowNewPost(false)}
+                  className="flex-1 py-2 px-4 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreatePost}
+                  className="flex-1 py-2 px-4 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                >
+                  Post
+                </button>
               </div>
             </div>
           </div>

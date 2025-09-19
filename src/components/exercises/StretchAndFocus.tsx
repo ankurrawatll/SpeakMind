@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useExerciseProgress } from '../../hooks/useExerciseProgress';
-import { ExerciseLayout } from './ExerciseLayout';
+import { IoChevronBack } from 'react-icons/io5';
 import type { Screen } from '../../App';
 
 interface StretchAndFocusProps {
@@ -47,12 +46,10 @@ const STRETCHES: StretchStep[] = [
 ];
 
 const StretchAndFocus = ({ onNavigate }: StretchAndFocusProps) => {
-  const { completeExercise } = useExerciseProgress();
   const [currentStep, setCurrentStep] = useState(0);
   const [timeLeft, setTimeLeft] = useState(STRETCHES[0].duration);
   const [isActive, setIsActive] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
-  const [showReward, setShowReward] = useState(false);
 
   const currentStretch = STRETCHES[currentStep];
 
@@ -63,7 +60,7 @@ const StretchAndFocus = ({ onNavigate }: StretchAndFocusProps) => {
       interval = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
-    } else if (timeLeft === 0) {
+    } else if (timeLeft === 0 && isActive) {
       if (currentStep < STRETCHES.length - 1) {
         // Move to next stretch
         setCurrentStep((prev) => prev + 1);
@@ -90,28 +87,22 @@ const StretchAndFocus = ({ onNavigate }: StretchAndFocusProps) => {
     setTimeLeft(STRETCHES[0].duration);
     setIsActive(false);
     setIsComplete(false);
-    setShowReward(false);
   };
 
   const handleComplete = () => {
     setIsActive(false);
-    completeExercise('stretch-focus');
     setIsComplete(true);
-    setShowReward(true);
-    // Auto-navigate back after showing reward
+    // Auto-navigate back after 2 seconds
     setTimeout(() => {
       onNavigate('meditation');
     }, 2000);
-  };
-
-  const handleBack = () => {
-    onNavigate('meditation');
   };
 
   const handleNext = () => {
     if (currentStep < STRETCHES.length - 1) {
       setCurrentStep((prev) => prev + 1);
       setTimeLeft(STRETCHES[currentStep + 1].duration);
+      setIsActive(false);
     } else {
       handleComplete();
     }
@@ -121,6 +112,7 @@ const StretchAndFocus = ({ onNavigate }: StretchAndFocusProps) => {
     if (currentStep > 0) {
       setCurrentStep((prev) => prev - 1);
       setTimeLeft(STRETCHES[currentStep - 1].duration);
+      setIsActive(false);
     }
   };
 
@@ -131,130 +123,120 @@ const StretchAndFocus = ({ onNavigate }: StretchAndFocusProps) => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Use a single background image for the entire component
-  const backgroundImage = 'https://images.pexels.com/photos/4775198/pexels-photo-4775198.jpeg';
-  
   return (
-    <ExerciseLayout
-      title="Stretch & Focus"
-      subtitle="Gentle stretching with mindfulness"
-      backgroundImage={backgroundImage}
-      overlayColor="bg-black/60"
-      onBack={handleBack}
-    >
-      <div className="flex flex-col h-full">
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4">
+        <button
+          onClick={() => onNavigate('meditation')}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <IoChevronBack className="w-6 h-6 text-gray-700" />
+        </button>
+        <div className="text-center">
+          <h1 className="text-lg font-semibold text-gray-900">Stretch & Focus</h1>
+          <p className="text-sm text-gray-500">Gentle stretching with mindfulness</p>
+        </div>
+        <div className="w-10"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 px-4 pb-24">
+        {/* Exercise Image */}
+        <div className="bg-gray-100 rounded-2xl mb-6 overflow-hidden">
+          <img
+            src={currentStretch.image}
+            alt={currentStretch.title}
+            className="w-full h-64 object-cover"
+          />
+        </div>
+
+        {/* Exercise Info */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {currentStretch.title}
+          </h2>
+          <p className="text-gray-600 mb-4">
+            {currentStretch.description}
+          </p>
+          
+          {/* Timer */}
+          <div className="text-4xl font-bold text-gray-900 mb-2">
+            {isComplete ? "Complete!" : formatTime(timeLeft)}
+          </div>
+          
+          {/* Progress indicator */}
+          <div className="text-sm text-gray-500 mb-6">
+            {currentStep + 1} of {STRETCHES.length}
+          </div>
+        </div>
+
         {/* Progress Dots */}
-        <div className="flex justify-center space-x-2 mb-6">
+        <div className="flex justify-center space-x-2 mb-8">
           {STRETCHES.map((_, index) => (
             <div
               key={index}
-              className={`w-2 h-2 rounded-full ${
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 index === currentStep
-                  ? 'bg-sage w-6'
+                  ? 'bg-purple-500 w-6'
                   : index < currentStep
-                  ? 'bg-sage/50'
-                  : 'bg-white/30'
-              } transition-all duration-300`}
+                  ? 'bg-purple-300'
+                  : 'bg-gray-200'
+              }`}
             />
           ))}
         </div>
 
-        {/* Stretch Card */}
-        <div className="bg-white/20 backdrop-blur-md rounded-2xl p-6 shadow-lg mb-6 border border-white/10">
-          <div className="aspect-w-16 aspect-h-9 mb-4 rounded-xl overflow-hidden shadow-md">
-            <img
-              src={currentStretch.image}
-              alt={currentStretch.title}
-              className="w-full h-48 object-cover rounded-lg transform transition-transform duration-500 hover:scale-105"
-            />
-          </div>
-          
-          <h3 className="text-2xl font-bold text-white mb-3">
-            {currentStretch.title}
-          </h3>
-          <p className="text-white/90 mb-4">{currentStretch.description}</p>
-          
-          <div className="flex items-center justify-between">
-            <div className="text-4xl font-bold text-white">
-              {formatTime(timeLeft)}
-            </div>
-            <div className="text-sm text-white/80 bg-black/20 px-3 py-1 rounded-full">
-              {currentStep + 1} of {STRETCHES.length}
-            </div>
-          </div>
-        </div>
-
-        {/* Controls */}
-        <div className="mt-auto flex flex-col space-y-3">
+        {/* Action Button */}
+        <div className="mb-6">
           {!isComplete ? (
-            <>
-              {!isActive ? (
-                <button
-                  onClick={startExercise}
-                  className="w-full py-3 bg-sage text-white rounded-full font-medium shadow-lg hover:bg-sage/90 transition-all transform hover:scale-105 active:scale-95"
-                >
-                  {currentStep === 0 ? 'Start Stretching' : 'Resume'}
-                </button>
-              ) : (
-                <button
-                  onClick={pauseExercise}
-                  className="w-full py-3 bg-amber-500 text-white rounded-full font-medium shadow-lg hover:bg-amber-600 transition-all transform hover:scale-105 active:scale-95"
-                >
-                  Pause
-                </button>
-              )}
-              
-              <div className="flex space-x-3">
-                <button
-                  onClick={handlePrevious}
-                  disabled={currentStep === 0}
-                  className={`flex-1 py-2 rounded-full font-medium transition-colors ${
-                    currentStep === 0
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-white/20 text-gray-700 hover:bg-white/30'
-                  }`}
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={handleNext}
-                  className="flex-1 py-2 bg-white/20 text-gray-700 rounded-full font-medium hover:bg-white/30 transition-colors"
-                >
-                  {currentStep === STRETCHES.length - 1 ? 'Finish' : 'Next'}
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="text-center">
-              <div className="text-lg font-semibold text-gray-800 mb-2">
-                🎉 Stretching Complete!
-              </div>
-              <p className="text-gray-600 mb-4">
-                Great job taking care of your body and mind.
-              </p>
+            !isActive ? (
               <button
-                onClick={resetExercise}
-                className="w-full py-3 bg-sage text-white rounded-full font-medium shadow-lg hover:bg-sage/90 transition-colors"
+                onClick={startExercise}
+                className="w-full py-4 bg-gray-600 text-white rounded-full text-lg font-medium hover:bg-gray-700 transition-colors"
               >
-                Start Over
+                Start Stretching
               </button>
-            </div>
+            ) : (
+              <button
+                onClick={pauseExercise}
+                className="w-full py-4 bg-amber-500 text-white rounded-full text-lg font-medium hover:bg-amber-600 transition-colors"
+              >
+                Pause
+              </button>
+            )
+          ) : (
+            <button
+              onClick={resetExercise}
+              className="w-full py-4 bg-gray-600 text-white rounded-full text-lg font-medium hover:bg-gray-700 transition-colors"
+            >
+              Start Over
+            </button>
           )}
         </div>
 
-        {/* Reward Message */}
-        {showReward && (
-          <div className="mt-4 p-4 bg-white/30 backdrop-blur-sm rounded-lg text-center">
-            <div className="text-lg font-semibold text-gray-800">
-              🎉 +10 Points Earned!
-            </div>
-            <p className="text-sm text-gray-600 mt-1">
-              You've completed your stretching routine!
-            </p>
-          </div>
-        )}
+        {/* Navigation Buttons */}
+        <div className="flex space-x-4">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex-1 py-3 rounded-full border text-center transition-colors ${
+              currentStep === 0
+                ? 'border-gray-200 text-gray-400 bg-gray-50'
+                : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNext}
+            className="flex-1 py-3 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition-colors"
+          >
+            {currentStep === STRETCHES.length - 1 ? 'Finish' : 'Next'}
+          </button>
+        </div>
       </div>
-    </ExerciseLayout>
+    </div>
   );
 };
 
