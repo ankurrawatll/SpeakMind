@@ -186,7 +186,7 @@ const AppContent = () => {
   const showBottomNav = currentUser && currentScreen !== 'auth' && currentScreen !== 'userOnboarding' && currentScreen !== 'timer' && currentScreen !== 'conversation'
 
   return (
-    <div className="mobile-container min-h-screen overflow-auto pb-24">
+    <div className="mobile-container min-h-screen overflow-auto">
       {renderScreen()}
       {showBottomNav && (
         <BottomNavigation 

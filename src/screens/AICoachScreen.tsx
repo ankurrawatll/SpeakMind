@@ -6,7 +6,7 @@ interface AICoachScreenProps {
 
 export default function AICoachScreen({ onNavigate }: AICoachScreenProps) {
   return (
-    <div className="min-h-screen bg-light-bg pb-24">
+    <div className="min-h-screen bg-light-bg pb-20">
       {/* Header */}
       <div className="gradient-bg px-6 pt-12 pb-8 rounded-b-5xl">
         <div className="flex items-center space-x-4 text-white">

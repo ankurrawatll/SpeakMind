@@ -65,7 +65,7 @@ export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 relative pb-24">
+    <div className="min-h-screen bg-gray-50 relative pb-20">
       {/* Header with close X */}
       <div className="flex items-center justify-between p-4 bg-white">
         <button 

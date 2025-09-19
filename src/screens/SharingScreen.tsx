@@ -244,7 +244,7 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
   // Chat interface
   if (selectedChat) {
     return (
-      <div className="min-h-screen bg-white relative pb-32 flex flex-col">
+      <div className="min-h-screen bg-white relative pb-20 flex flex-col">
         {/* Chat Header */}
         <div className="px-4 pt-12 pb-4 border-b border-gray-100">
           <div className="flex items-center space-x-4">
@@ -328,7 +328,7 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white relative pb-32">
+    <div className="min-h-screen bg-white relative pb-20">
       {/* Header */}
       <div className="px-4 pt-12 pb-6">
         <div className="flex items-center space-x-4 mb-4">

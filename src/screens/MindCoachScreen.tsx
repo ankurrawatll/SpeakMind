@@ -95,19 +95,19 @@ export default function MindCoachScreen({ onNavigate }: MindCoachScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="h-screen bg-white overflow-hidden flex flex-col">
       
 
       {/* Header */}
-      <div className="text-center py-4 pb-6">
+      <div className="text-center py-4 pb-6 flex-shrink-0">
         <h1 className="text-black text-lg font-semibold">Mind Coach</h1>
       </div>
 
       {/* Main Video Area - Heygen Avatar will appear here */}
-      <div className="flex-1 px-5 pb-32">
-        <div className="relative mx-auto max-w-sm">
+      <div className="flex-1 px-5 pb-20 overflow-hidden">
+        <div className="relative mx-auto max-w-sm h-full flex items-center justify-center">
           {/* Video Container - Heygen will inject here */}
-          <div className="relative aspect-[3/4] bg-white rounded-3xl overflow-hidden ">
+          <div className="relative aspect-[3/4] bg-white rounded-3xl overflow-hidden max-h-full">
             {/* Fallback content while Heygen loads */}
             <div className="absolute inset-0 bg-white flex items-center justify-center">
               <div className="text-black text-center">
@@ -134,7 +134,7 @@ export default function MindCoachScreen({ onNavigate }: MindCoachScreenProps) {
       </div>
 
       {/* Bottom Controls */}
-      <div className="fixed bottom-24 left-0 right-0">
+      <div className="fixed bottom-20 left-0 right-0 flex-shrink-0">
         <div className="flex items-center justify-center space-x-8 px-8">
           {/* Pause/Resume Button */}
           <button className="w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center shadow-lg">

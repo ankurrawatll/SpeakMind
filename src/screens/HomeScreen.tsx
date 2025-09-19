@@ -59,7 +59,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 pb-20">
       {/* Header with Greeting */}
       <div className="px-6 pt-12 pb-6">
         <div className="text-gray-900">
