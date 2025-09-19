@@ -74,15 +74,39 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
         return (
           <div className="text-center">
             <div className="text-6xl mb-6">🎂</div>
-            <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">What's your age?</h2>
-            <p className="text-white/80 mb-8">This helps us personalize your experience</p>
+            <h2 
+              className="text-white mb-4 drop-shadow-lg"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 800,
+                fontSize: '24px',
+                lineHeight: '28px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              What's your age?
+            </h2>
+            <p 
+              className="text-white/80 mb-8"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 600,
+                fontSize: '16px',
+                lineHeight: '20px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              This helps us personalize your experience
+            </p>
             <div className="space-y-4">
               <input
                 type="number"
                 placeholder="Enter your age"
                 value={data.age || ''}
                 onChange={(e) => updateData('age', parseInt(e.target.value) || 0)}
-                className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 backdrop-blur-md text-center text-xl"
+                className="w-full px-4 py-4 bg-black/20 border border-white/25 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 backdrop-blur-lg text-center text-xl"
                 min="13"
                 max="120"
               />
@@ -94,17 +118,41 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
         return (
           <div className="text-center">
             <div className="text-6xl mb-6">👤</div>
-            <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">What's your gender?</h2>
-            <p className="text-white/80 mb-8">Help us customize your meditation journey</p>
+            <h2 
+              className="text-white mb-4 drop-shadow-lg"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 800,
+                fontSize: '24px',
+                lineHeight: '28px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              What's your gender?
+            </h2>
+            <p 
+              className="text-white/80 mb-8"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 600,
+                fontSize: '16px',
+                lineHeight: '20px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              Help us customize your meditation journey
+            </p>
             <div className="space-y-3">
               {['Male', 'Female', 'Non-binary', 'Prefer not to say'].map((option) => (
                 <button
                   key={option}
                   onClick={() => updateData('sex', option)}
-                  className={`w-full py-4 px-6 rounded-xl font-medium transition-all duration-200 backdrop-blur-md ${
+                  className={`w-full py-4 px-6 rounded-xl font-medium transition-all duration-200 backdrop-blur-lg ${
                     data.sex === option
-                      ? 'bg-white/30 text-white border-2 border-white/50'
-                      : 'bg-white/10 text-white/90 border border-white/20 hover:bg-white/20'
+                      ? 'bg-white/20 text-white border-2 border-white/35'
+                      : 'bg-white/6 text-white/90 border border-white/15 hover:bg-white/12'
                   }`}
                 >
                   {option}
@@ -118,8 +166,32 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
         return (
           <div className="text-center">
             <div className="text-6xl mb-6">🧘‍♀️</div>
-            <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">Meditation experience?</h2>
-            <p className="text-white/80 mb-8">We'll adjust the content to your level</p>
+            <h2 
+              className="text-white mb-4 drop-shadow-lg"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 800,
+                fontSize: '24px',
+                lineHeight: '28px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              Meditation experience?
+            </h2>
+            <p 
+              className="text-white/80 mb-8"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 600,
+                fontSize: '16px',
+                lineHeight: '20px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              We'll adjust the content to your level
+            </p>
             <div className="space-y-3">
               {[
                 { value: 'beginner', label: 'Complete beginner', desc: 'Never meditated before' },
@@ -130,10 +202,10 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
                 <button
                   key={option.value}
                   onClick={() => updateData('meditationExperience', option.value)}
-                  className={`w-full py-4 px-6 rounded-xl font-medium transition-all duration-200 text-left backdrop-blur-md ${
+                  className={`w-full py-4 px-6 rounded-xl font-medium transition-all duration-200 text-left backdrop-blur-lg ${
                     data.meditationExperience === option.value
-                      ? 'bg-white/30 text-white border-2 border-white/50'
-                      : 'bg-white/10 text-white/90 border border-white/20 hover:bg-white/20'
+                      ? 'bg-white/20 text-white border-2 border-white/35'
+                      : 'bg-white/6 text-white/90 border border-white/15 hover:bg-white/12'
                   }`}
                 >
                   <div className="font-semibold">{option.label}</div>
@@ -148,8 +220,32 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
         return (
           <div className="text-center">
             <div className="text-6xl mb-6">🎯</div>
-            <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">What are your goals?</h2>
-            <p className="text-white/80 mb-8">Select all that apply</p>
+            <h2 
+              className="text-white mb-4 drop-shadow-lg"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 800,
+                fontSize: '24px',
+                lineHeight: '28px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              What are your goals?
+            </h2>
+            <p 
+              className="text-white/80 mb-8"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 600,
+                fontSize: '16px',
+                lineHeight: '20px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              Select all that apply
+            </p>
             <div className="grid grid-cols-1 gap-3">
               {[
                 { value: 'stress', label: 'Reduce stress', icon: '😌' },
@@ -162,10 +258,10 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
                 <button
                   key={goal.value}
                   onClick={() => toggleGoal(goal.value)}
-                  className={`w-full py-4 px-6 rounded-xl font-medium transition-all duration-200 flex items-center gap-3 backdrop-blur-md ${
+                  className={`w-full py-4 px-6 rounded-xl font-medium transition-all duration-200 flex items-center gap-3 backdrop-blur-lg ${
                     data.goals.includes(goal.value)
-                      ? 'bg-white/30 text-white border-2 border-white/50'
-                      : 'bg-white/10 text-white/90 border border-white/20 hover:bg-white/20'
+                      ? 'bg-white/20 text-white border-2 border-white/35'
+                      : 'bg-white/6 text-white/90 border border-white/15 hover:bg-white/12'
                   }`}
                 >
                   <span className="text-2xl">{goal.icon}</span>
@@ -180,8 +276,32 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
         return (
           <div className="text-center">
             <div className="text-6xl mb-6">⏰</div>
-            <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">When do you prefer to meditate?</h2>
-            <p className="text-white/80 mb-8">We'll send gentle reminders</p>
+            <h2 
+              className="text-white mb-4 drop-shadow-lg"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 800,
+                fontSize: '24px',
+                lineHeight: '28px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              When do you prefer to meditate?
+            </h2>
+            <p 
+              className="text-white/80 mb-8"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 600,
+                fontSize: '16px',
+                lineHeight: '20px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              We'll send gentle reminders
+            </p>
             <div className="space-y-3">
               {[
                 { value: 'morning', label: 'Morning', desc: '6:00 - 10:00 AM' },
@@ -193,10 +313,10 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
                 <button
                   key={option.value}
                   onClick={() => updateData('preferredTime', option.value)}
-                  className={`w-full py-4 px-6 rounded-xl font-medium transition-all duration-200 text-left backdrop-blur-md ${
+                  className={`w-full py-4 px-6 rounded-xl font-medium transition-all duration-200 text-left backdrop-blur-lg ${
                     data.preferredTime === option.value
-                      ? 'bg-white/30 text-white border-2 border-white/50'
-                      : 'bg-white/10 text-white/90 border border-white/20 hover:bg-white/20'
+                      ? 'bg-white/20 text-white border-2 border-white/35'
+                      : 'bg-white/6 text-white/90 border border-white/15 hover:bg-white/12'
                   }`}
                 >
                   <div className="font-semibold">{option.label}</div>
@@ -211,8 +331,32 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
         return (
           <div className="text-center">
             <div className="text-6xl mb-6">⏱️</div>
-            <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">Preferred session length?</h2>
-            <p className="text-white/80 mb-8">You can always adjust this later</p>
+            <h2 
+              className="text-white mb-4 drop-shadow-lg"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 800,
+                fontSize: '24px',
+                lineHeight: '28px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              Preferred session length?
+            </h2>
+            <p 
+              className="text-white/80 mb-8"
+              style={{
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: 600,
+                fontSize: '16px',
+                lineHeight: '20px',
+                letterSpacing: '0px',
+                textAlign: 'center'
+              }}
+            >
+              You can always adjust this later
+            </p>
             <div className="space-y-3">
               {[
                 { value: '5', label: '5 minutes', desc: 'Quick daily practice' },
@@ -224,10 +368,10 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
                 <button
                   key={option.value}
                   onClick={() => updateData('sessionLength', option.value)}
-                  className={`w-full py-4 px-6 rounded-xl font-medium transition-all duration-200 text-left backdrop-blur-md ${
+                  className={`w-full py-4 px-6 rounded-xl font-medium transition-all duration-200 text-left backdrop-blur-lg ${
                     data.sessionLength === option.value
-                      ? 'bg-white/30 text-white border-2 border-white/50'
-                      : 'bg-white/10 text-white/90 border border-white/20 hover:bg-white/20'
+                      ? 'bg-white/20 text-white border-2 border-white/35'
+                      : 'bg-white/6 text-white/90 border border-white/15 hover:bg-white/12'
                   }`}
                 >
                   <div className="font-semibold">{option.label}</div>
@@ -247,19 +391,14 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
     <div 
       className="min-h-screen flex items-center justify-center p-4 relative"
       style={{
-        backgroundImage: `url('https://images.pexels.com/photos/1051838/pexels-photo-1051838.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        background: 'linear-gradient(135deg, #9F6AFF 0%, #FF91E7 100%)'
       }}
     >
-      {/* Dark overlay for better readability */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
       
       <div className="w-full max-w-md relative z-10">
-        <div className="bg-white/10 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl border border-white/20 relative overflow-hidden">
+        <div className="bg-white/6 backdrop-blur-3xl rounded-3xl p-8 shadow-2xl border border-white/12 relative overflow-hidden">
           {/* Glassmorphism accent */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-white/5 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/12 via-transparent to-white/3 pointer-events-none"></div>
           
           <div className="relative z-10">
             {/* Progress bar */}
@@ -268,7 +407,7 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
                 <span className="text-sm text-white/70">Step {currentStep + 1} of {totalSteps}</span>
                 <span className="text-sm text-white/70">{Math.round(((currentStep + 1) / totalSteps) * 100)}%</span>
               </div>
-              <div className="w-full bg-white/20 rounded-full h-2 backdrop-blur-sm">
+              <div className="w-full bg-white/15 rounded-full h-2 backdrop-blur-sm">
                 <div 
                   className="bg-gradient-to-r from-white/80 to-white/60 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
@@ -286,7 +425,7 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
               {currentStep > 0 && (
                 <button
                   onClick={handleBack}
-                  className="flex-1 bg-white/10 backdrop-blur-md text-white/90 py-3 rounded-xl font-medium hover:bg-white/20 transition-all duration-200 border border-white/20"
+                  className="flex-1 bg-white/6 backdrop-blur-lg text-white/90 py-3 rounded-xl font-medium hover:bg-white/12 transition-all duration-200 border border-white/15"
                 >
                   Back
                 </button>
@@ -294,7 +433,7 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
               <button
                 onClick={handleNext}
                 disabled={!isStepValid()}
-                className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white py-3 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border border-white/30 relative overflow-hidden group"
+                className="flex-1 bg-white/12 hover:bg-white/20 backdrop-blur-lg text-white py-3 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border border-white/20 relative overflow-hidden group"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700"></div>
                 <span className="relative z-10">
