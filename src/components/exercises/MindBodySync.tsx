@@ -123,7 +123,7 @@ const MindBodySync = ({ onNavigate }: MindBodySyncProps) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 px-4 pb-24 flex flex-col">
+      <div className="flex-1 px-4 pb-20 flex flex-col">
         {/* Exercise Image */}
         <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl mb-6 overflow-hidden">
           <img
@@ -171,7 +171,7 @@ const MindBodySync = ({ onNavigate }: MindBodySyncProps) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 px-4 pb-24 flex flex-col items-center justify-center">
+      <div className="flex-1 px-4 pb-20 flex flex-col items-center justify-center">
         {/* Progress */}
         <div className="text-center mb-8">
           <div className="text-2xl font-bold text-gray-900 mb-2">

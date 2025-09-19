@@ -141,7 +141,7 @@ const StretchAndFocus = ({ onNavigate }: StretchAndFocusProps) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 px-4 pb-24">
+      <div className="flex-1 px-4 pb-20">
         {/* Exercise Image */}
         <div className="bg-gray-100 rounded-2xl mb-6 overflow-hidden">
           <img

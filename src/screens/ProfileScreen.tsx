@@ -41,7 +41,7 @@ export default function ProfileScreen({ user }: ProfileScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white relative pb-32">
+    <div className="min-h-screen bg-white relative pb-20">
       {/* Header */}
       <div className="px-4 pt-12 pb-6">
         <div className="flex items-center justify-between mb-6">

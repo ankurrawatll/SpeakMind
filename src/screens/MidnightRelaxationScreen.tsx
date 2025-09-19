@@ -35,7 +35,7 @@ export default function MidnightRelaxationScreen({ onNavigate }: MidnightRelaxat
   const embedUrl = `https://www.youtube.com/embed/${current.id}`
 
   return (
-    <div className="min-h-screen relative pb-24">
+    <div className="min-h-screen relative pb-20">
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <img

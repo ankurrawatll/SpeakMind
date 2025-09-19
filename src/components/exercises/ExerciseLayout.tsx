@@ -66,7 +66,7 @@ export const ExerciseLayout = ({
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 px-6 pb-24">{children}</main>
+        <main className="flex-1 px-6 pb-20">{children}</main>
       </div>
     </div>
   );
