@@ -59,25 +59,16 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
   ]
 
   return (
-    <div className="min-h-screen relative pb-24">
-      {/* Background */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.pexels.com/photos/3543912/pexels-photo-3543912.jpeg"
-          alt="Calm background"
-          className="w-full h-full object-cover"/>
-        <div className="absolute inset-0 bg-white/40"/>
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 pb-24">
       {/* Header with Greeting */}
-      <div className="relative z-10 px-6 pt-12 pb-6">
+      <div className="px-6 pt-12 pb-6">
         <div className="text-gray-900">
           <h1 className="text-2xl font-semibold mb-2">Hi {user.name}</h1>
           <p className="text-gray-700 text-base">How are you feeling today?</p>
         </div>
       </div>
 
-      <div className="relative z-10 px-6">
+      <div className="px-6">
         {/* Mood Selector */}
         <div className="mb-8 bg-white/40 backdrop-blur-md border border-white/30 rounded-2xl p-4 shadow">
           <div className="flex justify-between items-center gap-4">
