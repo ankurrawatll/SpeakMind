@@ -51,7 +51,6 @@ export type Screen =
 const AppContent = () => {
   const { currentUser } = useAuth()
   const [currentScreen, setCurrentScreen] = useState<Screen>('auth')
-  const [isNewUser, setIsNewUser] = useState(false)
   const [user] = useState({
     name: 'User',
     streak: 1,
@@ -99,7 +98,6 @@ const AppContent = () => {
   }, [currentUser])
 
   const handleAuthComplete = (wasSignup: boolean = false, user?: any) => {
-    setIsNewUser(wasSignup)
     
     // Immediately navigate based on signup status to avoid delay
     if (wasSignup) {
@@ -176,7 +174,7 @@ const AppContent = () => {
             {...exerciseData['exercise-stretch-focus']}
             onBack={() => navigateToScreen('meditation')}
           >
-            <StretchAndFocus />
+            <StretchAndFocus onNavigate={navigateToScreen} />
           </ExerciseLayout>
         )
       case 'exercise-mind-body-sync':
@@ -194,7 +192,7 @@ const AppContent = () => {
             {...exerciseData['exercise-reflection-journal']}
             onBack={() => navigateToScreen('meditation')}
           >
-            <ReflectionJournal />
+            <ReflectionJournal onNavigate={navigateToScreen} />
           </ExerciseLayout>
         )
       case 'vedicCalm':
@@ -209,7 +207,7 @@ const AppContent = () => {
   const showBottomNav = currentUser && currentScreen !== 'auth' && currentScreen !== 'userOnboarding' && currentScreen !== 'timer' && currentScreen !== 'conversation'
 
   return (
-    <div className="mobile-container">
+    <div className="mobile-container min-h-screen overflow-auto pb-24">
       {renderScreen()}
       {showBottomNav && (
         <BottomNavigation 
