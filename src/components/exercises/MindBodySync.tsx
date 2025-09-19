@@ -1,64 +1,40 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { ExerciseLayout } from './ExerciseLayout';
+import { useState, useEffect } from 'react';
+import { IoChevronBack } from 'react-icons/io5';
 import type { Screen } from '../../App';
 
 interface MindBodySyncProps {
   onNavigate: (screen: Screen) => void;
 }
 
-// Mock the exercise progress functionality
-const useExerciseProgress = () => {
-  const completeExercise = (exerciseId: string) => {
-    console.log(`Exercise ${exerciseId} completed!`);
-    // Save to localStorage or your preferred state management
-    const completedExercises = JSON.parse(localStorage.getItem('completedExercises') || '[]');
-    if (!completedExercises.includes(exerciseId)) {
-      localStorage.setItem(
-        'completedExercises', 
-        JSON.stringify([...completedExercises, exerciseId])
-      );
-    }
-  };
-
-  return { completeExercise };
-};
-
 const TARGET_RHYTHM = 1000; // 1 second interval in ms
 const TOTAL_ROUNDS = 10;
 
-export const MindBodySync = ({ onNavigate }: MindBodySyncProps) => {
-  const { completeExercise } = useExerciseProgress();
+const MindBodySync = ({ onNavigate }: MindBodySyncProps) => {
   const [isActive, setIsActive] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
-  const [showReward, setShowReward] = useState(false);
   const [round, setRound] = useState(0);
   const [score, setScore] = useState<number>(0);
   const [lastTap, setLastTap] = useState<number>(0);
   const [feedback, setFeedback] = useState<string>('');
   const [showFeedback, setShowFeedback] = useState(false);
   const [pulse, setPulse] = useState(false);
-  const pulseInterval = useRef<NodeJS.Timeout | null>(null);
-
 
   // Start the pulsing animation when active
   useEffect(() => {
+    let pulseInterval: ReturnType<typeof setInterval>;
+    
     if (isActive && !isComplete) {
-      pulseInterval.current = setTimeout(() => {
+      pulseInterval = setInterval(() => {
         setPulse((prev) => !prev);
       }, TARGET_RHYTHM);
-    } else {
-      if (pulseInterval.current) {
-        clearTimeout(pulseInterval.current);
-      }
     }
 
     return () => {
-      if (pulseInterval.current) {
-        clearTimeout(pulseInterval.current);
+      if (pulseInterval) {
+        clearInterval(pulseInterval);
       }
     };
-  }, [isActive, isComplete]);
+  }, [isActive, isComplete, pulse]);
 
   const calculateTimingScore = (tapTime: number, targetTime: number) => {
     const difference = Math.abs(tapTime - targetTime);
@@ -109,22 +85,15 @@ export const MindBodySync = ({ onNavigate }: MindBodySyncProps) => {
     setScore(0);
     setLastTap(0);
     setIsComplete(false);
-    setShowReward(false);
   };
 
   const handleComplete = () => {
     setIsActive(false);
-    completeExercise('mind-body-sync');
     setIsComplete(true);
-    setShowReward(true);
-    // Auto-navigate back after showing reward
+    // Auto-navigate back after 2 seconds
     setTimeout(() => {
       onNavigate('meditation');
     }, 2000);
-  };
-
-  const handleBack = () => {
-    onNavigate('meditation');
   };
 
   const resetExercise = () => {
@@ -133,120 +102,166 @@ export const MindBodySync = ({ onNavigate }: MindBodySyncProps) => {
     setRound(0);
     setScore(0);
     setLastTap(0);
-    setShowReward(false);
+    setShowFeedback(false);
   };
 
-  const getPulseSize = () => {
-    return pulse ? 'scale-100' : 'scale-90';
-  };
-
-  return (
-    <motion.div 
-      className="relative h-full"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <ExerciseLayout
-        title="Mind Body Sync"
-        subtitle="Find your rhythm"
-        backgroundImage="https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg"
-        overlayColor="bg-serenity/60"
-        onBack={handleBack}
-      >
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-          {!isActive && !isComplete ? (
-            <div className="text-center">
-              <p className="mb-6 text-gray-700">
-                Tap the circle in sync with the pulsing rhythm to connect your mind and body.
-              </p>
-              <button
-                onClick={startExercise}
-                className="px-8 py-3 bg-serenity text-white rounded-full font-medium shadow-lg hover:bg-serenity/90 transition-colors"
-              >
-                Start
-              </button>
-            </div>
-          ) : (
-            <div className="text-center w-full">
-              {/* Progress */}
-              <div className="mb-8">
-                <div className="text-2xl font-bold text-gray-800 mb-1">
-                  {round} / {TOTAL_ROUNDS}
-                </div>
-                <div className="text-sm text-gray-600">Taps</div>
-                <div className="mt-2 text-lg font-semibold text-gray-800">
-                  Score: {score}
-                </div>
-              </div>
-
-              {/* Pulsing Circle */}
-              <div 
-                onClick={handleTap}
-                className={`relative w-64 h-64 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center cursor-pointer transition-transform duration-300 mx-auto ${getPulseSize()}`}
-                style={{
-                  boxShadow: '0 0 40px rgba(214, 229, 250, 0.5)',
-                }}
-              >
-                <div className="absolute inset-0 rounded-full border-4 border-white/30" />
-                
-                {showFeedback ? (
-                  <div className="text-2xl font-bold text-gray-800 animate-bounce">
-                    {feedback}
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <div className="text-4xl">👆</div>
-                    <div className="mt-2 text-sm text-gray-700">Tap in rhythm</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Instructions */}
-              <div className="mt-8 text-center text-sm text-gray-600">
-                {isActive ? (
-                  <p>Tap the circle in time with the pulse</p>
-                ) : (
-                  <p>Exercise complete! Tap below to restart</p>
-                )}
-              </div>
-
-              {/* Controls */}
-              <div className="mt-8 flex justify-center gap-4">
-                {isComplete ? (
-                  <button
-                    onClick={startExercise}
-                    className="px-6 py-2 bg-serenity text-white rounded-full font-medium shadow hover:bg-serenity/90 transition-colors"
-                  >
-                    Try Again
-                  </button>
-                ) : (
-                  <button
-                    onClick={resetExercise}
-                    className="px-6 py-2 bg-white/20 text-gray-700 rounded-full font-medium hover:bg-white/30 transition-colors"
-                  >
-                    Reset
-                  </button>
-                )}
-              </div>
-
-              {/* Reward Message */}
-              {showReward && (
-                <div className="mt-6 p-4 bg-white/30 backdrop-blur-sm rounded-lg text-center">
-                  <div className="text-lg font-semibold text-gray-800">
-                    🎉 +10 Points Earned!
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Your sync score: {score}/{TOTAL_ROUNDS * 2}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+  const renderInitialScreen = () => (
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4">
+        <button
+          onClick={() => onNavigate('meditation')}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <IoChevronBack className="w-6 h-6 text-gray-700" />
+        </button>
+        <div className="text-center">
+          <h1 className="text-lg font-semibold text-gray-900">Mind Body Sync</h1>
+          <p className="text-sm text-gray-500">Find your rhythm</p>
         </div>
-      </ExerciseLayout>
-    </motion.div>
+        <div className="w-10"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 px-4 pb-24 flex flex-col">
+        {/* Exercise Image */}
+        <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl mb-6 overflow-hidden">
+          <img
+            src="https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg"
+            alt="Mind Body Sync"
+            className="w-full h-64 object-cover mix-blend-overlay"
+          />
+        </div>
+
+        {/* Description */}
+        <div className="mb-8 text-center">
+          <p className="text-gray-600 mb-4">
+            Tap the circle in sync with the pulsing rhythm to connect your mind and body.
+          </p>
+        </div>
+
+        {/* Start Button */}
+        <div className="mt-auto">
+          <button
+            onClick={startExercise}
+            className="w-full py-4 bg-purple-500 text-white rounded-full text-lg font-medium hover:bg-purple-600 transition-colors"
+          >
+            Start
+          </button>
+        </div>
+      </div>
+    </div>
   );
+
+  const renderActiveScreen = () => (
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4">
+        <button
+          onClick={() => onNavigate('meditation')}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <IoChevronBack className="w-6 h-6 text-gray-700" />
+        </button>
+        <div className="text-center">
+          <h1 className="text-lg font-semibold text-gray-900">Mind Body Sync</h1>
+          <p className="text-sm text-gray-500">Find your rhythm</p>
+        </div>
+        <div className="w-10"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 px-4 pb-24 flex flex-col items-center justify-center">
+        {/* Progress */}
+        <div className="text-center mb-8">
+          <div className="text-2xl font-bold text-gray-900 mb-2">
+            Tap: {round} / {TOTAL_ROUNDS}
+          </div>
+        </div>
+
+        {/* Pulsing Circle */}
+        <div className="mb-8">
+          <div 
+            onClick={handleTap}
+            className={`w-64 h-64 rounded-full bg-gradient-to-br from-yellow-200 to-yellow-300 flex items-center justify-center cursor-pointer transition-transform duration-300 ${
+              pulse ? 'scale-105' : 'scale-100'
+            } shadow-lg border-4 border-yellow-400`}
+          >
+            {showFeedback ? (
+              <div className="text-2xl font-bold text-gray-800 animate-bounce">
+                {feedback}
+              </div>
+            ) : (
+              <div className="text-center">
+                <div className="text-6xl mb-2">👆</div>
+                <div className="text-sm text-gray-700 font-medium">Tap in Rhythm</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Score */}
+        <div className="text-center mb-8">
+          <div className="text-lg font-semibold text-gray-900">
+            Score: {score}
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <div className="text-center mb-8">
+          <p className="text-gray-600">
+            Tap the circle in time with the pulse
+          </p>
+        </div>
+
+        {/* Start Button */}
+        <div className="w-full max-w-sm">
+          <button
+            onClick={startExercise}
+            className="w-full py-4 bg-purple-500 text-white rounded-full text-lg font-medium hover:bg-purple-600 transition-colors"
+          >
+            Start
+          </button>
+        </div>
+
+        {/* Reset Button (when exercise is active) */}
+        {(isActive || round > 0) && !isComplete && (
+          <div className="w-full max-w-sm mt-4">
+            <button
+              onClick={resetExercise}
+              className="w-full py-3 bg-gray-300 text-gray-700 rounded-full font-medium hover:bg-gray-400 transition-colors"
+            >
+              Reset
+            </button>
+          </div>
+        )}
+
+        {/* Completion Message */}
+        {isComplete && (
+          <div className="mt-6 p-4 bg-green-50 rounded-lg text-center">
+            <div className="text-lg font-semibold text-green-800 mb-2">
+              🎉 Exercise Complete!
+            </div>
+            <p className="text-green-600 mb-4">
+              Your sync score: {score}/{TOTAL_ROUNDS * 2}
+            </p>
+            <button
+              onClick={resetExercise}
+              className="px-6 py-2 bg-purple-500 text-white rounded-full font-medium hover:bg-purple-600 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  if (!isActive && round === 0) {
+    return renderInitialScreen();
+  }
+
+  return renderActiveScreen();
 };
 
 export default MindBodySync;

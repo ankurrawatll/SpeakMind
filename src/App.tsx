@@ -160,32 +160,11 @@ const AppContent = () => {
       case 'conversation':
         return <ConversationScreen onNavigate={navigateToScreen} />
       case 'exercise-quick-calm':
-        return (
-          <ExerciseLayout 
-            {...exerciseData['exercise-quick-calm']}
-            onBack={() => navigateToScreen('meditation')}
-          >
-            <QuickCalm onNavigate={() => navigateToScreen('meditation')} />
-          </ExerciseLayout>
-        )
+        return <QuickCalm onNavigate={navigateToScreen} />
       case 'exercise-stretch-focus':
-        return (
-          <ExerciseLayout 
-            {...exerciseData['exercise-stretch-focus']}
-            onBack={() => navigateToScreen('meditation')}
-          >
-            <StretchAndFocus onNavigate={navigateToScreen} />
-          </ExerciseLayout>
-        )
+        return <StretchAndFocus onNavigate={navigateToScreen} />
       case 'exercise-mind-body-sync':
-        return (
-          <ExerciseLayout 
-            {...exerciseData['exercise-mind-body-sync']}
-            onBack={() => navigateToScreen('meditation')}
-          >
-            <MindBodySync onNavigate={() => navigateToScreen('meditation')} />
-          </ExerciseLayout>
-        )
+        return <MindBodySync onNavigate={navigateToScreen} />
       case 'exercise-reflection-journal':
         return (
           <ExerciseLayout 
