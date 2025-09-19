@@ -64,6 +64,18 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
           src="/onboarding/speakmindlogoupscaled.png"
           alt="SpeakMind Logo"
           className="w-28 h-28 mb-4"
+          onError={(e) => {
+            // Fallback to alternative logo if main one fails
+            const target = e.currentTarget;
+            if (target.src.includes('speakmindlogoupscaled')) {
+              target.src = "/onboarding/speakmindlogo.png";
+            } else if (target.src.includes('speakmindlogo')) {
+              target.src = "/onboarding/Logo (1).png";
+            } else {
+              // Final fallback - hide image and show text
+              target.style.display = 'none';
+            }
+          }}
         />
         <h1
           className="text-white drop-shadow-lg"
@@ -119,7 +131,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
                   placeholder="Full Name"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/8 border border-white/20 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 backdrop-blur-lg"
+                  className="w-full px-4 py-3 bg-black/20 border border-white/20 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 backdrop-blur-lg"
                   required={!isLogin}
                 />
               </div>
@@ -130,7 +142,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/8 border border-white/20 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 backdrop-blur-lg"
+                  className="w-full px-4 py-3 bg-black/20 border border-white/20 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 backdrop-blur-lg"
                   required
                   autoComplete="username"
                 />
@@ -142,7 +154,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/8 border border-white/20 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 backdrop-blur-lg"
+                  className="w-full px-4 py-3 bg-black/20 border border-white/20 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 backdrop-blur-lg"
                   required
                   minLength={6}
                   autoComplete="current-password"
