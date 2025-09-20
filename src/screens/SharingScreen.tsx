@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Screen } from '../App'
+import { IoChevronBack } from 'react-icons/io5';
 
 interface SharingScreenProps {
   onNavigate: (screen: Screen) => void
@@ -181,7 +182,7 @@ const MOCK_POSTS: ForumPost[] = [
   }
 ]
 
-export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
+export default function SharingScreen({ onNavigate }: SharingScreenProps) {
   const [activeTab, setActiveTab] = useState<'chat' | 'forum'>('forum')
   const [selectedChat, setSelectedChat] = useState<ChatConversation | null>(null)
   const [showNewPost, setShowNewPost] = useState(false)
@@ -259,7 +260,7 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
                 👤
               </div>
               <div>
-                <h2 className="font-semibold text-gray-900">Conversation</h2>
+                <h2 className="font-semibold text-gray-900">{selectedChat.participant}</h2>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-500">Available for support</span>
                   <button className="text-gray-400">
@@ -310,13 +311,13 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
 
         {/* Message Input */}
         <div className="px-4 py-4 border-t border-gray-100">
-          <div className="bg-gray-50 rounded-full flex items-center px-4 py-2">
+          <div className="bg-gray-50 rounded-full flex items-center px-4 py-3">
             <input
               type="text"
               placeholder="Ask anything"
-              className="flex-1 px-2 py-2 bg-transparent text-gray-800 placeholder-gray-500 focus:outline-none"
+              className="flex-1 px-2 py-1 bg-transparent text-gray-800 placeholder-gray-500 focus:outline-none text-sm"
             />
-            <button className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors">
+            <button className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors ml-2 flex-shrink-0">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
@@ -328,23 +329,24 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white relative pb-20">
+    <div className="min-h-screen bg-white relative">
       {/* Header */}
-      <div className="px-4 pt-12 pb-6">
-        <div className="flex items-center space-x-4 mb-4">
-          <button className="text-gray-600">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-        </div>
+      <div className="flex items-center justify-between p-4">
+        <button
+          onClick={() => onNavigate('home')}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <IoChevronBack className="w-6 h-6 text-gray-700" />
+        </button>
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-gray-900 mb-1">Community</h1>
-          <p className="text-gray-500 text-sm">Connect, share and support each other</p>
+          <h1 className="text-lg font-semibold text-gray-900">Sharing</h1>
+          <p className="text-sm text-gray-500">Connect with the community</p>
         </div>
+        <div className="w-10"></div>
       </div>
 
-      <div className="px-4">
+      {/* Scrollable Content Container */}
+      <div className="px-4 pb-32 overflow-y-auto" style={{ height: 'calc(100vh - 160px)' }}>
         {/* Tab Navigation */}
         <div className="mb-6">
           <div className="flex bg-gray-100 rounded-lg p-1">
@@ -450,16 +452,6 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
                 </div>
               ))}
             </div>
-
-            {/* Share Experience Button */}
-            <div className="mt-8 pb-6">
-              <button
-                onClick={() => setShowNewPost(true)}
-                className="w-full py-4 bg-purple-500 text-white rounded-2xl font-medium shadow-lg hover:bg-purple-600 transition-colors"
-              >
-                Share your Experience
-              </button>
-            </div>
           </div>
         )}
 
@@ -547,6 +539,18 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
           </div>
         )}
       </div>
+
+      {/* Fixed Share Experience Button above navbar */}
+      {activeTab === 'forum' && (
+        <div className="fixed left-6 right-6 bottom-24 z-50 max-w-sm mx-auto">
+          <button
+            onClick={() => setShowNewPost(true)}
+            className="w-full py-3 px-6 bg-purple-500 text-white rounded-2xl font-medium shadow-lg hover:bg-purple-600 transition-colors text-sm"
+          >
+            Share your Experience
+          </button>
+        </div>
+      )}
     </div>
   )
 }

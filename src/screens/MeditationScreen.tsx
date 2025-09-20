@@ -77,7 +77,7 @@ const MeditationScreen = ({ onNavigate }: MeditationScreenProps = {}) => {
         'quick-calm': 'exercise-quick-calm',
         'stretch-focus': 'exercise-stretch-focus',
         'mind-body-sync': 'exercise-mind-body-sync',
-        'reflection-journal': 'exercise-reflection-journal'
+        'reflection-journal': 'journal'
       };
       
       const screenName = exerciseScreenMap[exerciseId];
@@ -136,13 +136,13 @@ const MeditationScreen = ({ onNavigate }: MeditationScreenProps = {}) => {
                     </div>
                   </div>
                   {/* Play Button */}
-                  <div className="bg-yellow-400 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
+                  <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
                     <svg 
                       width="16" 
                       height="16" 
                       viewBox="0 0 24 24" 
                       fill="none" 
-                      className="text-gray-800 ml-0.5"
+                      className="text-purple-800 ml-0.5"
                     >
                       <path 
                         d="M8 5v14l11-7z" 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Screen } from '../App'
+import { IoChevronBack } from 'react-icons/io5';
 
 interface JournalScreenProps {
   onNavigate: (screen: Screen) => void
@@ -37,19 +38,18 @@ export default function JournalScreen({ onNavigate, user: _user }: JournalScreen
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
-      <div className="px-6 pt-12 pb-6">
-        <div className="flex items-center space-x-4">
-          <button 
-            onClick={() => onNavigate('home')}
-            className="text-gray-600 text-2xl"
-          >
-            ←
-          </button>
-          <div className="flex-1 text-center">
-            <h1 className="text-xl font-semibold text-gray-900">Reflection Journal</h1>
-            <p className="text-gray-500 text-sm">Write one thought to clear your mind</p>
-          </div>
+      <div className="flex items-center justify-between p-4">
+        <button
+          onClick={() => onNavigate('meditation')}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <IoChevronBack className="w-6 h-6 text-gray-700" />
+        </button>
+        <div className="text-center">
+          <h1 className="text-lg font-semibold text-gray-900">Reflection Journal</h1>
+          <p className="text-sm text-gray-500">Write one thought to clear your mind</p>
         </div>
+        <div className="w-10"></div>
       </div>
 
       <div className="px-6 space-y-6">
