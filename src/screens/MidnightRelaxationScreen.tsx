@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { IoChevronBack } from 'react-icons/io5'
 import type { Screen } from '../App'
 
 interface MidnightRelaxationScreenProps {
@@ -35,33 +36,25 @@ export default function MidnightRelaxationScreen({ onNavigate }: MidnightRelaxat
   const embedUrl = `https://www.youtube.com/embed/${current.id}`
 
   return (
-    <div className="min-h-screen relative pb-20">
-      {/* Background */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.pexels.com/photos/18071149/pexels-photo-18071149.jpeg"
-          alt="Midnight Relaxation background"
-          className="w-full h-full object-cover"/>
-        <div className="absolute inset-0 bg-black/35"/>
-      </div>
-
+    <div className="min-h-screen bg-white relative pb-20">
       {/* Header */}
-      <div className="relative z-10 px-6 pt-6 pb-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Midnight & Relaxation</h1>
-          <p className="text-white/80 text-sm mt-1">Calm yoga & mental health insights</p>
-        </div>
+      <div className="flex items-center justify-between p-4">
         <button
           onClick={() => onNavigate('home')}
-          className="px-3 py-1.5 rounded-full bg-white/80 text-gray-800 text-sm hover:bg-white"
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
-          Home
+          <IoChevronBack className="w-6 h-6 text-gray-700" />
         </button>
+        <div className="text-center">
+          <h1 className="text-lg font-semibold text-gray-900">Midnight & Relaxation</h1>
+          <p className="text-sm text-gray-500">Calm yoga & Mental health insights</p>
+        </div>
+        <div className="w-10"></div>
       </div>
 
-      {/* Player */}
-      <div className="relative z-10 px-6">
-        <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl overflow-hidden shadow-lg">
+      {/* Main Video Player */}
+      <div className="px-4 mb-6">
+        <div className="bg-gray-900 rounded-2xl overflow-hidden shadow-sm relative">
           <div className="aspect-video w-full">
             <iframe
               className="w-full h-full"
@@ -71,35 +64,37 @@ export default function MidnightRelaxationScreen({ onNavigate }: MidnightRelaxat
               allowFullScreen
             />
           </div>
+         
         </div>
       </div>
 
-      {/* Playlist */}
-      <div className="relative z-10 px-6 mt-4 grid grid-cols-1 gap-3">
-        {videos.map((v, i) => (
-          <button
-            key={`${v.id}-${i}`}
-            onClick={() => setCurrentIndex(i)}
-            className={`flex items-center gap-3 p-3 rounded-2xl border transition-all text-left ${
-              i === currentIndex
-                ? 'bg-white/50 backdrop-blur-md border-white/30 shadow'
-                : 'bg-white/20 backdrop-blur-md border-white/20 hover:bg-white/30'
-            }`}
-          >
-            <div className="w-20 h-12 rounded-lg overflow-hidden bg-black/30">
-              <img
-                src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
-                alt="thumbnail"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-white truncate">{v.isShort ? 'Short' : 'Video'} {i + 1}</div>
-              <div className="text-xs text-white/80 truncate">YouTube • Relaxation</div>
-            </div>
-            {v.isShort && <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-600/30 text-emerald-50">Short</span>}
-          </button>
-        ))}
+      {/* Video List */}
+      <div className="px-4">
+        <div className="space-y-3">
+          {videos.map((v, i) => (
+            <button
+              key={`${v.id}-${i}`}
+              onClick={() => setCurrentIndex(i)}
+              className={`flex items-center gap-3 p-4 rounded-2xl border transition-all text-left w-full ${
+                i === currentIndex
+                  ? 'bg-purple-50 border-purple-100'
+                  : 'bg-purple-50 border-purple-100 hover:bg-purple-100'
+              }`}
+            >
+              <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                <img
+                  src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
+                  alt="thumbnail"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-gray-900 truncate">Relax & Recharge</div>
+                <div className="text-sm text-gray-500 truncate">Video {i + 1}</div>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Screen } from '../../App';
+import { IoChevronBack } from 'react-icons/io5';
 
 interface QuickCalmProps {
   onNavigate: (screen: Screen) => void;
@@ -93,22 +94,19 @@ export const QuickCalm = ({ onNavigate }: QuickCalmProps) => {
   return (
     <div className="min-h-screen bg-white relative pb-20">
       {/* Header */}
-      <div className="px-4 pt-12 pb-6">
-        <div className="flex items-center space-x-4 mb-4">
-          <button 
-            onClick={() => onNavigate('meditation')}
-            className="text-gray-600"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-        </div>
-        <div className="text-center">
-          <h1 className="text-xl font-semibold text-gray-900 mb-1">Quick Calm</h1>
-          <p className="text-gray-500 text-sm">5 minute breathing exercise</p>
-        </div>
-      </div>
+            <div className="flex items-center justify-between p-4">
+              <button
+                onClick={() => onNavigate('meditation')}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <IoChevronBack className="w-6 h-6 text-gray-700" />
+              </button>
+              <div className="text-center">
+                <h1 className="text-lg font-semibold text-gray-900">Quick Calm</h1>
+                <p className="text-sm text-gray-500">5 minute breathing exercise</p>
+              </div>
+              <div className="w-10"></div>
+            </div>
 
       {/* Content */}
       <div className="px-4 flex flex-col items-center">

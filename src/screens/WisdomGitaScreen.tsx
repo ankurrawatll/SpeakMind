@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { IoChevronBack } from 'react-icons/io5'
 import type { Screen } from '../App'
 
 interface WisdomGitaScreenProps {
@@ -40,70 +41,65 @@ export default function WisdomGitaScreen({ onNavigate }: WisdomGitaScreenProps) 
     : `https://www.youtube.com/embed/${current.id}`
 
   return (
-    <div className="min-h-screen relative pb-24">
-      {/* Background */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg"
-          alt="Wisdom of the Gita background"
-          className="w-full h-full object-cover"/>
-        <div className="absolute inset-0 bg-black/30"/>
-      </div>
-
-      <div className="relative z-10 px-6 pt-6 pb-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Wisdom of the Gita</h1>
-          <p className="text-gray-600 text-sm mt-1">Practical insights for equanimity</p>
-        </div>
+    <div className="min-h-screen bg-white relative pb-20">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4">
         <button
           onClick={() => onNavigate('home')}
-          className="px-3 py-1.5 rounded-full bg-white/70 text-gray-800 text-sm hover:bg-white"
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
-          Home
+          <IoChevronBack className="w-6 h-6 text-gray-700" />
         </button>
+        <div className="text-center">
+          <h1 className="text-lg font-semibold text-gray-900">Wisdom of the Gita</h1>
+          <p className="text-sm text-gray-500">Practical insights for equanimity</p>
+        </div>
+        <div className="w-10"></div>
       </div>
 
-      {/* Player */}
-      <div className="relative z-10 px-6">
-        <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl overflow-hidden shadow-lg">
+      {/* Main Video Player */}
+      <div className="px-4 mb-6">
+        <div className="bg-gray-100 rounded-2xl overflow-hidden shadow-sm">
           <div className="aspect-video w-full">
             <iframe
               className="w-full h-full"
               src={embedUrl}
-              title="Wisdom of the Gita"
+              title="Midnight & Relaxation"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
             />
           </div>
+          
         </div>
       </div>
 
-      {/* Playlist */}
-      <div className="relative z-10 px-6 mt-4 grid grid-cols-1 gap-3">
-        {videos.map((v, i) => (
-          <button
-            key={`${v.id}-${i}`}
-            onClick={() => setCurrentIndex(i)}
-            className={`flex items-center gap-3 p-3 rounded-2xl border transition-all text-left ${
-              i === currentIndex
-                ? 'bg-white/50 backdrop-blur-md border-white/30 shadow'
-                : 'bg-white/20 backdrop-blur-md border-white/20 hover:bg-white/30'
-            }`}
-          >
-            <div className="w-20 h-12 rounded-lg overflow-hidden bg-black/30">
-              <img
-                src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
-                alt="thumbnail"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-gray-800 truncate">{v.isShort ? 'Short' : 'Video'} {i + 1}</div>
-              <div className="text-xs text-gray-600 truncate">YouTube • Gita Insights</div>
-            </div>
-            {v.isShort && <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-600/30 text-emerald-50">Short</span>}
-          </button>
-        ))}
+      {/* Video List */}
+      <div className="px-4">
+        <div className="space-y-3">
+          {videos.map((v, i) => (
+            <button
+              key={`${v.id}-${i}`}
+              onClick={() => setCurrentIndex(i)}
+              className={`flex items-center gap-3 p-4 rounded-2xl border transition-all text-left w-full ${
+                i === currentIndex
+                  ? 'bg-purple-50 border-purple-100'
+                  : 'bg-white border-gray-100 hover:bg-gray-50'
+              }`}
+            >
+              <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                <img
+                  src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
+                  alt="thumbnail"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-gray-900 truncate">Gita insights</div>
+                <div className="text-sm text-gray-500 truncate">Video {i + 1}</div>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )
