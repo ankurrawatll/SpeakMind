@@ -1,4 +1,5 @@
 import type { Screen } from '../App'
+import { IoChevronBack } from 'react-icons/io5'
 
 interface StreaksScreenProps {
   onNavigate: (screen: Screen) => void
@@ -65,45 +66,58 @@ export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 relative pb-20">
-      {/* Header with close X */}
-      <div className="flex items-center justify-between p-4 bg-white">
-        <button 
-          onClick={() => onNavigate('home')} 
-          className="text-gray-600 text-xl font-light"
+    <div className="min-h-screen bg-white relative pb-20">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4">
+        <button
+          onClick={() => onNavigate('home')}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
-          ×
+          <IoChevronBack className="w-6 h-6 text-gray-700" />
         </button>
-        <h1 className="text-lg font-semibold text-gray-900">1 Day Streak</h1>
-        <div className="w-6"></div> {/* Spacer for centering */}
+        <div className="text-center">
+          <h1 className="text-lg font-semibold text-gray-900">1 Day Streak</h1>
+          <p className="text-sm text-gray-500">Keep building your momentum</p>
+        </div>
+        <div className="w-10"></div>
       </div>
 
-      <div className="px-4 space-y-4">
+      <div className="px-4 space-y-6">
         {/* Miracle Moment card */}
         <div 
-          className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
+          className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
           onClick={() => onNavigate('meditation')}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-              <span className="text-purple-600 text-lg">⭐</span>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <span className="text-white text-2xl">⭐</span>
             </div>
             <div className="flex-1">
-              <div className="font-semibold text-gray-900">Miracle Moment</div>
-              <div className="text-sm text-gray-500">2 days until your next miracle moment</div>
+              <div className="text-xl font-bold text-white mb-1">Miracle Moment</div>
+              <div className="text-white/90 text-sm">2 days until your next milestone</div>
             </div>
           </div>
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-yellow-50 rounded-2xl p-4">
-            <div className="text-sm text-gray-600 mb-1">Days Meditated</div>
-            <div className="text-2xl font-bold text-gray-900">2</div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-yellow-100 rounded-2xl flex items-center justify-center mb-3">
+                <span className="text-yellow-600 text-xl">📅</span>
+              </div>
+              <div className="text-sm text-gray-600 mb-1">Days Meditated</div>
+              <div className="text-3xl font-bold text-gray-900">2</div>
+            </div>
           </div>
-          <div className="bg-pink-50 rounded-2xl p-4">
-            <div className="text-sm text-gray-600 mb-1">Shields Used</div>
-            <div className="text-2xl font-bold text-gray-900">1</div>
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-pink-100 rounded-2xl flex items-center justify-center mb-3">
+                <span className="text-pink-600 text-xl">🛡️</span>
+              </div>
+              <div className="text-sm text-gray-600 mb-1">Shields Used</div>
+              <div className="text-3xl font-bold text-gray-900">1</div>
+            </div>
           </div>
         </div>
 
