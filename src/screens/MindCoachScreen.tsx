@@ -17,13 +17,13 @@ export default function MindCoachScreen({ onNavigate }: MindCoachScreenProps) {
   const [isMuted, setIsMuted] = useState(false)
 
   useEffect(() => {
-    // Initialize Heygen avatar with mobile-optimized positioning
+    // Initialize Heygen avatar with new Shawn_Therapist avatar
     const initializeHeygen = () => {
       const script = document.createElement('script')
       script.innerHTML = `
         !function(window){
           const host="https://labs.heygen.com",
-          url=host+"/guest/streaming-embed?share=eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJLYXR5YV9Qcm9mZXNzaW9uYWxMb29rMl9w%0D%0AdWJsaWMiLCJwcmV2aWV3SW1nIjoiaHR0cHM6Ly9maWxlczIuaGV5Z2VuLmFpL2F2YXRhci92My9k%0D%0ANTJmZmExYjQ0N2Q0ZjJmOGViMTY5MTdlN2VjMjIyYV81NTg3MC9wcmV2aWV3X3RhbGtfMS53ZWJw%0D%0AIiwibmVlZFJlbW92ZUJhY2tncm91bmQiOnRydWUsImtub3dsZWRnZUJhc2VJZCI6IjFhY2VmYjM2%0D%0AZmVhODQ2NWM4Y2NiMTVjZDVlODQxNTljIiwidXNlcm5hbWUiOiIzZjU3Zjc1MzRlMzc0ZjVhYTcz%0D%0AY2MwM2IzNjM1ZTJhNCJ9&inIFrame=1",
+          url=host+"/guest/streaming-embed?share=eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJTaGF3bl9UaGVyYXBpc3RfcHVibGljIiwi%0D%0AcHJldmlld0ltZyI6Imh0dHBzOi8vZmlsZXMyLmhleWdlbi5haS9hdmF0YXIvdjMvZGIyZmI3ZmQw%0D%0AZDA0NGI5MDgzOTVhMDExMTY2YWIyMmRfNDU2ODAvcHJldmlld190YXJnZXQud2VicCIsIm5lZWRS%0D%0AZW1vdmVCYWNrZ3JvdW5kIjpmYWxzZSwia25vd2xlZGdlQmFzZUlkIjoiMjE4YTFlMDkxNGY2NDZl%0D%0AYjg4YzMwNGYzNDY2ODY3N2IiLCJ1c2VybmFtZSI6IjNmNTdmNzUzNGUzNzRmNWFhNzNjYzAzYjM2%0D%0AMzVlMmE0In0%3D&inIFrame=1",
           clientWidth=document.body.clientWidth,
           wrapDiv=document.createElement("div");
           wrapDiv.id="heygen-streaming-embed";
