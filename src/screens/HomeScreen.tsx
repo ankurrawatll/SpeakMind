@@ -1,10 +1,10 @@
 import type { Screen } from '../App'
 
 // Import mood images from public folder
-import calmImg from '/Homescreen/Moods/calm.png'
-import relaxImg from '/Homescreen/Moods/relax.png'
-import focusImg from '/Homescreen/Moods/focus.png'
-import anxiousImg from '/Homescreen/Moods/Anxious.png'
+import calmImg from '/Homescreen/Calm.gif'
+import relaxImg from '/Homescreen/Relax.gif'
+import focusImg from '/Homescreen/Focus.gif'
+import anxiousImg from '/Homescreen/Anxious.gif'
 import meditativeInsightsImg from '/Homescreen/Meditative Insights.png'
 
 interface HomeScreenProps {
