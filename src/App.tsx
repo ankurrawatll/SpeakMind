@@ -51,7 +51,6 @@ export type Screen =
 const AppContent = () => {
   const { currentUser } = useAuth()
   const [currentScreen, setCurrentScreen] = useState<Screen>('auth')
-  const [isNewUser, setIsNewUser] = useState(false)
   const [user] = useState({
     name: 'User',
     streak: 1,
@@ -99,7 +98,6 @@ const AppContent = () => {
   }, [currentUser])
 
   const handleAuthComplete = (wasSignup: boolean = false, user?: any) => {
-    setIsNewUser(wasSignup)
     
     // Immediately navigate based on signup status to avoid delay
     if (wasSignup) {
@@ -162,39 +160,18 @@ const AppContent = () => {
       case 'conversation':
         return <ConversationScreen onNavigate={navigateToScreen} />
       case 'exercise-quick-calm':
-        return (
-          <ExerciseLayout 
-            {...exerciseData['exercise-quick-calm']}
-            onBack={() => navigateToScreen('meditation')}
-          >
-            <QuickCalm onNavigate={() => navigateToScreen('meditation')} />
-          </ExerciseLayout>
-        )
+        return <QuickCalm onNavigate={navigateToScreen} />
       case 'exercise-stretch-focus':
-        return (
-          <ExerciseLayout 
-            {...exerciseData['exercise-stretch-focus']}
-            onBack={() => navigateToScreen('meditation')}
-          >
-            <StretchAndFocus />
-          </ExerciseLayout>
-        )
+        return <StretchAndFocus onNavigate={navigateToScreen} />
       case 'exercise-mind-body-sync':
-        return (
-          <ExerciseLayout 
-            {...exerciseData['exercise-mind-body-sync']}
-            onBack={() => navigateToScreen('meditation')}
-          >
-            <MindBodySync onNavigate={() => navigateToScreen('meditation')} />
-          </ExerciseLayout>
-        )
+        return <MindBodySync onNavigate={navigateToScreen} />
       case 'exercise-reflection-journal':
         return (
           <ExerciseLayout 
             {...exerciseData['exercise-reflection-journal']}
             onBack={() => navigateToScreen('meditation')}
           >
-            <ReflectionJournal />
+            <ReflectionJournal onNavigate={navigateToScreen} />
           </ExerciseLayout>
         )
       case 'vedicCalm':
@@ -209,7 +186,7 @@ const AppContent = () => {
   const showBottomNav = currentUser && currentScreen !== 'auth' && currentScreen !== 'userOnboarding' && currentScreen !== 'timer' && currentScreen !== 'conversation'
 
   return (
-    <div className="mobile-container">
+    <div className="mobile-container min-h-screen overflow-auto">
       {renderScreen()}
       {showBottomNav && (
         <BottomNavigation 

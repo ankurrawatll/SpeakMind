@@ -1,5 +1,5 @@
 // src/screens/MeditationScreen.tsx
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface Exercise {
@@ -62,14 +62,11 @@ interface MeditationScreenProps {
 }
 
 const MeditationScreen = ({ onNavigate }: MeditationScreenProps = {}) => {
-  const [progress, setProgress] = useState(0);
-
-  // Load progress from localStorage
+  // Load progress from localStorage (for future use)
   useEffect(() => {
     const savedProgress = localStorage.getItem('dailyExerciseProgress');
     if (savedProgress) {
-      const { completed } = JSON.parse(savedProgress);
-      setProgress(completed.length);
+      // Progress tracking available for future features
     }
   }, []);
 
@@ -80,7 +77,7 @@ const MeditationScreen = ({ onNavigate }: MeditationScreenProps = {}) => {
         'quick-calm': 'exercise-quick-calm',
         'stretch-focus': 'exercise-stretch-focus',
         'mind-body-sync': 'exercise-mind-body-sync',
-        'reflection-journal': 'exercise-reflection-journal'
+        'reflection-journal': 'journal'
       };
       
       const screenName = exerciseScreenMap[exerciseId];
@@ -95,83 +92,57 @@ const MeditationScreen = ({ onNavigate }: MeditationScreenProps = {}) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-teal-50 relative overflow-hidden">
-      {/* Removed back button to save space */}
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&dpr=2" 
-          alt="Peaceful meditation background"
-          className="w-full h-full object-cover opacity-20"
-        />
-      </div>
-
+    <div className="min-h-screen bg-white relative pb-20">
       {/* Content */}
-      <div className="relative z-10">
+      <div className="relative">
         {/* Simple Header */}
-        <div className="px-6 pt-6 pb-2">
-          <h1 className="text-2xl font-bold text-gray-800">Mindful Moments</h1>
-          <p className="text-gray-600 mt-1">Find your calm, one breath at a time</p>
-        </div>
-
-        {/* Progress Container - Dark Glassmorphism */}
-        <div className="px-6 py-4">
-          <div className="bg-black/20 backdrop-blur-lg rounded-2xl p-5 shadow-lg border border-white/10">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-medium text-white/90">Daily Progress</span>
-              <span className="text-sm font-semibold text-white">{progress} of 4</span>
-            </div>
-            <div className="w-full bg-white/20 rounded-full h-2.5 mb-2">
-              <div 
-                className="bg-gradient-to-r from-emerald-400 to-teal-500 h-2.5 rounded-full transition-all duration-500" 
-                style={{ width: `${(progress / 4) * 100}%` }}
-              />
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-white/70">
-                Complete {4 - progress} more to complete today's goal
-              </span>
-              <span className="text-sm font-medium text-white">
-                {Math.round((progress / 4) * 100)}%
-              </span>
-            </div>
-          </div>
+        <div className="px-6 pt-8 pb-6">
+          <h1 className="text-2xl font-bold text-gray-900 text-center">Mindful Moments</h1>
         </div>
 
         {/* Exercise Grid */}
-        <div className="px-6 py-4 grid grid-cols-1 gap-4">
+        <div className="px-6 space-y-4">
           {exercises.map((exercise) => (
             <motion.div
               key={exercise.id}
               onClick={() => handleExercisePress(exercise.id)}
               whileTap={{ scale: 0.98 }}
-              className="relative rounded-2xl overflow-hidden h-40 flex items-end p-4 cursor-pointer transform transition-all hover:scale-[1.02]"
+              className="relative rounded-2xl overflow-hidden h-40 flex items-end p-6 cursor-pointer shadow-sm"
             >
-              {/* Background Image with Gradient Overlay */}
+              {/* Background Image */}
               <div className="absolute inset-0 z-0">
                 <img
                   src={exercise.image}
                   alt={exercise.title}
                   className="w-full h-full object-cover"
                 />
-                <div className={`absolute inset-0 ${exercise.color.replace('from-', 'bg-gradient-to-t from-').replace('to-', ' to-')} opacity-80`} />
+                <div className="absolute inset-0 bg-black/40" />
               </div>
 
               {/* Content */}
               <div className="relative z-10 w-full">
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-end">
                   <div>
-                    <h3 className="text-white text-lg font-semibold">{exercise.title}</h3>
-                    <p className="text-white/80 text-sm">{exercise.description}</p>
+                    <h3 className="text-white text-xl font-semibold mb-1">{exercise.title}</h3>
+                    <p className="text-white/90 text-sm mb-2">{exercise.description}</p>
+                    <div className="flex items-center text-xs text-white/80">
+                      <div className="bg-white/20 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-white">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                          <polyline points="12,6 12,12 16,14" stroke="currentColor" strokeWidth="2"/>
+                        </svg>
+                        <span>{exercise.duration} Min</span>
+                      </div>
+                    </div>
                   </div>
                   {/* Play Button */}
-                  <div className="bg-white/90 backdrop-blur-sm rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:bg-white transition-colors">
+                  <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
                     <svg 
                       width="16" 
                       height="16" 
                       viewBox="0 0 24 24" 
                       fill="none" 
-                      className="text-gray-700 ml-0.5"
+                      className="text-purple-800 ml-0.5"
                     >
                       <path 
                         d="M8 5v14l11-7z" 
@@ -179,13 +150,6 @@ const MeditationScreen = ({ onNavigate }: MeditationScreenProps = {}) => {
                       />
                     </svg>
                   </div>
-                </div>
-                <div className="mt-2 flex items-center text-xs text-white/80">
-                  <span className="bg-white/20 backdrop-blur px-2 py-1 rounded-full">
-                    {exercise.duration} min
-                  </span>
-                  <span className="mx-2">•</span>
-                  <span className="capitalize">{exercise.category}</span>
                 </div>
               </div>
             </motion.div>

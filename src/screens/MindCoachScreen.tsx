@@ -17,13 +17,13 @@ export default function MindCoachScreen({ onNavigate }: MindCoachScreenProps) {
   const [isMuted, setIsMuted] = useState(false)
 
   useEffect(() => {
-    // Initialize Heygen avatar with mobile-optimized positioning
+    // Initialize Heygen avatar with correct knowledge base
     const initializeHeygen = () => {
       const script = document.createElement('script')
       script.innerHTML = `
         !function(window){
           const host="https://labs.heygen.com",
-          url=host+"/guest/streaming-embed?share=eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJLYXR5YV9Qcm9mZXNzaW9uYWxMb29rMl9w%0D%0AdWJsaWMiLCJwcmV2aWV3SW1nIjoiaHR0cHM6Ly9maWxlczIuaGV5Z2VuLmFpL2F2YXRhci92My9k%0D%0ANTJmZmExYjQ0N2Q0ZjJmOGViMTY5MTdlN2VjMjIyYV81NTg3MC9wcmV2aWV3X3RhbGtfMS53ZWJw%0D%0AIiwibmVlZFJlbW92ZUJhY2tncm91bmQiOnRydWUsImtub3dsZWRnZUJhc2VJZCI6IjFhY2VmYjM2%0D%0AZmVhODQ2NWM4Y2NiMTVjZDVlODQxNTljIiwidXNlcm5hbWUiOiIzZjU3Zjc1MzRlMzc0ZjVhYTcz%0D%0AY2MwM2IzNjM1ZTJhNCJ9&inIFrame=1",
+          url=host+"/guest/streaming-embed?share=eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiI2MGY4MGVlYTk3NTM0OGZhYjZhZjcwOWU5%0D%0AZTQ0OWYzMyIsInByZXZpZXdJbWciOiJodHRwczovL2ZpbGVzMi5oZXlnZW4uYWkvYXZhdGFyL3Yz%0D%0ALzYwZjgwZWVhOTc1MzQ4ZmFiNmFmNzA5ZTllNDQ5ZjMzL2Z1bGwvMi4yL3ByZXZpZXdfdGFyZ2V0%0D%0ALndlYnAiLCJuZWVkUmVtb3ZlQmFja2dyb3VuZCI6ZmFsc2UsImtub3dsZWRnZUJhc2VJZCI6IjIx%0D%0AOGExZTA5MTRmNjQ2ZWI4OGMzMDRmMzQ2Njg2NzdiIiwidXNlcm5hbWUiOiIzZjU3Zjc1MzRlMzc0%0D%0AZjVhYTczY2MwM2IzNjM1ZTJhNCJ9&inIFrame=1",
           clientWidth=document.body.clientWidth,
           wrapDiv=document.createElement("div");
           wrapDiv.id="heygen-streaming-embed";
@@ -95,19 +95,19 @@ export default function MindCoachScreen({ onNavigate }: MindCoachScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="h-screen bg-white overflow-hidden flex flex-col">
       
 
       {/* Header */}
-      <div className="text-center py-4 pb-6">
+      <div className="text-center py-4 pb-6 flex-shrink-0">
         <h1 className="text-black text-lg font-semibold">Mind Coach</h1>
       </div>
 
       {/* Main Video Area - Heygen Avatar will appear here */}
-      <div className="flex-1 px-5 pb-32">
-        <div className="relative mx-auto max-w-sm">
+      <div className="flex-1 px-5 pb-20 overflow-hidden">
+        <div className="relative mx-auto max-w-sm h-full flex items-center justify-center">
           {/* Video Container - Heygen will inject here */}
-          <div className="relative aspect-[3/4] bg-white rounded-3xl overflow-hidden ">
+          <div className="relative aspect-[3/4] bg-white rounded-3xl overflow-hidden max-h-full">
             {/* Fallback content while Heygen loads */}
             <div className="absolute inset-0 bg-white flex items-center justify-center">
               <div className="text-black text-center">
@@ -134,7 +134,7 @@ export default function MindCoachScreen({ onNavigate }: MindCoachScreenProps) {
       </div>
 
       {/* Bottom Controls */}
-      <div className="fixed bottom-24 left-0 right-0">
+      <div className="fixed bottom-20 left-0 right-0 flex-shrink-0">
         <div className="flex items-center justify-center space-x-8 px-8">
           {/* Pause/Resume Button */}
           <button className="w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center shadow-lg">

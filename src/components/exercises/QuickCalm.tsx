@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import type { Screen } from '../../App';
+import { IoChevronBack } from 'react-icons/io5';
 
 interface QuickCalmProps {
   onNavigate: (screen: Screen) => void;
@@ -24,17 +24,14 @@ const useExerciseProgress = () => {
 };
 
 export const QuickCalm = ({ onNavigate }: QuickCalmProps) => {
-  const backgroundImage = 'https://images.pexels.com/photos/2097628/pexels-photo-2097628.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2';
   const [isActive, setIsActive] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60); // 1 minute timer
+  const [timeLeft, setTimeLeft] = useState(300); // 5 minute timer (300 seconds)
   const [phase, setPhase] = useState<'inhale' | 'hold' | 'exhale' | 'rest'>('inhale');
   const { markExerciseComplete } = useExerciseProgress();
 
   useEffect(() => {
+    let timer: NodeJS.Timeout;
 
-    let timer: number;
-
-    
     if (isActive && timeLeft > 0) {
       timer = setTimeout(() => {
         setTimeLeft(prev => prev - 1);
@@ -42,6 +39,11 @@ export const QuickCalm = ({ onNavigate }: QuickCalmProps) => {
     } else if (timeLeft === 0) {
       // Exercise completed
       markExerciseComplete();
+      setIsActive(false);
+      // Navigate back to meditation screen after completion
+      setTimeout(() => {
+        onNavigate('meditation');
+      }, 2000);
     }
 
     // Breathing animation timing
@@ -69,7 +71,8 @@ export const QuickCalm = ({ onNavigate }: QuickCalmProps) => {
 
   const resetExercise = () => {
     setIsActive(false);
-    setTimeLeft(60);
+    setTimeLeft(300);
+    setPhase('inhale');
   };
 
   const formatTime = (seconds: number) => {
@@ -89,74 +92,79 @@ export const QuickCalm = ({ onNavigate }: QuickCalmProps) => {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src={backgroundImage} 
-          alt="Calming background" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/30" />
-      </div>
-      
+    <div className="min-h-screen bg-white relative pb-20">
+      {/* Header */}
+            <div className="flex items-center justify-between p-4">
+              <button
+                onClick={() => onNavigate('meditation')}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <IoChevronBack className="w-6 h-6 text-gray-700" />
+              </button>
+              <div className="text-center">
+                <h1 className="text-lg font-semibold text-gray-900">Quick Calm</h1>
+                <p className="text-sm text-gray-500">5 minute breathing exercise</p>
+              </div>
+              <div className="w-10"></div>
+            </div>
+
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-6">
-        <h1 className="text-3xl font-bold text-white mb-8">Quick Calm</h1>
-        
-        <div className="relative w-64 h-64 mb-8">
-          <motion.div
-            className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-400/80 to-blue-500/80 shadow-lg flex items-center justify-center"
-            animate={{
-              scale: phase === 'inhale' ? 1.2 : phase === 'exhale' ? 0.8 : 1,
-              opacity: phase === 'rest' ? 0.7 : 1,
-            }}
-            transition={{
-              duration: 2,
-              ease: phase === 'inhale' 
-                ? [0.4, 0, 0.2, 1] 
-                : phase === 'exhale'
-                ? [0.4, 0, 0.2, 1]
-                : 'linear'
-            }}
-          >
-            <span className="text-white text-2xl font-medium">
-              {getBreathingText()}
-            </span>
-          </motion.div>
+      <div className="px-4 flex flex-col items-center">
+        {/* Meditation Image Card */}
+        <div className="w-full max-w-sm mb-8">
+          <div className="bg-gradient-to-b from-yellow-300 to-yellow-400 rounded-3xl overflow-hidden aspect-[4/3] relative">
+            <img 
+              src="https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2" 
+              alt="Meditation pose" 
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
 
-        <div className="text-4xl font-bold text-white mb-8">
-          {formatTime(timeLeft)}
+        {/* Breathing Instruction */}
+        <div className="mb-8 text-center">
+          <h2 className="text-lg font-medium text-gray-900 mb-2">
+            {getBreathingText()}
+          </h2>
         </div>
 
-        <div className="flex gap-4">
-          {!isActive ? (
+        {/* Timer */}
+        <div className="text-6xl font-light text-gray-900 mb-12">
+          {timeLeft === 0 ? 'Complete!' : formatTime(timeLeft)}
+        </div>
+
+        {/* Start Button */}
+        <div className="w-full max-w-sm">
+          {timeLeft === 0 ? (
+            <button
+              onClick={() => onNavigate('meditation')}
+              className="w-full py-4 bg-green-500 text-white rounded-2xl font-semibold text-lg hover:bg-green-600 transition-colors"
+            >
+              Done
+            </button>
+          ) : !isActive ? (
             <button
               onClick={startExercise}
-              className="px-6 py-3 bg-teal-500 text-white rounded-full font-medium hover:bg-teal-600 transition-colors"
+              className="w-full py-4 bg-purple-500 text-white rounded-2xl font-semibold text-lg hover:bg-purple-600 transition-colors"
             >
               Start
             </button>
           ) : (
-            <button
-              onClick={resetExercise}
-              className="px-6 py-3 bg-rose-500 text-white rounded-full font-medium hover:bg-rose-600 transition-colors"
-            >
-              Reset
-            </button>
+            <div className="flex space-x-3">
+              <button
+                onClick={resetExercise}
+                className="flex-1 py-4 bg-gray-200 text-gray-700 rounded-2xl font-semibold hover:bg-gray-300 transition-colors"
+              >
+                Reset
+              </button>
+              <button
+                onClick={() => setIsActive(false)}
+                className="flex-1 py-4 bg-purple-500 text-white rounded-2xl font-semibold hover:bg-purple-600 transition-colors"
+              >
+                Pause
+              </button>
+            </div>
           )}
-          <button
-            onClick={() => onNavigate('meditation')}
-            className="px-6 py-3 bg-white/90 text-slate-700 rounded-full font-medium hover:bg-white transition-colors"
-          >
-            Back
-          </button>
-        </div>
-
-        <div className="mt-8 text-center text-white/90">
-          <p>Follow the breathing pattern to calm your mind.</p>
-          <p className="text-sm mt-2">Inhale for 4s, hold for 4s, exhale for 4s</p>
         </div>
       </div>
     </div>

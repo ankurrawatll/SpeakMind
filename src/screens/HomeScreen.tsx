@@ -1,10 +1,10 @@
 import type { Screen } from '../App'
 
 // Import mood images from public folder
-import calmImg from '/Homescreen/Moods/calm.png'
-import relaxImg from '/Homescreen/Moods/relax.png'
-import focusImg from '/Homescreen/Moods/focus.png'
-import anxiousImg from '/Homescreen/Moods/Anxious.png'
+import calmImg from '/Homescreen/Calm.gif'
+import relaxImg from '/Homescreen/Relax.gif'
+import focusImg from '/Homescreen/Focus.gif'
+import anxiousImg from '/Homescreen/Anxious.gif'
 import meditativeInsightsImg from '/Homescreen/Meditative Insights.png'
 
 interface HomeScreenProps {
@@ -59,11 +59,11 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 pb-20">
       {/* Header with Greeting */}
       <div className="px-6 pt-12 pb-6">
         <div className="text-gray-900">
-          <h1 className="text-2xl font-semibold mb-2">Hi {user.name}</h1>
+          <h1 className="text-2xl font-semibold mb-2">Hi {user?.name || 'Guest'}</h1>
           <p className="text-gray-700 text-base">How are you feeling today?</p>
         </div>
       </div>
@@ -176,32 +176,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
           </div>
         </div>
 
-        {/* Wellness Activities Cards */}
-        <div className="grid grid-cols-1 gap-4 mb-6">
-          {/* Journal Card */}
-          <div 
-            className="bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl p-5 cursor-pointer transform transition-transform active:scale-95 border border-white/40 backdrop-blur-sm"
-            onClick={() => onNavigate('journal')}
-          >
-            <div className="flex items-center justify-between text-white">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <span className="text-2xl">📖</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">AI Journal</h3>
-                  <p className="text-white/90 text-sm">Reflect with personalized prompts</p>
-                </div>
-              </div>
-              <div className="flex flex-col items-end">
-                <button className="text-white/80 hover:text-white text-xl">→</button>
-                <span className="text-xs text-white/70 mt-1">+50 XP</span>
-              </div>
-            </div>
-          </div>
-
-          
-        </div>
+        
       </div>
     </div>
   )
