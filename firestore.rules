@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Events Collection Rules
+    match /events/{eventId} {
+      // Anyone can read events (even non-authenticated users)
+      allow read: if true;
+      
+      // Only authenticated users can create events
+      // Ensure the creatorId matches the authenticated user
+      allow create: if request.auth != null 
+        && request.resource.data.creatorId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.address is string
+        && request.resource.data.city is string
+        && request.resource.data.dateTime is timestamp
+        && request.resource.data.createdAt is timestamp;
+      
+      // Only the creator can update their own events
+      allow update: if request.auth != null 
+        && resource.data.creatorId == request.auth.uid;
+      
+      // Only the creator can delete their own events
+      // OR allow auto-deletion by checking if event has expired (server-side function recommended)
+      allow delete: if request.auth != null 
+        && resource.data.creatorId == request.auth.uid;
+    }
+    
+    // You can add rules for other collections here
+    // For example: forum posts, chat messages, user profiles, etc.
+  }
+}

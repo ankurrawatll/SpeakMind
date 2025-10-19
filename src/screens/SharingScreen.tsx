@@ -1,4 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { collection, addDoc, query, where, onSnapshot, deleteDoc, doc, Timestamp } from 'firebase/firestore'
+import { db } from '../config/firebase'
+import { useAuth } from '../contexts/AuthContext'
 import type { Screen } from '../App'
 
 interface SharingScreenProps {
@@ -43,6 +46,45 @@ interface ForumPost {
   isLiked: boolean
 }
 
+interface Event {
+  id: string
+  title: string
+  address: string
+  city: string
+  dateTime: Date
+  creatorId: string
+  creatorName: string
+  createdAt: Date
+}
+
+// Major cities in India
+const INDIAN_CITIES = [
+  'Mumbai',
+  'Delhi',
+  'Bangalore',
+  'Hyderabad',
+  'Ahmedabad',
+  'Chennai',
+  'Kolkata',
+  'Pune',
+  'Jaipur',
+  'Lucknow',
+  'Kanpur',
+  'Nagpur',
+  'Indore',
+  'Thane',
+  'Bhopal',
+  'Visakhapatnam',
+  'Patna',
+  'Vadodara',
+  'Ghaziabad',
+  'Ludhiana',
+  'Agra',
+  'Nashik',
+  'Faridabad',
+  'Meerut',
+  'Rajkot'
+]
 
 
 // Mock data for chat conversations
@@ -182,15 +224,125 @@ const MOCK_POSTS: ForumPost[] = [
 ]
 
 export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
-  const [activeTab, setActiveTab] = useState<'chat' | 'forum'>('forum')
+  const { currentUser } = useAuth()
+  const [activeTab, setActiveTab] = useState<'forum' | 'chat' | 'events'>('forum')
   const [selectedChat, setSelectedChat] = useState<ChatConversation | null>(null)
   const [showNewPost, setShowNewPost] = useState(false)
   const [newPostTitle, setNewPostTitle] = useState('')
   const [newPostContent, setNewPostContent] = useState('')
   const [newPostTags, setNewPostTags] = useState('')
 
+  // Events state
+  const [selectedCity, setSelectedCity] = useState<string>('Mumbai')
+  const [showNewEvent, setShowNewEvent] = useState(false)
+  const [events, setEvents] = useState<Event[]>([])
+  const [newEventTitle, setNewEventTitle] = useState('')
+  const [newEventAddress, setNewEventAddress] = useState('')
+  const [newEventDate, setNewEventDate] = useState('')
+  const [newEventTime, setNewEventTime] = useState('')
+
   const [conversations] = useState<ChatConversation[]>(MOCK_CONVERSATIONS)
   const [forumPosts, setForumPosts] = useState<ForumPost[]>(MOCK_POSTS)
+
+  // Fetch events for selected city
+  useEffect(() => {
+    console.log('Fetching events for city:', selectedCity)
+    
+    // Clear events first to ensure fresh data
+    setEvents([])
+    
+    const eventsRef = collection(db, 'events')
+    const q = query(eventsRef, where('city', '==', selectedCity))
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedEvents: Event[] = []
+      snapshot.forEach((doc) => {
+        const data = doc.data()
+        console.log('Event data:', data.title, 'City:', data.city)
+        fetchedEvents.push({
+          id: doc.id,
+          title: data.title,
+          address: data.address,
+          city: data.city,
+          dateTime: data.dateTime.toDate(),
+          creatorId: data.creatorId,
+          creatorName: data.creatorName,
+          createdAt: data.createdAt.toDate()
+        })
+      })
+      console.log('Total events fetched:', fetchedEvents.length)
+      setEvents(fetchedEvents)
+    }, (error) => {
+      console.error('Error fetching events:', error)
+    })
+
+    return () => {
+      console.log('Cleaning up listener for city:', selectedCity)
+      unsubscribe()
+    }
+  }, [selectedCity])
+
+  // Auto-delete expired events
+  useEffect(() => {
+    const checkAndDeleteExpiredEvents = async () => {
+      const now = new Date()
+      events.forEach(async (event) => {
+        if (event.dateTime < now) {
+          try {
+            await deleteDoc(doc(db, 'events', event.id))
+          } catch (error) {
+            console.error('Error deleting expired event:', error)
+          }
+        }
+      })
+    }
+
+    const interval = setInterval(checkAndDeleteExpiredEvents, 60000) // Check every minute
+    return () => clearInterval(interval)
+  }, [events])
+
+  const handleCreateEvent = async () => {
+    if (!currentUser) {
+      alert('Please log in to create events')
+      return
+    }
+
+    if (!newEventTitle.trim() || !newEventAddress.trim() || !newEventDate || !newEventTime) {
+      alert('Please fill in all fields')
+      return
+    }
+
+    try {
+      const dateTimeString = `${newEventDate}T${newEventTime}`
+      const eventDateTime = new Date(dateTimeString)
+
+      if (eventDateTime <= new Date()) {
+        alert('Event date and time must be in the future')
+        return
+      }
+
+      await addDoc(collection(db, 'events'), {
+        title: newEventTitle.trim(),
+        address: newEventAddress.trim(),
+        city: selectedCity,
+        dateTime: Timestamp.fromDate(eventDateTime),
+        creatorId: currentUser.uid,
+        creatorName: currentUser.displayName || currentUser.email || 'Anonymous',
+        createdAt: Timestamp.now()
+      })
+
+      // Clear form and close modal
+      setNewEventTitle('')
+      setNewEventAddress('')
+      setNewEventDate('')
+      setNewEventTime('')
+      setShowNewEvent(false)
+      
+    } catch (error) {
+      console.error('Error creating event:', error)
+      alert('Failed to create event. Please try again.')
+    }
+  }
 
   const handleLikePost = (postId: string) => {
     setForumPosts(posts => 
@@ -333,15 +485,21 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
           <div className="flex bg-white/15 backdrop-blur-xl border border-white/20 rounded-full p-1">
             <button
               onClick={() => setActiveTab('forum')}
-              className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-colors ${activeTab === 'forum' ? 'bg-white text-gray-900 shadow' : 'text-white/80 hover:text-white'}`}
+              className={`flex-1 py-2 px-3 rounded-full text-xs font-medium transition-colors ${activeTab === 'forum' ? 'bg-white text-gray-900 shadow' : 'text-white/80 hover:text-white'}`}
             >
               Forum
             </button>
             <button
               onClick={() => setActiveTab('chat')}
-              className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-colors ${activeTab === 'chat' ? 'bg-white text-gray-900 shadow' : 'text-white/80 hover:text-white'}`}
+              className={`flex-1 py-2 px-3 rounded-full text-xs font-medium transition-colors ${activeTab === 'chat' ? 'bg-white text-gray-900 shadow' : 'text-white/80 hover:text-white'}`}
             >
               Support Chat
+            </button>
+            <button
+              onClick={() => setActiveTab('events')}
+              className={`flex-1 py-2 px-3 rounded-full text-xs font-medium transition-colors ${activeTab === 'events' ? 'bg-white text-gray-900 shadow' : 'text-white/80 hover:text-white'}`}
+            >
+              Events
             </button>
           </div>
         </div>
@@ -533,6 +691,202 @@ export default function SharingScreen({ onNavigate: _ }: SharingScreenProps) {
                 <p>• This is a prototype - real implementation would include matching algorithms</p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Events Tab */}
+        {activeTab === 'events' && (
+          <div>
+            {/* City Selector */}
+            <div className="mb-4 bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
+              <label className="block text-white text-sm font-semibold mb-2">📍 Select City</label>
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                className="w-full px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white focus:outline-none focus:border-white/50 backdrop-blur"
+                style={{ 
+                  backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%23ffffff\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3E%3C/svg%3E")',
+                  backgroundPosition: 'right 0.5rem center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '1.5em 1.5em',
+                  paddingRight: '2.5rem',
+                  appearance: 'none'
+                }}
+              >
+                {INDIAN_CITIES.map((city) => (
+                  <option key={city} value={city} className="bg-gray-800 text-white">
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Events List */}
+            <div className="space-y-4 pb-20">
+              {events.length === 0 ? (
+                <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-8 text-center text-white">
+                  <div className="text-5xl mb-3">📅</div>
+                  <h3 className="font-semibold mb-2">No Events Yet</h3>
+                  <p className="text-white/80 text-sm">Be the first to create an event in {selectedCity}!</p>
+                </div>
+              ) : (
+                events
+                  .sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime())
+                  .map((event) => (
+                    <div key={event.id} className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-5 text-white">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-lg">{event.title}</h3>
+                            <span className="px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">
+                              {event.city}
+                            </span>
+                          </div>
+                          <div className="flex items-center text-white/80 text-sm mb-2">
+                            <span className="mr-2">👤</span>
+                            <span>Organized by {event.creatorName}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-start text-white/90 text-sm">
+                          <span className="mr-2">📍</span>
+                          <span>{event.address}</span>
+                        </div>
+                        <div className="flex items-center text-white/90 text-sm">
+                          <span className="mr-2">📅</span>
+                          <span>{event.dateTime.toLocaleDateString('en-IN', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          })}</span>
+                        </div>
+                        <div className="flex items-center text-white/90 text-sm">
+                          <span className="mr-2">🕐</span>
+                          <span>{event.dateTime.toLocaleTimeString('en-IN', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-3 border-t border-white/20">
+                        <span className="text-xs text-white/70">
+                          Posted {event.createdAt.toLocaleDateString()}
+                        </span>
+                        {currentUser && event.creatorId === currentUser.uid && (
+                          <span className="px-2 py-1 bg-white/20 text-white text-xs rounded-full">
+                            Your Event
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+
+            {/* Info Box */}
+            <div className="mt-6 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 text-white">
+              <h3 className="text-sm font-semibold mb-2">💡 About Events</h3>
+              <div className="space-y-2 text-xs text-white/80">
+                <p>• Connect with others in your city for real-life meetups</p>
+                <p>• Share mental wellness activities and group sessions</p>
+                <p>• Events automatically expire after the scheduled time</p>
+              </div>
+            </div>
+
+            {/* Floating Add Button */}
+            <button
+              onClick={() => setShowNewEvent(true)}
+              className="fixed bottom-24 left-1/2 -translate-x-1/2 w-14 h-14 bg-primary-purple text-white rounded-full shadow-lg hover:bg-primary-purple/90 transition-all hover:scale-110 flex items-center justify-center text-3xl font-light z-40 leading-none"
+              style={{ boxShadow: '0 4px 20px rgba(124, 58, 237, 0.4)' }}
+            >
+              <span className="block leading-none">+</span>
+            </button>
+
+            {/* New Event Modal */}
+            {showNewEvent && (
+              <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                <div className="bg-white/95 rounded-2xl w-full max-w-sm p-5 backdrop-blur-md max-h-[90vh] overflow-y-auto">
+                  <h3 className="text-base font-semibold mb-3">Create New Event</h3>
+                  
+                  <div className="space-y-2.5">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Event Title</label>
+                      <input
+                        type="text"
+                        placeholder="E.g., Meditation Group Session"
+                        value={newEventTitle}
+                        onChange={(e) => setNewEventTitle(e.target.value)}
+                        className="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-primary-purple"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Address</label>
+                      <textarea
+                        placeholder="Full address with landmarks"
+                        value={newEventAddress}
+                        onChange={(e) => setNewEventAddress(e.target.value)}
+                        rows={2}
+                        className="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-primary-purple resize-none"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">City</label>
+                      <div className="px-2.5 py-2 text-sm bg-gray-100 border border-gray-300 rounded-lg text-gray-700">
+                        {selectedCity}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+                      <input
+                        type="date"
+                        value={newEventDate}
+                        onChange={(e) => setNewEventDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-primary-purple"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Time</label>
+                      <input
+                        type="time"
+                        value={newEventTime}
+                        onChange={(e) => setNewEventTime(e.target.value)}
+                        className="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-primary-purple"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex space-x-3 mt-4">
+                    <button
+                      onClick={() => {
+                        setShowNewEvent(false)
+                        setNewEventTitle('')
+                        setNewEventAddress('')
+                        setNewEventDate('')
+                        setNewEventTime('')
+                      }}
+                      className="flex-1 py-2 px-4 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCreateEvent}
+                      className="flex-1 py-2 px-4 bg-primary-purple text-white rounded-lg hover:bg-primary-purple/90 transition-colors"
+                    >
+                      Create Event
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
