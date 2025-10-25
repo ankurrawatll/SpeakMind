@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm install --include=dev && tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build",
+    "build:prod": "npm ci && npm run build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "vite preview --port $PORT"
   },
   "dependencies": {
     "firebase": "^12.2.1",
