@@ -99,8 +99,19 @@ export default function MindCoachScreen({ onNavigate }: MindCoachScreenProps) {
       
 
       {/* Header */}
-      <div className="text-center py-4 pb-6 flex-shrink-0">
-        <h1 className="text-black text-lg font-semibold">Mind Coach</h1>
+      <div className="px-6 pt-12 pb-6">
+        <div className="flex items-center justify-between">
+          <div className="w-10"></div>
+          <h1 className="text-lg font-semibold text-gray-900">Mind Coach</h1>
+          <button
+            onClick={() => onNavigate('profile')}
+            className="p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
+          >
+            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Main Video Area - Heygen Avatar will appear here */}

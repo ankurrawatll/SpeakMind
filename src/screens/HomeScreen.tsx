@@ -81,15 +81,25 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
           </div>
           
           {/* Streak Flame Icon */}
-          <button
-            onClick={() => setIsStreakExpanded(!isStreakExpanded)}
-            className="relative flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-          >
-            <span className="text-2xl">🔥</span>
-            <div className="absolute -bottom-1 -right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
-              <span className="text-xs font-bold text-orange-600">{user.streak}</span>
-            </div>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onNavigate('profile')}
+              className="p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setIsStreakExpanded(!isStreakExpanded)}
+              className="relative flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              <span className="text-2xl">🔥</span>
+              <div className="absolute -bottom-1 -right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
+                <span className="text-xs font-bold text-orange-600">{user.streak}</span>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 

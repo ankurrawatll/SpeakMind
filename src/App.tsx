@@ -17,6 +17,7 @@ import MindCoachScreen from './screens/MindCoachScreen'
 import VedicCalmScreen from './screens/VedicCalmScreen'
 import WisdomGitaScreen from './screens/WisdomGitaScreen'
 import ConversationScreen from './screens/ConversationScreen'
+import EEGBrainHealthScreen from './screens/EEGBrainHealthScreen'
 import BottomNavigation from './components/BottomNavigation'
 // Exercise components
 import QuickCalm from './components/exercises/QuickCalm'
@@ -29,6 +30,7 @@ export type Screen =
   | 'auth'
   | 'userOnboarding'
   | 'home'
+  | 'eegBrainHealth'
   | 'meditation'
   | 'journal'
   | 'emotionalRelease'
@@ -135,6 +137,8 @@ const AppContent = () => {
         return <UserOnboardingScreen onComplete={handleUserOnboardingComplete} />
       case 'home':
         return <HomeScreen onNavigate={navigateToScreen} user={user} />
+      case 'eegBrainHealth':
+        return <EEGBrainHealthScreen onNavigate={navigateToScreen} />
       case 'meditation':
         return <MeditationScreen onNavigate={navigateToScreen} />
       case 'journal':

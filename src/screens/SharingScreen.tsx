@@ -493,7 +493,14 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
           <h1 className="text-lg font-semibold text-gray-900">Sharing</h1>
           <p className="text-sm text-gray-500">Connect with the community</p>
         </div>
-        <div className="w-10"></div>
+        <button
+          onClick={() => onNavigate('profile')}
+          className="p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
+        >
+          <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </button>
       </div>
 
       {/* Scrollable Content Container */}
