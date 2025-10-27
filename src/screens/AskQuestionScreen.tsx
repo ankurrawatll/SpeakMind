@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { Screen } from '../App'
 import { callGeminiAPI } from '../utils/geminiAPI'
+import { recommendVideos } from '../utils/youtubeAI'
+import type { VideoSuggestion } from '../utils/youtubeAI'
 import { BsEmojiSmile } from 'react-icons/bs'
 import { CiCamera, CiImageOn } from 'react-icons/ci'
 import { FaMicrophone } from 'react-icons/fa6'
@@ -15,6 +17,8 @@ export default function AskQuestionScreen({ onNavigate }: AskQuestionScreenProps
   const [question, setQuestion] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [aiResponse, setAiResponse] = useState<string | null>(null)
+  const [videoSuggestions, setVideoSuggestions] = useState<VideoSuggestion[] | null>(null)
+  const [convoHistory, setConvoHistory] = useState<Array<{q: string; a: string}>>([])
   const [isRecording, setIsRecording] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState('en')
@@ -68,6 +72,17 @@ export default function AskQuestionScreen({ onNavigate }: AskQuestionScreenProps
     if (!q) return
     setIsLoading(true)
     setAiResponse(null)
+    setVideoSuggestions(null)
+    // Determine if this question requests video recommendations so we can call the recommender
+    const lowerQ = q.toLowerCase()
+    const videoTriggers = [
+      'recommend', 'recommendation', 'recommend videos', 'recommend a video', 'recommend some videos',
+      'show videos', 'show me', 'youtube', 'video', 'videos', 'watch', 'play', 'tutorial', 'tutorials',
+      'class', 'classes', 'session', 'sessions', 'practice', 'guided', 'guided practice', 'flow', 'vinyasa',
+      'meditation video', 'find', 'search', 'look up', 'suggest'
+    ]
+    const timePattern = /\b\d+\s*(m|min|mins|minute|minutes|h|hr|hrs|hour|hours)\b/
+    const wantsVideos = videoTriggers.some(t => lowerQ.includes(t)) || timePattern.test(lowerQ)
 
     try {
       const languagePrompt = selectedLanguage !== 'en' 
@@ -77,8 +92,37 @@ export default function AskQuestionScreen({ onNavigate }: AskQuestionScreenProps
       if (res.success && res.text) {
         setAiResponse(res.text)
         setQuestion('')
+        // push to conversation history for richer context and build next context immediately
+        const nextConvo = [...convoHistory, { q, a: res.text as string }]
+        setConvoHistory(nextConvo.slice(-8))
+
+        if (wantsVideos) {
+          try {
+            // build a conversation context from recent history (q/a pairs)
+            const context = nextConvo.map(c => `User: ${c.q}\nBot: ${c.a}`).join('\n')
+            const vids = await recommendVideos(q, context, 4)
+            setVideoSuggestions(vids)
+          } catch (err: any) {
+            // eslint-disable-next-line no-console
+            console.error('recommendVideos error', err)
+            // show no videos but keep AI response
+            setVideoSuggestions([])
+          }
+        }
       } else {
         setAiResponse(res.error || 'Unable to get response. Please try again.')
+        // Even if the AI text failed, if user asked for videos try to fetch suggestions
+        if (wantsVideos) {
+          try {
+            const context = convoHistory.map(c => `User: ${c.q}\nBot: ${c.a}`).join('\n')
+            const vids = await recommendVideos(q, context, 4)
+            setVideoSuggestions(vids)
+          } catch (err: any) {
+            // eslint-disable-next-line no-console
+            console.error('recommendVideos error (fallback)', err)
+            setVideoSuggestions([])
+          }
+        }
       }
     } catch (err) {
       setAiResponse('I\'m having trouble connecting to the AI right now. Please try again later.')
@@ -93,11 +137,10 @@ export default function AskQuestionScreen({ onNavigate }: AskQuestionScreenProps
       speechSynthesis.cancel()
       setIsSpeaking(true)
 
-      const utterance = new SpeechSynthesisUtterance(text)
-      const selectedLang = languages.find(l => l.code === selectedLanguage)
+  const utterance = new SpeechSynthesisUtterance(text)
       
-      // Set language for speech synthesis
-      utterance.lang = selectedLanguage === 'zh' ? 'zh-CN' : 
+  // Set language for speech synthesis
+  utterance.lang = selectedLanguage === 'zh' ? 'zh-CN' : 
                       selectedLanguage === 'ar' ? 'ar-SA' :
                       selectedLanguage === 'hi' ? 'hi-IN' :
                       selectedLanguage === 'bn' ? 'bn-IN' :
@@ -269,6 +312,26 @@ export default function AskQuestionScreen({ onNavigate }: AskQuestionScreenProps
               </button>
             </div>
             <div className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{aiResponse}</div>
+            {/* Video suggestions (if any) */}
+            {videoSuggestions && (
+              <div className="mt-4">
+                {videoSuggestions.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-2">
+                    {videoSuggestions.map(v => (
+                      <a key={v.videoId} href={v.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-2 bg-white rounded-lg border border-gray-100 hover:shadow">
+                        <img src={v.thumbnails?.default?.url || v.thumbnails?.medium?.url || ''} alt={v.title} className="w-24 h-14 object-cover rounded" />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-gray-900">{v.title}</div>
+                          <div className="text-xs text-gray-500">{v.channelTitle}</div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">No video suggestions found.</div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -282,6 +345,25 @@ export default function AskQuestionScreen({ onNavigate }: AskQuestionScreenProps
             <span className="text-xs text-gray-500">
               ({languages.find(l => l.code === selectedLanguage)?.flag} {languages.find(l => l.code === selectedLanguage)?.name})
             </span>
+          </div>
+
+          {/* Example placeholder to surface video recommendation capability */}
+          <div className="mb-3">
+            <div className="text-xs text-gray-500 mb-2">Tip: You can ask the chatbot for video recommendations. Try:</div>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => setQuestion('Suggest me videos to deal with anxiety')}
+                className="text-xs px-3 py-1 bg-purple-50 text-purple-700 rounded-full border border-purple-100"
+              >
+                Suggest me videos to deal with anxiety
+              </button>
+              <button
+                onClick={() => setQuestion('Recommend a 20 minute mindfulness meditation for anxiety')}
+                className="text-xs px-3 py-1 bg-gray-50 text-gray-700 rounded-full border border-gray-100"
+              >
+                20 minute mindfulness meditation
+              </button>
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">

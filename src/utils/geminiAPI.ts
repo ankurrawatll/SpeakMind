@@ -3,11 +3,14 @@
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
-// Multiple endpoints to try in case one doesn't work - starting with the most reliable
+// Multiple endpoints to try in case one doesn't work - prefer v1 Gemini 2.5 models
 const GEMINI_ENDPOINTS = [
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent'
+  'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent',
+  'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent',
+  'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent',
+  // fallbacks to 2.0 family
+  'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-001:generateContent',
+  'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent'
 ]
 
 export interface GeminiResponse {
