@@ -3,11 +3,11 @@
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
-// Updated Gemini API endpoints with correct model names
+// Updated Gemini API endpoints with current working model names (2024)
 const GEMINI_ENDPOINTS = [
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent',
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent',
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent'
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent'
 ]
 
 export interface GeminiResponse {
@@ -52,6 +52,7 @@ Keep your response warm, encouraging, practical, and limited to 2-3 paragraphs. 
     const endpoint = GEMINI_ENDPOINTS[i]
     
     try {
+      console.log(`Trying endpoint ${i + 1}: ${endpoint}`)
       const response = await fetch(`${endpoint}?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: {
@@ -60,8 +61,11 @@ Keep your response warm, encouraging, practical, and limited to 2-3 paragraphs. 
         body: JSON.stringify(requestBody)
       })
 
+      console.log(`Response status: ${response.status}`)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('API Response:', data)
         
         if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
           return {
@@ -70,7 +74,8 @@ Keep your response warm, encouraging, practical, and limited to 2-3 paragraphs. 
           }
         }
       } else {
-        console.log(`Endpoint ${i + 1} failed with status: ${response.status}`)
+        const errorText = await response.text()
+        console.log(`Endpoint ${i + 1} failed with status: ${response.status}, error: ${errorText}`)
         
         // If this is the last endpoint, provide a fallback response
         if (i === GEMINI_ENDPOINTS.length - 1) {
@@ -129,14 +134,49 @@ const getFallbackResponse = (question: string): string => {
 }
 
 /**
- * Test if Gemini API key is working
+ * Test if Gemini API key is working with a simple request
  */
-export const testGeminiAPI = async (): Promise<boolean> => {
+export const testGeminiAPI = async (): Promise<{success: boolean, error?: string}> => {
   try {
-    const response = await callGeminiAPI("test")
-    return response.success
-  } catch {
-    return false
+    console.log('Testing Gemini API with key:', GEMINI_API_KEY?.substring(0, 10) + '...')
+    
+    const testEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
+    const testBody = {
+      contents: [{
+        parts: [{
+          text: "Hello, this is a test message."
+        }]
+      }]
+    }
+    
+    const response = await fetch(`${testEndpoint}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(testBody)
+    })
+    
+    console.log('Test response status:', response.status)
+    
+    if (response.ok) {
+      const data = await response.json()
+      console.log('Test API Response:', data)
+      return { success: true }
+    } else {
+      const errorText = await response.text()
+      console.log('Test API Error:', errorText)
+      return { 
+        success: false, 
+        error: `API test failed with status ${response.status}: ${errorText}` 
+      }
+    }
+  } catch (error) {
+    console.log('Test API Exception:', error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    }
   }
 }
 
