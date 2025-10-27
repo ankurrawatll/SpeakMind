@@ -3,9 +3,18 @@
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
-// Updated Gemini API endpoints with current working model names (2024)
+// Multiple Gemini API endpoints to try in case one doesn't work
+// Prioritizing newer models (2.5) with fallbacks to 2.0 and 1.5 families
 const GEMINI_ENDPOINTS = [
+  // Latest Gemini 2.5 models (v1)
+  'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent',
+  'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent',
+  'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent',
+  // Gemini 2.0 models (v1 and v1beta)
+  'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-001:generateContent',
+  'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent',
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent',
+  // Gemini 1.5 models (v1beta fallbacks)
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent'
 ]
