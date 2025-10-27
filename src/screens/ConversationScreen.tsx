@@ -42,7 +42,7 @@ export default function ConversationScreen({ onNavigate }: ConversationScreenPro
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col max-w-md mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 flex flex-col max-w-md mx-auto">
       {/* Header */}
       <div className="relative px-4 pt-12 pb-4 bg-white border-b border-gray-100">
         <div className="flex items-center justify-between">

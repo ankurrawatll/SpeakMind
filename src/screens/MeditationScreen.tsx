@@ -92,7 +92,7 @@ const MeditationScreen = ({ onNavigate }: MeditationScreenProps = {}) => {
   };
 
   return (
-    <div className="min-h-screen bg-white relative pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 relative pb-20">
       {/* Content */}
       <div className="relative">
         {/* Simple Header */}
