@@ -55,7 +55,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
     <div
       className="min-h-screen flex flex-col relative"
       style={{
-        background: 'linear-gradient(135deg, #9F6AFF 0%, #FF91E7 100%)'
+        background: 'linear-gradient(135deg, #D8B5FF 0%, #FFB5E8 50%, #B5E0FF 100%)'
       }}
     >
       {/* Top Section - Logo and SpeakMind */}

@@ -10,14 +10,20 @@
   html {
     font-family: 'Inter', system-ui, sans-serif;
     scroll-behavior: smooth;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
   }
   
   body {
-    @apply bg-light-bg text-light-text overflow-x-hidden;
+    @apply text-light-text overflow-x-hidden;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+    margin: 0;
+    padding: 0;
   }
   
   /* Prevent zoom on input focus on iOS */
@@ -28,7 +34,7 @@
 
 @layer components {
   .mobile-container {
-    @apply max-w-md mx-auto min-h-screen bg-light-bg relative;
+    @apply max-w-md mx-auto min-h-screen relative;
   }
   
   .btn-primary {

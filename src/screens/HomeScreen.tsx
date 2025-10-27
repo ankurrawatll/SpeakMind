@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Screen } from '../App'
 
 // Import mood images from public folder
@@ -5,7 +6,6 @@ import calmImg from '/Homescreen/Calm.gif'
 import relaxImg from '/Homescreen/Relax.gif'
 import focusImg from '/Homescreen/Focus.gif'
 import anxiousImg from '/Homescreen/Anxious.gif'
-import meditativeInsightsImg from '/Homescreen/Meditative Insights.png'
 
 interface HomeScreenProps {
   onNavigate: (screen: Screen) => void
@@ -19,7 +19,19 @@ interface HomeScreenProps {
   }
 }
 
+type MoodValue = 'calm' | 'relax' | 'focus' | 'anxious' | null
+
 export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
+  const [isStreakExpanded, setIsStreakExpanded] = useState(false)
+  const [selectedMood, setSelectedMood] = useState<MoodValue>(null)
+
+  const moodPrompts = {
+    calm: "You're feeling calm today 🌊",
+    relax: "You're feeling relaxed 😌",
+    focus: "You're feeling focused 🎯",
+    anxious: "You're feeling anxious 😰"
+  }
+
   const moods = [
     { emoji: calmImg, label: 'Calm', value: 'calm' },
     { emoji: relaxImg, label: 'Relax', value: 'relax' },
@@ -59,60 +71,118 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 pb-20">
-      {/* Header with Greeting */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 pb-20">
+      {/* Header with Greeting and Streak Flame */}
       <div className="px-6 pt-12 pb-6">
-        <div className="text-gray-900">
-          <h1 className="text-2xl font-semibold mb-2">Hi {user?.name || 'Guest'}</h1>
-          <p className="text-gray-700 text-base">How are you feeling today?</p>
+        <div className="flex items-start justify-between">
+          <div className="text-gray-900">
+            <h1 className="text-2xl font-semibold mb-2">Hi {user?.name || 'Guest'}</h1>
+            <p className="text-gray-700 text-base">How are you feeling today?</p>
+          </div>
+          
+          {/* Streak Flame Icon */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onNavigate('profile')}
+              className="p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setIsStreakExpanded(!isStreakExpanded)}
+              className="relative flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              <span className="text-2xl">🔥</span>
+              <div className="absolute -bottom-1 -right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
+                <span className="text-xs font-bold text-orange-600">{user.streak}</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Expandable Streak Section - Small Banner */}
+      <div 
+        className={`transition-all duration-300 ease-out overflow-hidden ${
+          isStreakExpanded ? 'max-h-40' : 'max-h-0'
+        }`}
+      >
+        <div className="px-6 pb-6">
+          <div className="bg-gradient-to-r from-orange-400 to-pink-500 rounded-2xl p-4 shadow-lg">
+            <div className="flex items-center justify-between text-white">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🔥</span>
+                <div>
+                  <h3 className="text-lg font-semibold">{user.streak} Day Streak</h3>
+                  <p className="text-white/90 text-sm">Miracle moment in 2 days!</p>
+                </div>
+              </div>
+              <button 
+                className="text-white/80 hover:text-white transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onNavigate('streaks')
+                }}
+              >
+                <span className="text-sm">View Details →</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="px-6">
-        {/* Mood Selector */}
-        <div className="mb-8 bg-white/40 backdrop-blur-md border border-white/30 rounded-2xl p-4 shadow">
-          <div className="flex justify-between items-center gap-4">
-            {moods.map((mood) => (
-              <button
-                key={mood.value}
-                className="flex flex-col items-center space-y-2 flex-1"
-              >
-                <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                  <img 
-                    src={mood.emoji} 
-                    alt={mood.label}
-                    className="w-12 h-12 object-contain"
-                  />
-                </div>
-                <span className="text-xs font-medium text-gray-700">{mood.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Meditative Insights Card */}
-        <div className="mb-8">
-          <div 
-            className="relative rounded-3xl overflow-hidden cursor-pointer border border-white/30 bg-white/30 backdrop-blur-md"
-            // clicking anywhere navigates to Ask Question, button also works
-            onClick={() => onNavigate('askQuestion')}
-          >
-            <img 
-              src={meditativeInsightsImg} 
-              alt="Meditative Insights"
-              className="w-full h-auto object-cover"
-            />
-            {/* subtle gradient for contrast */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"/>
-            {/* overlay container */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-full h-full flex items-center justify-center px-6">
-                <div className="relative w-full max-w-md">
-                  {/* keep pointer-events on button so click works */}
-                  
-                </div>
-              </div>
+        {/* Integrated Mood Selector & Banner */}
+        <div className="mb-8 bg-white/40 backdrop-blur-md border border-white/30 rounded-2xl shadow overflow-hidden">
+          {/* Mood Selector */}
+          <div className="p-4">
+            <div className="flex justify-between items-center gap-4">
+              {moods.map((mood) => (
+                <button
+                  key={mood.value}
+                  onClick={() => setSelectedMood(mood.value as MoodValue)}
+                  className={`flex flex-col items-center space-y-2 flex-1 transition-all ${
+                    selectedMood === mood.value ? 'scale-110' : selectedMood ? 'opacity-50 scale-95' : ''
+                  }`}
+                >
+                  <div className={`w-16 h-16 rounded-full overflow-hidden flex items-center justify-center ${
+                    selectedMood === mood.value ? 'ring-4 ring-purple-400' : 'bg-gray-100'
+                  }`}>
+                    <img 
+                      src={mood.emoji} 
+                      alt={mood.label}
+                      className="w-12 h-12 object-contain"
+                    />
+                  </div>
+                  <span className={`text-xs font-medium ${
+                    selectedMood === mood.value ? 'text-purple-600' : 'text-gray-700'
+                  }`}>{mood.label}</span>
+                </button>
+              ))}
             </div>
+          </div>
+
+          {/* Expandable Banner */}
+          <div 
+            className={`transition-all duration-300 ease-out overflow-hidden ${
+              selectedMood ? 'max-h-32' : 'max-h-0'
+            }`}
+          >
+            {selectedMood && (
+              <div 
+                className="bg-gradient-to-r from-purple-500 via-purple-400 to-pink-400 p-6 cursor-pointer hover:from-purple-600 hover:via-purple-500 hover:to-pink-500 transition-all"
+                onClick={() => onNavigate('askQuestion')}
+              >
+                <p className="text-white font-medium text-center mb-2">
+                  {moodPrompts[selectedMood]}
+                </p>
+                <p className="text-white/90 text-sm text-center font-medium">
+                  Tap to share your thoughts →
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -154,25 +224,6 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                 {/* No play button to avoid overlap */}
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* Streak Widget */}
-        <div className="bg-gradient-to-r from-orange-400 to-pink-400 rounded-2xl p-4 mb-6 border border-white/40 backdrop-blur-md">
-          <div className="flex items-center justify-between text-white">
-            <div>
-              <div className="flex items-center space-x-2 mb-1">
-                <span className="text-2xl">🔥</span>
-                <h3 className="text-lg font-semibold">Streak: {user.streak} day</h3>
-              </div>
-              <p className="text-white/90 text-sm">Miracle moment in 2 days!</p>
-            </div>
-            <button 
-              className="text-white/80 hover:text-white"
-              onClick={() => onNavigate('streaks')}
-            >
-              →
-            </button>
           </div>
         </div>
 

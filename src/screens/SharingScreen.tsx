@@ -396,7 +396,7 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
   // Chat interface
   if (selectedChat) {
     return (
-      <div className="min-h-screen bg-white relative pb-20 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 relative pb-20 flex flex-col">
         {/* Chat Header */}
         <div className="px-4 pt-12 pb-4 border-b border-gray-100">
           <div className="flex items-center space-x-4">
@@ -480,7 +480,7 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 relative">
       {/* Header */}
       <div className="flex items-center justify-between p-4">
         <button
@@ -493,7 +493,14 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
           <h1 className="text-lg font-semibold text-gray-900">Sharing</h1>
           <p className="text-sm text-gray-500">Connect with the community</p>
         </div>
-        <div className="w-10"></div>
+        <button
+          onClick={() => onNavigate('profile')}
+          className="p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
+        >
+          <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </button>
       </div>
 
       {/* Scrollable Content Container */}
@@ -700,14 +707,14 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
         {activeTab === 'events' && (
           <div>
             {/* City Selector */}
-            <div className="mb-4 bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
-              <label className="block text-white text-sm font-semibold mb-2">📍 Select City</label>
+            <div className="mb-4 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-4">
+              <label className="block text-gray-900 text-sm font-semibold mb-2">📍 Select City</label>
               <select
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
-                className="w-full px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white focus:outline-none focus:border-white/50 backdrop-blur"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
                 style={{ 
-                  backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%23ffffff\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3E%3C/svg%3E")',
+                  backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%23374151\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3E%3C/svg%3E")',
                   backgroundPosition: 'right 0.5rem center',
                   backgroundRepeat: 'no-repeat',
                   backgroundSize: '1.5em 1.5em',
@@ -716,7 +723,7 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
                 }}
               >
                 {INDIAN_CITIES.map((city) => (
-                  <option key={city} value={city} className="bg-gray-800 text-white">
+                  <option key={city} value={city} className="bg-white text-gray-900">
                     {city}
                   </option>
                 ))}
@@ -726,25 +733,25 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
             {/* Events List */}
             <div className="space-y-4 pb-20">
               {events.length === 0 ? (
-                <div className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-8 text-center text-white">
+                <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-8 text-center text-gray-900">
                   <div className="text-5xl mb-3">📅</div>
                   <h3 className="font-semibold mb-2">No Events Yet</h3>
-                  <p className="text-white/80 text-sm">Be the first to create an event in {selectedCity}!</p>
+                  <p className="text-gray-600 text-sm">Be the first to create an event in {selectedCity}!</p>
                 </div>
               ) : (
                 events
                   .sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime())
                   .map((event) => (
-                    <div key={event.id} className="bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl p-5 text-white">
+                    <div key={event.id} className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-5 text-gray-900">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-semibold text-lg">{event.title}</h3>
-                            <span className="px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">
+                            <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full">
                               {event.city}
                             </span>
                           </div>
-                          <div className="flex items-center text-white/80 text-sm mb-2">
+                          <div className="flex items-center text-gray-600 text-sm mb-2">
                             <span className="mr-2">👤</span>
                             <span>Organized by {event.creatorName}</span>
                           </div>
@@ -752,11 +759,11 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
                       </div>
                       
                       <div className="space-y-2 mb-4">
-                        <div className="flex items-start text-white/90 text-sm">
+                        <div className="flex items-start text-gray-700 text-sm">
                           <span className="mr-2">📍</span>
                           <span>{event.address}</span>
                         </div>
-                        <div className="flex items-center text-white/90 text-sm">
+                        <div className="flex items-center text-gray-700 text-sm">
                           <span className="mr-2">📅</span>
                           <span>{event.dateTime.toLocaleDateString('en-IN', { 
                             weekday: 'long', 
@@ -765,7 +772,7 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
                             day: 'numeric' 
                           })}</span>
                         </div>
-                        <div className="flex items-center text-white/90 text-sm">
+                        <div className="flex items-center text-gray-700 text-sm">
                           <span className="mr-2">🕐</span>
                           <span>{event.dateTime.toLocaleTimeString('en-IN', { 
                             hour: '2-digit', 
@@ -774,12 +781,12 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
                         </div>
                       </div>
                       
-                      <div className="flex items-center justify-between pt-3 border-t border-white/20">
-                        <span className="text-xs text-white/70">
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                        <span className="text-xs text-gray-500">
                           Posted {event.createdAt.toLocaleDateString()}
                         </span>
                         {currentUser && event.creatorId === currentUser.uid && (
-                          <span className="px-2 py-1 bg-white/20 text-white text-xs rounded-full">
+                          <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
                             Your Event
                           </span>
                         )}
@@ -790,9 +797,9 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
             </div>
 
             {/* Info Box */}
-            <div className="mt-6 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 text-white">
+            <div className="mt-6 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-4 text-gray-900">
               <h3 className="text-sm font-semibold mb-2">💡 About Events</h3>
-              <div className="space-y-2 text-xs text-white/80">
+              <div className="space-y-2 text-xs text-gray-600">
                 <p>• Connect with others in your city for real-life meetups</p>
                 <p>• Share mental wellness activities and group sessions</p>
                 <p>• Events automatically expire after the scheduled time</p>

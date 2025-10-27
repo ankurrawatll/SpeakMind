@@ -173,7 +173,7 @@ export default function EmotionalReleaseScreen({ onNavigate, user: _user }: Emot
 
   if (sessionState === 'selection') {
     return (
-      <div className="min-h-screen bg-light-bg pb-24">
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 pb-24">
         {/* Header */}
         <div className="gradient-bg px-6 pt-12 pb-6 rounded-b-5xl">
           <div className="flex items-center justify-between mb-4">
@@ -238,7 +238,7 @@ export default function EmotionalReleaseScreen({ onNavigate, user: _user }: Emot
 
   if (sessionState === 'completed') {
     return (
-      <div className="min-h-screen bg-light-bg pb-24">
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 pb-24">
         {/* Header */}
         <div className="gradient-bg px-6 pt-12 pb-6 rounded-b-5xl">
           <div className="flex items-center justify-between mb-4">
@@ -312,7 +312,7 @@ export default function EmotionalReleaseScreen({ onNavigate, user: _user }: Emot
 
   // Active or Paused Session
   return (
-    <div className="min-h-screen bg-light-bg pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 pb-24">
       {/* Header */}
       <div className="gradient-bg px-6 pt-12 pb-6 rounded-b-5xl">
         <div className="flex items-center justify-between mb-4">

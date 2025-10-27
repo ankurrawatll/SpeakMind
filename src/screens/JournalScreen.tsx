@@ -36,7 +36,7 @@ export default function JournalScreen({ onNavigate, user: _user }: JournalScreen
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 pb-20">
       {/* Header */}
       <div className="flex items-center justify-between p-4">
         <button

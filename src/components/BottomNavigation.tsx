@@ -3,6 +3,7 @@ import { AiOutlineHome } from 'react-icons/ai'
 import { PiFlowerLotusLight, PiHandsPrayingLight } from 'react-icons/pi'
 import { GoPerson } from 'react-icons/go'
 import { HiOutlineChatAlt2 } from 'react-icons/hi'
+import { FaBrain } from 'react-icons/fa'
 
 interface BottomNavigationProps {
   currentScreen: Screen
@@ -15,7 +16,7 @@ export default function BottomNavigation({ currentScreen, onNavigate }: BottomNa
     { id: 'meditation' as const, label: 'Meditation', Icon: PiFlowerLotusLight },
     { id: 'mindCoach' as const, label: 'Mind Coach', Icon: PiHandsPrayingLight },
     { id: 'sharing' as const, label: 'Sharing', Icon: HiOutlineChatAlt2 },
-    { id: 'profile' as const, label: 'Profile', Icon: GoPerson },
+    { id: 'eegBrainHealth' as const, label: 'Brain Health', Icon: FaBrain },
   ]
 
   return (
