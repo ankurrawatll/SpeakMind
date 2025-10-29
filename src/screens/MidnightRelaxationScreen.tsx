@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react'
-import { IoChevronBack } from 'react-icons/io5'
 import type { Screen } from '../App'
+import VideoPlaylist from '../components/VideoPlaylist'
 
 interface MidnightRelaxationScreenProps {
   onNavigate: (screen: Screen) => void
@@ -13,90 +12,20 @@ const LINKS: string[] = [
   'https://youtu.be/2K4T9HmEhWE?si=E-DjqxzRz-mcZV16',
 ]
 
-const getYouTubeId = (url: string) => {
-  const shorts = url.match(/shorts\/([a-zA-Z0-9_-]{6,})/)
-  if (shorts) return shorts[1]
-  const youtu = url.match(/youtu\.be\/([a-zA-Z0-9_-]{6,})/)
-  if (youtu) return youtu[1]
-  const watch = url.match(/[?&]v=([a-zA-Z0-9_-]{6,})/)
-  if (watch) return watch[1]
-  const seg = url.split('/').pop() || ''
-  return seg.replace(/\?.*$/, '')
-}
-
 export default function MidnightRelaxationScreen({ onNavigate }: MidnightRelaxationScreenProps) {
-  const videos = useMemo(() => LINKS.map(link => ({
-    id: getYouTubeId(link),
-    url: link,
-    isShort: /shorts\//.test(link),
-  })), [])
-
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const current = videos[currentIndex]
-  const embedUrl = `https://www.youtube.com/embed/${current.id}`
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 relative pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4">
-        <button
-          onClick={() => onNavigate('home')}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <IoChevronBack className="w-6 h-6 text-gray-700" />
-        </button>
-        <div className="text-center">
-          <h1 className="text-lg font-semibold text-gray-900">Midnight & Relaxation</h1>
-          <p className="text-sm text-gray-500">Calm yoga & Mental health insights</p>
-        </div>
-        <div className="w-10"></div>
-      </div>
-
-      {/* Main Video Player */}
-      <div className="px-4 mb-6">
-        <div className="bg-gray-900 rounded-2xl overflow-hidden shadow-sm relative">
-          <div className="aspect-video w-full">
-            <iframe
-              className="w-full h-full"
-              src={embedUrl}
-              title="Midnight & Relaxation"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          </div>
-         
-        </div>
-      </div>
-
-      {/* Video List */}
-      <div className="px-4">
-        <div className="space-y-3">
-          {videos.map((v, i) => (
-            <button
-              key={`${v.id}-${i}`}
-              onClick={() => setCurrentIndex(i)}
-              className={`flex items-center gap-3 p-4 rounded-2xl border transition-all text-left w-full ${
-                i === currentIndex
-                  ? 'bg-purple-50 border-purple-100'
-                  : 'bg-purple-50 border-purple-100 hover:bg-purple-100'
-              }`}
-            >
-              <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                <img
-                  src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
-                  alt="thumbnail"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-gray-900 truncate">Relax & Recharge</div>
-                <div className="text-sm text-gray-500 truncate">Video {i + 1}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+    <VideoPlaylist
+      title="Midnight & Relaxation"
+      subtitle="Calm yoga & mental health insights"
+      links={LINKS}
+      back={() => onNavigate('home')}
+      videoTitles={[
+        'Night Yoga Flow for Relaxation',
+        'Short: Breathing for Sleep',
+        'Guided Body Scan for Night',
+        'Soothing Music for Deep Rest',
+      ]}
+    />
   )
 }
 

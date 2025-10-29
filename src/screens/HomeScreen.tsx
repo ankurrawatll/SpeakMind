@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { IoPlay } from 'react-icons/io5'
 import type { Screen } from '../App'
 
 // Import mood images from public folder
@@ -59,7 +60,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
       title: 'Midnight Launderette',
       image: 'https://images.pexels.com/photos/3125171/pexels-photo-3125171.jpeg',
       category: 'Focus',
-      onClick: () => onNavigate('aiCoach')
+      onClick: () => onNavigate('midnightLaunderette')
     },
     {
       id: 'wisdom-gita',
@@ -186,42 +187,62 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
           </div>
         </div>
 
-        {/* AI Coach Sessions */}
-        <div className="mb-6 bg-white/40 backdrop-blur-md border border-white/30 rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Meditation & Relaxation</h3>
+        {/* AI Coach Sessions - 2x2 Grid with rectangles */}
+        <div className="mb-6">
+          <div className="px-1 flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-gray-900">Curated Sessions</h3>
             <button 
-              className="text-blue-600 text-sm font-medium flex items-center"
-              onClick={() => onNavigate('aiCoach')}
+              className="text-purple-600 text-sm font-medium flex items-center"
+              onClick={() => onNavigate('explore')}
             >
-              <span>Load More</span>
+              <span>Explore</span>
               <span className="ml-1">→</span>
             </button>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             {aiCoachSessions.map((session) => (
-              <div 
+              <div
                 key={session.id}
-                className="relative rounded-2xl overflow-hidden cursor-pointer group"
                 onClick={session.onClick}
+                className="relative rounded-2xl overflow-hidden h-28 flex items-end p-3 cursor-pointer shadow-lg group hover:shadow-xl transition-shadow"
               >
-                <img 
-                  src={session.image} 
-                  alt={session.title}
-                  className="w-full h-32 sm:h-36 object-cover"
-                />
-                {/* subtle gradient to ensure text contrast */}
-                <div className="absolute inset-0 bg-black/20"/>
-
-                {/* Title text at top-left */}
-                <div className="absolute inset-0 p-4 flex flex-col justify-start">
-                  <h4 className="text-white text-sm font-semibold leading-tight drop-shadow-md">
-                    {session.title}
-                  </h4>
+                {/* Background Image */}
+                <div className="absolute inset-0 z-0">
+                  <img
+                    src={session.image}
+                    alt={session.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
                 </div>
 
-                {/* No play button to avoid overlap */}
+                {/* Content */}
+                <div className="relative z-10 w-full">
+                  <div className="flex justify-between items-end">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-white text-sm font-semibold mb-1 drop-shadow truncate">{session.title}</h4>
+                      <div className="inline-flex items-center text-[10px] text-white/90 bg-white/15 backdrop-blur px-2 py-0.5 rounded-full border border-white/20">
+                        {session.category}
+                      </div>
+                    </div>
+                    {/* Play Button */}
+                    <div className="bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform ml-2 flex-shrink-0">
+                      <svg 
+                        width="12" 
+                        height="12" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        className="text-purple-800 ml-0.5"
+                      >
+                        <path 
+                          d="M8 5v14l11-7z" 
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

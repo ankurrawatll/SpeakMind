@@ -16,6 +16,8 @@ import SharingScreen from './screens/SharingScreen'
 import MindCoachScreen from './screens/MindCoachScreen'
 import VedicCalmScreen from './screens/VedicCalmScreen'
 import WisdomGitaScreen from './screens/WisdomGitaScreen'
+import MidnightLaunderetteScreen from './screens/MidnightLaunderetteScreen'
+import ExploreScreen from './screens/ExploreScreen'
 import ConversationScreen from './screens/ConversationScreen'
 import EEGBrainHealthScreen from './screens/EEGBrainHealthScreen'
 import BottomNavigation from './components/BottomNavigation'
@@ -47,20 +49,32 @@ export type Screen =
   | 'exercise-mind-body-sync'
   | 'exercise-reflection-journal'
   | 'midnightRelaxation'
+  | 'midnightLaunderette'
   | 'vedicCalm'
   | 'wisdomGita'
+  | 'explore'
 
 const AppContent = () => {
   const { currentUser } = useAuth()
   const [currentScreen, setCurrentScreen] = useState<Screen>('auth')
-  const [user] = useState({
-    name: 'User',
+  const [user, setUser] = useState({
+    name: 'Guest',
     streak: 1,
     level: 3,
     timemeditated: 45,
     meditations: 12,
     points: 850
   })
+
+  // Update user name when currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      const userName = currentUser.displayName || currentUser.email?.split('@')[0] || 'Guest'
+      setUser(prev => ({ ...prev, name: userName }))
+    } else {
+      setUser(prev => ({ ...prev, name: 'Guest' }))
+    }
+  }, [currentUser])
 
   // Exercise data for proper routing
   const exerciseData = {
@@ -155,6 +169,8 @@ const AppContent = () => {
         return <AICoachScreen onNavigate={navigateToScreen} />
       case 'midnightRelaxation':
         return <MidnightRelaxationScreen onNavigate={navigateToScreen} />
+      case 'midnightLaunderette':
+        return <MidnightLaunderetteScreen onNavigate={navigateToScreen} />
       case 'profile':
         return <ProfileScreen onNavigate={navigateToScreen} user={user} />
       case 'sharing':
@@ -182,6 +198,8 @@ const AppContent = () => {
         return <VedicCalmScreen onNavigate={navigateToScreen} />
       case 'wisdomGita':
         return <WisdomGitaScreen onNavigate={navigateToScreen} />
+      case 'explore':
+        return <ExploreScreen onNavigate={navigateToScreen} />
       default:
         return <HomeScreen onNavigate={navigateToScreen} user={user} />
     }

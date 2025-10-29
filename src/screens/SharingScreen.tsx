@@ -439,14 +439,14 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
                   </div>
                 )}
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
                     message.isOwn 
-                      ? 'bg-purple-500 text-white' 
-                      : 'bg-purple-50 text-gray-800'
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
+                      : 'bg-white text-gray-800 border border-gray-200'
                   }`}
                 >
                   <p className="text-sm">{message.message}</p>
-                  <p className={`text-xs mt-1 ${message.isOwn ? 'text-white/70' : 'text-gray-500'}`}>
+                  <p className={`text-xs mt-1 ${message.isOwn ? 'text-white/80' : 'text-gray-500'}`}>
                     {message.timestamp}
                   </p>
                 </div>
@@ -577,7 +577,7 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
                       {post.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                          className="px-2 py-1 text-xs rounded-full bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border border-purple-200"
                         >
                           #{tag}
                         </span>
@@ -589,7 +589,7 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
                   {post.replies.length > 0 && (
                     <div className="border-t border-gray-100 mt-4 pt-4 space-y-3">
                       {post.replies.map((reply) => (
-                        <div key={reply.id} className="bg-gray-50 p-3 rounded-xl ml-13">
+                        <div key={reply.id} className="bg-white border border-gray-100 p-3 rounded-xl ml-13 shadow-sm">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center space-x-2">
                               <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
