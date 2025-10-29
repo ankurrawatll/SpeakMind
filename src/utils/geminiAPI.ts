@@ -31,10 +31,10 @@ export interface GeminiResponse {
  * @returns Promise<GeminiResponse>
  */
 export const callGeminiAPI = async (question: string): Promise<GeminiResponse> => {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here' || GEMINI_API_KEY === 'your-gemini-api-key') {
     return {
       success: false,
-      error: 'Gemini API key not configured. Please add your real API key to the .env file. Get your key from: https://makersuite.google.com/app/apikey'
+      error: 'Gemini API key not configured. Please copy .env.example to .env and add your actual VITE_GEMINI_API_KEY. Get your key from: https://makersuite.google.com/app/apikey'
     }
   }
 

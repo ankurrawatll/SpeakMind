@@ -131,7 +131,7 @@ A comprehensive mobile-first meditation and mindfulness application built with R
 - **Firestore Database**: User data and meditation progress (optional)
 
 ### **Environment Variables:**
-Create a `.env.local` file in the root directory:
+Create a `.env` file in the root directory (copy from `.env.example`):
 ```env
 # Firebase Configuration
 VITE_FIREBASE_API_KEY=your-api-key
@@ -140,6 +140,10 @@ VITE_FIREBASE_PROJECT_ID=your-project-id
 VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
 VITE_FIREBASE_APP_ID=your-app-id
+VITE_FIREBASE_MEASUREMENT_ID=your-measurement-id
+
+# YouTube API Key (for video recommendations)
+VITE_YOUTUBE_API_KEY=your-youtube-api-key
 
 # Gemini AI API Configuration
 VITE_GEMINI_API_KEY=your-gemini-api-key
@@ -151,12 +155,20 @@ VITE_GEMINI_API_KEY=your-gemini-api-key
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Create a new project or select existing
 3. Go to Project Settings > General > Your apps
-4. Copy the config values to your `.env.local` file
+4. Copy the config values to your `.env` file
+
+#### **YouTube API Setup:**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Enable YouTube Data API v3
+4. Go to Credentials > Create Credentials > API Key
+5. Add the key to your `.env` file as `VITE_YOUTUBE_API_KEY`
+6. The app will use this for AI-powered video recommendations
 
 #### **Gemini AI Setup:**
 1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Create a new API key for Gemini Pro
-3. Add the key to your `.env.local` file as `VITE_GEMINI_API_KEY`
+3. Add the key to your `.env` file as `VITE_GEMINI_API_KEY`
 4. The AI coach feature will provide personalized meditation guidance
 
 ### **Firebase Console Setup:**
