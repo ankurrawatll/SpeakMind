@@ -3,6 +3,7 @@ import type { Screen } from '../App'
 import { callGeminiAPI } from '../utils/geminiAPI'
 import { recommendVideos } from '../utils/youtubeAI'
 import type { VideoSuggestion } from '../utils/youtubeAI'
+import { saveUserContext } from '../utils/userContext'
 import { BsEmojiSmile } from 'react-icons/bs'
 import { CiCamera, CiImageOn } from 'react-icons/ci'
 import { FaMicrophone } from 'react-icons/fa6'
@@ -92,6 +93,10 @@ export default function AskQuestionScreen({ onNavigate }: AskQuestionScreenProps
       if (res.success && res.text) {
         setAiResponse(res.text)
         setQuestion('')
+        
+        // Save user context for personalized recommendations
+        saveUserContext(q, res.text)
+        
         // push to conversation history for richer context and build next context immediately
         const nextConvo = [...convoHistory, { q, a: res.text as string }]
         setConvoHistory(nextConvo.slice(-8))
