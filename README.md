@@ -163,7 +163,88 @@ VITE_GEMINI_API_KEY=your-gemini-api-key
 1. Go to Authentication > Sign-in method
 2. Enable Email/Password provider
 3. Enable Google provider (add your domain)
-4. Add authorized domains for production
+4. Add authorized domains for production (see Vercel Deployment section below)
+
+## 🚀 Deploying to Vercel
+
+### **Prerequisites:**
+1. Install Vercel CLI globally:
+   ```bash
+   npm install -g vercel
+   ```
+
+### **Step 1: Initial Setup**
+1. Login to Vercel:
+   ```bash
+   vercel login
+   ```
+2. Follow the prompts to authenticate
+
+### **Step 2: Deploy**
+1. From the project root, run:
+   ```bash
+   vercel --prod --archive=tgz
+   ```
+2. Follow the prompts:
+   - **Set up and deploy?** Yes
+   - **Which scope?** Select your account
+   - **Link to existing project?** No (first time) or Yes (subsequent deploys)
+   - **Project name?** speak-mind (or your preferred name)
+   - **Directory?** ./ (default)
+
+### **Step 3: Add Environment Variables in Vercel**
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Click on your project (e.g., "speak-mind")
+3. Go to **Settings** → **Environment Variables**
+4. Add each variable from your `.env.local`:
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+   - `VITE_FIREBASE_APP_ID`
+   - `VITE_FIREBASE_MEASUREMENT_ID`
+   - `VITE_GEMINI_API_KEY`
+
+   For each variable:
+   - **Key**: Variable name (e.g., `VITE_FIREBASE_API_KEY`)
+   - **Value**: The actual value from your `.env.local`
+   - **Environment**: Check all three boxes (Production, Preview, Development)
+   - Click **Save**
+
+5. After adding all variables, **redeploy** for changes to take effect
+
+### **Step 4: Configure Firebase for Vercel Domain**
+⚠️ **IMPORTANT:** You must authorize your Vercel domain in Firebase or you'll get authentication errors!
+
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Select your project
+3. Click **Authentication** in the left sidebar
+4. Click the **Settings** tab (⚙️ gear icon)
+5. Scroll to **Authorized domains**
+6. Click **Add domain**
+7. Add your Vercel deployment URL (e.g., `speak-mind-xxxxx.vercel.app`)
+8. Also add the wildcard for all preview deployments: `*.vercel.app`
+9. Click **Add**
+
+### **Step 5: Verify Deployment**
+1. Visit your deployment URL (shown after `vercel` command completes)
+2. Test the authentication flow
+3. Navigate to **Sharing → Events** to test real event scraping
+
+### **Common Issues:**
+
+**"Firebase: Error (auth/unauthorized-domain)"**
+- Solution: Add your Vercel domain to Firebase authorized domains (see Step 4)
+
+**Blank page on Vercel:**
+- Ensure environment variables are added in Vercel dashboard
+- Check browser console for errors
+- Redeploy after adding environment variables
+
+**Events not showing:**
+- Events scraping only works in production (Vercel), not localhost
+- Check Vercel logs: `vercel logs --follow`
 
 ## 📱 App Flow & Navigation
 
@@ -204,9 +285,17 @@ src/
 │   ├── MindCoachScreen.tsx     # Video call UI
 │   └── ConversationScreen.tsx  # AI chat interface
 ├── hooks/                      # Custom React hooks
+├── utils/
+│   ├── geminiAPI.ts           # Gemini AI integration
+│   ├── youtubeAI.ts           # YouTube video recommendations
+│   ├── geolocation.ts         # Location & distance utilities
+│   └── eventsAPI.ts           # Events scraping API client
 ├── App.tsx                     # Main app component
 ├── main.tsx                    # Entry point
 └── index.css                   # Global styles + Tailwind
+
+api/
+└── events.ts                   # Vercel serverless function for event scraping
 ```
 
 ## 🎯 Key Features Implementation
@@ -229,6 +318,35 @@ src/
 - User progress tracking
 - Screen navigation state
 - Timer and session state
+
+### **Real Events Feature (NEW!):**
+The Events tab now shows **real wellness events** near the user:
+
+#### **Features:**
+- 📍 **Automatic Geolocation**: Detects user's location (or uses Mumbai for testing)
+- 🌐 **Real Event Scraping**: Scrapes wellness events from AllEvents.in and District.in
+- 📏 **Distance Calculation**: Shows distance from user to event venues
+- ⏰ **Hourly Caching**: Caches events for 1 hour to reduce API calls
+- 🎯 **Smart Filtering**: Only shows meditation, yoga, mental health, and wellness events
+
+#### **Implementation:**
+- **Frontend**: Geolocation API + React hooks
+- **Backend**: Vercel serverless function (`/api/events.ts`)
+- **Scraping**: Cheerio + Axios for HTML parsing
+- **Sources**: AllEvents.in, District.in
+
+#### **How It Works:**
+1. User opens Events tab → Location permission requested
+2. Location detected (or test location for Mumbai used)
+3. API calls scraper with city name + coordinates
+4. Events scraped from wellness categories
+5. Distances calculated and events sorted by proximity
+6. Results cached for 1 hour
+
+#### **Testing:**
+- **Development**: Shows test location (Mumbai) with info banner
+- **Production**: Full event scraping with real data
+- **Test Mode**: Set `USE_TEST_LOCATION = true` in SharingScreen.tsx (line 320)
 
 ## 🔮 Future Enhancements
 

@@ -3,7 +3,9 @@ import { collection, addDoc, query, where, onSnapshot, deleteDoc, doc, Timestamp
 import { db } from '../config/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import type { Screen } from '../App'
-import { IoChevronBack } from 'react-icons/io5';
+import { IoChevronBack } from 'react-icons/io5'
+import { getUserLocation, formatDistance, type UserLocation } from '../utils/geolocation'
+import { fetchWellnessEvents, type ScrapedEvent } from '../utils/eventsAPI'
 
 interface SharingScreenProps {
   onNavigate: (screen: Screen) => void
@@ -225,7 +227,8 @@ const MOCK_POSTS: ForumPost[] = [
 ]
 
 export default function SharingScreen({ onNavigate }: SharingScreenProps) {
-  const [activeTab, setActiveTab] = useState<'chat' | 'forum'>('forum')
+  const { currentUser } = useAuth()
+  const [activeTab, setActiveTab] = useState<'chat' | 'forum' | 'events'>('forum')
   const [selectedChat, setSelectedChat] = useState<ChatConversation | null>(null)
   const [showNewPost, setShowNewPost] = useState(false)
   const [newPostTitle, setNewPostTitle] = useState('')
@@ -240,6 +243,12 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
   const [newEventAddress, setNewEventAddress] = useState('')
   const [newEventDate, setNewEventDate] = useState('')
   const [newEventTime, setNewEventTime] = useState('')
+
+  // Real events from scraping
+  const [scrapedEvents, setScrapedEvents] = useState<ScrapedEvent[]>([])
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false)
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null)
+  const [locationError, setLocationError] = useState<string | null>(null)
 
   const [conversations] = useState<ChatConversation[]>(MOCK_CONVERSATIONS)
   const [forumPosts, setForumPosts] = useState<ForumPost[]>(MOCK_POSTS)
@@ -300,6 +309,78 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
     const interval = setInterval(checkAndDeleteExpiredEvents, 60000) // Check every minute
     return () => clearInterval(interval)
   }, [events])
+
+  // Get user location when Events tab is opened
+  useEffect(() => {
+    if (activeTab === 'events' && !userLocation) {
+      console.log('Requesting user location...')
+
+      // 🔧 TEST MODE: Override location to Mumbai for testing web scraper
+      // Set to false to use real user location
+      const USE_TEST_LOCATION = true;
+
+      if (USE_TEST_LOCATION) {
+        console.log('🧪 Using test location: Mumbai, India')
+        const testLocation = {
+          latitude: 19.0760,  // Mumbai coordinates
+          longitude: 72.8777,
+          city: 'Mumbai',
+          accuracy: 100
+        };
+        setUserLocation(testLocation);
+        setSelectedCity('Mumbai');
+        setLocationError(null);
+        return;
+      }
+
+      // Real location for production
+      getUserLocation()
+        .then((location) => {
+          console.log('User location obtained:', location)
+          setUserLocation(location)
+          setLocationError(null)
+
+          // Update city selector if we got a city name
+          if (location.city) {
+            setSelectedCity(location.city)
+          }
+        })
+        .catch((error) => {
+          console.error('Location error:', error)
+          setLocationError(error.message)
+        })
+    }
+  }, [activeTab, userLocation])
+
+  // Fetch scraped events when city changes or Events tab is opened
+  useEffect(() => {
+    if (activeTab === 'events') {
+      console.log('Fetching wellness events for:', selectedCity)
+      setIsLoadingEvents(true)
+
+      fetchWellnessEvents(
+        selectedCity,
+        userLocation?.latitude,
+        userLocation?.longitude
+      )
+        .then((response) => {
+          console.log('Fetched events:', response.count)
+          if (response.success) {
+            setScrapedEvents(response.events)
+          } else {
+            console.error('Failed to fetch events:', response.error)
+            setScrapedEvents([])
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching events:', error)
+          setScrapedEvents([])
+        })
+        .finally(() => {
+          setIsLoadingEvents(false)
+        })
+    }
+  }, [activeTab, selectedCity, userLocation])
 
   const handleCreateEvent = async () => {
     if (!currentUser) {
@@ -730,70 +811,162 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
               </select>
             </div>
 
-            {/* Events List */}
+            {/* Location Status */}
+            {locationError && (
+              <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
+                <p className="text-sm text-yellow-800">
+                  📍 {locationError}
+                </p>
+                <p className="text-xs text-yellow-600 mt-1">
+                  We'll show events for {selectedCity} instead.
+                </p>
+              </div>
+            )}
+
+            {userLocation && (
+              <div className="mb-4 bg-green-50 border border-green-200 rounded-2xl p-3">
+                <p className="text-sm text-green-800">
+                  📍 Your location detected: {userLocation.city || 'Near ' + selectedCity}
+                </p>
+              </div>
+            )}
+
+            {/* Development Mode Notice */}
+            {import.meta.env.DEV && !isLoadingEvents && scrapedEvents.length === 0 && (
+              <div className="mb-4 bg-blue-50 border border-blue-200 rounded-2xl p-4">
+                <p className="text-sm text-blue-800 font-medium mb-2">
+                  ℹ️ Development Mode
+                </p>
+                <p className="text-xs text-blue-600">
+                  Real event scraping works only in production. Deploy to Vercel to see wellness events from BookMyShow & District.in.
+                </p>
+              </div>
+            )}
+
+            {/* Loading State */}
+            {isLoadingEvents && (
+              <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-8 text-center">
+                <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                <p className="text-gray-600 text-sm">Finding wellness events in {selectedCity}...</p>
+              </div>
+            )}
+
+            {/* Scraped Events Section */}
+            {!isLoadingEvents && scrapedEvents.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3 px-1">
+                  🌟 Wellness Events Nearby
+                </h3>
+                <div className="space-y-3">
+                  {scrapedEvents.map((event, index) => (
+                    <a
+                      key={`scraped-${index}`}
+                      href={event.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-2xl p-4 hover:shadow-md transition-all"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-semibold text-gray-900 flex-1 pr-2">{event.title}</h4>
+                        <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full whitespace-nowrap">
+                          {event.source}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1.5 text-sm">
+                        <div className="flex items-start text-gray-700">
+                          <span className="mr-2">📍</span>
+                          <span className="flex-1">{event.venue}</span>
+                        </div>
+
+                        {event.distance && (
+                          <div className="flex items-center text-purple-600 font-medium">
+                            <span className="mr-2">🚶</span>
+                            <span>{formatDistance(event.distance)}</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-2">
+                          <span className="text-xs text-gray-500">{event.date}</span>
+                          <span className="text-xs text-purple-600 font-medium">View Details →</span>
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* User-Created Events Section */}
             <div className="space-y-4 pb-20">
-              {events.length === 0 ? (
+              {events.length > 0 && (
+                <h3 className="text-sm font-semibold text-gray-900 mb-3 px-1">
+                  👥 Community Events
+                </h3>
+              )}
+
+              {events.length === 0 && scrapedEvents.length === 0 && !isLoadingEvents && (
                 <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-8 text-center text-gray-900">
                   <div className="text-5xl mb-3">📅</div>
                   <h3 className="font-semibold mb-2">No Events Yet</h3>
                   <p className="text-gray-600 text-sm">Be the first to create an event in {selectedCity}!</p>
                 </div>
-              ) : (
-                events
-                  .sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime())
-                  .map((event) => (
-                    <div key={event.id} className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-5 text-gray-900">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-lg">{event.title}</h3>
-                            <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full">
-                              {event.city}
-                            </span>
-                          </div>
-                          <div className="flex items-center text-gray-600 text-sm mb-2">
-                            <span className="mr-2">👤</span>
-                            <span>Organized by {event.creatorName}</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-start text-gray-700 text-sm">
-                          <span className="mr-2">📍</span>
-                          <span>{event.address}</span>
-                        </div>
-                        <div className="flex items-center text-gray-700 text-sm">
-                          <span className="mr-2">📅</span>
-                          <span>{event.dateTime.toLocaleDateString('en-IN', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                          })}</span>
-                        </div>
-                        <div className="flex items-center text-gray-700 text-sm">
-                          <span className="mr-2">🕐</span>
-                          <span>{event.dateTime.toLocaleTimeString('en-IN', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                        <span className="text-xs text-gray-500">
-                          Posted {event.createdAt.toLocaleDateString()}
-                        </span>
-                        {currentUser && event.creatorId === currentUser.uid && (
-                          <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
-                            Your Event
+              )}
+
+              {events.length > 0 && events
+                .sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime())
+                .map((event) => (
+                  <div key={event.id} className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-5 text-gray-900">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-lg">{event.title}</h3>
+                          <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full">
+                            {event.city}
                           </span>
-                        )}
+                        </div>
+                        <div className="flex items-center text-gray-600 text-sm mb-2">
+                          <span className="mr-2">👤</span>
+                          <span>Organized by {event.creatorName}</span>
+                        </div>
                       </div>
                     </div>
-                  ))
-              )}
+
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-start text-gray-700 text-sm">
+                        <span className="mr-2">📍</span>
+                        <span>{event.address}</span>
+                      </div>
+                      <div className="flex items-center text-gray-700 text-sm">
+                        <span className="mr-2">📅</span>
+                        <span>{event.dateTime.toLocaleDateString('en-IN', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}</span>
+                      </div>
+                      <div className="flex items-center text-gray-700 text-sm">
+                        <span className="mr-2">🕐</span>
+                        <span>{event.dateTime.toLocaleTimeString('en-IN', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                      <span className="text-xs text-gray-500">
+                        Posted {event.createdAt.toLocaleDateString()}
+                      </span>
+                      {currentUser && event.creatorId === currentUser.uid && (
+                        <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                          Your Event
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
             </div>
 
             {/* Info Box */}
