@@ -1,19 +1,11 @@
-# Ignore everything
-except:
-!**/*
-
-# Except these files
-!.gitignore
-!package.json
-!package-lock.json
-!tsconfig.json
-!vite.config.ts
-!tailwind.config.js
-!postcss.config.js
-!eslint.config.js
-!vercel.json
-!vercel-build.js
-!.npmrc
-!src/**/*
-!public/**/*
-!index.html
+node_modules
+.git
+.env
+.env.local
+dist
+*.log
+.DS_Store
+.vscode
+.idea
+coverage
+.cache
