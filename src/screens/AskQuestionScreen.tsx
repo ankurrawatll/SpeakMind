@@ -3,10 +3,11 @@ import type { Screen } from '../App'
 import { callGeminiAPI } from '../utils/geminiAPI'
 import { recommendVideos } from '../utils/youtubeAI'
 import type { VideoSuggestion } from '../utils/youtubeAI'
+import { saveUserContext } from '../utils/userContext'
 import { BsEmojiSmile } from 'react-icons/bs'
 import { CiCamera, CiImageOn } from 'react-icons/ci'
 import { FaMicrophone } from 'react-icons/fa6'
-import { IoSendSharp, IoChevronBack, IoVolumeHigh, IoLanguage } from 'react-icons/io5'
+import { IoSendSharp, IoChevronBack, IoVolumeHigh, IoLanguage, IoPlay } from 'react-icons/io5'
 import { useEffect, useRef } from 'react'
 
 interface AskQuestionScreenProps {
@@ -92,6 +93,10 @@ export default function AskQuestionScreen({ onNavigate }: AskQuestionScreenProps
       if (res.success && res.text) {
         setAiResponse(res.text)
         setQuestion('')
+        
+        // Save user context for personalized recommendations
+        saveUserContext(q, res.text)
+        
         // push to conversation history for richer context and build next context immediately
         const nextConvo = [...convoHistory, { q, a: res.text as string }]
         setConvoHistory(nextConvo.slice(-8))
@@ -231,164 +236,195 @@ export default function AskQuestionScreen({ onNavigate }: AskQuestionScreenProps
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 pb-24">
       {/* Header */}
-      <div className="flex items-center justify-between p-4">
-        <button
-          onClick={() => onNavigate('home')}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <IoChevronBack className="w-6 h-6 text-gray-700" />
-        </button>
-        <div className="text-center">
-          <h1 className="text-lg font-semibold text-gray-900">Ask your Question</h1>
-          <p className="text-sm text-gray-500">Get AI-powered guidance</p>
-        </div>
-        <div className="relative">
+      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-white/30">
+        <div className="flex items-center justify-between p-4">
           <button
-            onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+            onClick={() => onNavigate('home')}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <IoLanguage className="w-6 h-6 text-gray-700" />
+            <IoChevronBack className="w-6 h-6 text-gray-700" />
           </button>
-          {showLanguageMenu && (
-            <div className="absolute right-0 top-12 bg-white border border-gray-200 rounded-2xl shadow-lg z-50 w-48 max-h-64 overflow-y-auto">
-              {languages.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => {
-                    setSelectedLanguage(lang.code)
-                    setShowLanguageMenu(false)
-                  }}
-                  className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 ${
-                    selectedLanguage === lang.code ? 'bg-purple-50 text-purple-700' : 'text-gray-700'
-                  }`}
-                >
-                  <span className="text-lg">{lang.flag}</span>
-                  <span className="text-sm font-medium">{lang.name}</span>
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="text-center">
+            <h1 className="text-lg font-semibold text-gray-900">Ask your Question</h1>
+            <p className="text-sm text-gray-500">AI-powered guidance</p>
+          </div>
+          <div className="relative">
+            <button
+              onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <IoLanguage className="w-6 h-6 text-gray-700" />
+            </button>
+            {showLanguageMenu && (
+              <div className="absolute right-0 top-12 bg-white border border-gray-200 rounded-2xl shadow-lg z-50 w-48 max-h-64 overflow-y-auto">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      setSelectedLanguage(lang.code)
+                      setShowLanguageMenu(false)
+                    }}
+                    className={`w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center space-x-3 ${
+                      selectedLanguage === lang.code ? 'bg-purple-50 text-purple-700' : 'text-gray-700'
+                    }`}
+                  >
+                    <span className="text-lg">{lang.flag}</span>
+                    <span className="text-sm font-medium">{lang.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="px-4 space-y-4">
-        {/* Quick Questions */}
-        {quickQuestions.map((questionObj, index) => (
-          <button
-            key={index}
-            onClick={() => handleQuickQuestion(questionObj)}
-            className="w-full bg-purple-50 rounded-2xl p-4 flex items-center justify-between hover:bg-purple-100 transition-colors text-left"
-          >
-            <span className="text-gray-800 text-sm font-medium flex-1">{questionObj.question}</span>
-            <span className="text-gray-500 text-lg ml-2">›</span>
-          </button>
-        ))}
-
-        {/* Load More Button */}
-        <div className="py-4">
-          <button className="w-full bg-white border border-gray-200 rounded-2xl py-3 text-purple-600 text-sm font-medium hover:bg-gray-50 transition-colors">
-            Load More Questions
-          </button>
-        </div>
+      <div className="space-y-6 pb-6">
+        {/* Quick Questions Section */}
+        {(!aiResponse || convoHistory.length === 0) && (
+          <div className="px-4 pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-semibold text-gray-900">Quick Questions</h2>
+              <span className="text-xs text-gray-500">{quickQuestions.length} questions</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {quickQuestions.map((questionObj, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleQuickQuestion(questionObj)}
+                  className="bg-white/80 backdrop-blur-sm rounded-xl p-3 h-auto min-h-[7rem] flex flex-col justify-between hover:bg-white hover:shadow-md transition-all text-left border border-gray-100"
+                >
+                  <span className="text-gray-800 text-sm font-medium line-clamp-4">{questionObj.question}</span>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xs text-gray-500">Quick</span>
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-purple-600 text-lg">›</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* AI Response Card */}
         {aiResponse && (
-          <div className="bg-purple-50 rounded-2xl p-4 border border-purple-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs">AI</span>
+          <div className="px-4">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-5 border border-purple-100 shadow-lg">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-md">
+                    <span className="text-white text-xs font-bold">AI</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-900 font-semibold text-sm block">AI Assistant</span>
+                    <span className="text-xs text-gray-500">
+                      {languages.find(l => l.code === selectedLanguage)?.flag} {languages.find(l => l.code === selectedLanguage)?.name}
+                    </span>
+                  </div>
                 </div>
-                <span className="text-gray-900 font-medium text-sm">AI Response</span>
+                <button
+                  onClick={() => speakResponse(aiResponse)}
+                  className={`p-2 rounded-full transition-all ${
+                    isSpeaking 
+                      ? 'bg-purple-100 text-purple-600' 
+                      : 'bg-gray-100 hover:bg-purple-100 text-gray-600 hover:text-purple-600'
+                  }`}
+                  disabled={isSpeaking}
+                >
+                  <IoVolumeHigh className="w-5 h-5" />
+                </button>
               </div>
-              <button
-                onClick={() => speakResponse(aiResponse)}
-                className="p-2 hover:bg-purple-100 rounded-full transition-colors"
-                disabled={isSpeaking}
-              >
-                <IoVolumeHigh className={`w-5 h-5 ${isSpeaking ? 'text-purple-600' : 'text-gray-600'}`} />
-              </button>
-            </div>
-            <div className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">{aiResponse}</div>
-            {/* Video suggestions (if any) */}
-            {videoSuggestions && (
-              <div className="mt-4">
-                {videoSuggestions.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-2">
+              <div className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap mb-4">
+                {aiResponse}
+              </div>
+              {/* Video suggestions */}
+              {videoSuggestions && videoSuggestions.length > 0 && (
+                <div className="mt-5 pt-4 border-t border-gray-100">
+                  <h3 className="text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wide">Recommended Videos</h3>
+                  <div className="grid grid-cols-1 gap-3">
                     {videoSuggestions.map(v => (
-                      <a key={v.videoId} href={v.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-2 bg-white rounded-lg border border-gray-100 hover:shadow">
-                        <img src={v.thumbnails?.default?.url || v.thumbnails?.medium?.url || ''} alt={v.title} className="w-24 h-14 object-cover rounded" />
-                        <div className="flex-1">
-                          <div className="text-sm font-medium text-gray-900">{v.title}</div>
+                      <a 
+                        key={v.videoId} 
+                        href={v.url} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:border-purple-300 hover:shadow-md transition-all group"
+                      >
+                        <div className="relative w-28 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                          <img 
+                            src={v.thumbnails?.default?.url || v.thumbnails?.medium?.url || ''} 
+                            alt={v.title} 
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <IoPlay className="text-white text-2xl" />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">{v.title}</div>
                           <div className="text-xs text-gray-500">{v.channelTitle}</div>
                         </div>
                       </a>
                     ))}
                   </div>
-                ) : (
-                  <div className="text-sm text-gray-500">No video suggestions found.</div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Ask Question Section */}
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-              <span className="text-purple-600 text-xs">💬</span>
-            </div>
-            <span className="text-gray-900 font-medium">Ask your question</span>
-            <span className="text-xs text-gray-500">
-              ({languages.find(l => l.code === selectedLanguage)?.flag} {languages.find(l => l.code === selectedLanguage)?.name})
-            </span>
-          </div>
-
-          {/* Example placeholder to surface video recommendation capability */}
-          <div className="mb-3">
-            <div className="text-xs text-gray-500 mb-2">Tip: You can ask the chatbot for video recommendations. Try:</div>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => setQuestion('Suggest me videos to deal with anxiety')}
-                className="text-xs px-3 py-1 bg-purple-50 text-purple-700 rounded-full border border-purple-100"
-              >
-                Suggest me videos to deal with anxiety
-              </button>
-              <button
-                onClick={() => setQuestion('Recommend a 20 minute mindfulness meditation for anxiety')}
-                className="text-xs px-3 py-1 bg-gray-50 text-gray-700 rounded-full border border-gray-100"
-              >
-                20 minute mindfulness meditation
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+        {/* Ask Question Section - Fixed at bottom */}
+        <div className="px-4">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-gray-200 shadow-lg">
+            {/* Tips */}
+            {!aiResponse && (
+              <div className="mb-4 pb-4 border-b border-gray-100">
+                <div className="text-xs text-gray-500 mb-2 font-medium">💡 Try asking:</div>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => setQuestion('Suggest me videos to deal with anxiety')}
+                    className="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full border border-purple-200 hover:bg-purple-100 transition-colors"
+                  >
+                    Videos for anxiety
+                  </button>
+                  <button
+                    onClick={() => setQuestion('Recommend a 20 minute mindfulness meditation')}
+                    className="text-xs px-3 py-1.5 bg-gray-50 text-gray-700 rounded-full border border-gray-200 hover:bg-gray-100 transition-colors"
+                  >
+                    20 min meditation
+                  </button>
+                </div>
+              </div>
+            )}
+            
             <textarea
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder={`Ask anything in ${languages.find(l => l.code === selectedLanguage)?.name || 'English'}...`}
-              className="w-full text-gray-700 placeholder-gray-400 bg-transparent border-none outline-none text-sm resize-none"
+              className="w-full text-gray-700 placeholder-gray-400 bg-transparent border-none outline-none text-sm resize-none min-h-[80px]"
               rows={3}
             />
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-              <div className="flex space-x-4 text-gray-400 items-center">
-                <button aria-label="emoji" className="hover:text-gray-600 transition-colors">
+              <div className="flex space-x-3 text-gray-400 items-center">
+                <button aria-label="emoji" className="hover:text-purple-600 transition-colors p-1.5 hover:bg-purple-50 rounded-lg">
                   <BsEmojiSmile className="w-5 h-5" />
                 </button>
-                <button aria-label="camera" className="hover:text-gray-600 transition-colors">
+                <button aria-label="camera" className="hover:text-purple-600 transition-colors p-1.5 hover:bg-purple-50 rounded-lg">
                   <CiCamera className="w-5 h-5" />
                 </button>
-                <button aria-label="image" className="hover:text-gray-600 transition-colors">
+                <button aria-label="image" className="hover:text-purple-600 transition-colors p-1.5 hover:bg-purple-50 rounded-lg">
                   <CiImageOn className="w-5 h-5" />
                 </button>
                 <button 
                   aria-label="microphone" 
                   onClick={toggleRecording} 
-                  className={`hover:text-gray-600 transition-colors ${isRecording ? 'text-purple-600' : ''}`}
+                  className={`transition-all p-1.5 rounded-lg ${
+                    isRecording 
+                      ? 'text-purple-600 bg-purple-100' 
+                      : 'hover:text-purple-600 hover:bg-purple-50'
+                  }`}
                 >
                   <FaMicrophone className="w-5 h-5" />
                 </button>
@@ -396,15 +432,15 @@ export default function AskQuestionScreen({ onNavigate }: AskQuestionScreenProps
               <button
                 onClick={handleSend}
                 disabled={isLoading || !question.trim()}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg ${
                   isLoading || !question.trim() 
                     ? 'bg-gray-300 cursor-not-allowed' 
-                    : 'bg-purple-500 hover:bg-purple-600'
+                    : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hover:scale-105'
                 }`}
                 aria-label="send"
               >
                 {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 ) : (
                   <IoSendSharp className="text-white w-5 h-5" />
                 )}

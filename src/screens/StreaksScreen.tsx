@@ -1,5 +1,6 @@
 import type { Screen } from '../App'
 import { IoChevronBack } from 'react-icons/io5'
+import { useEffect, useMemo, useState } from 'react'
 
 interface StreaksScreenProps {
   onNavigate: (screen: Screen) => void
@@ -14,13 +15,56 @@ interface StreaksScreenProps {
 }
 
 export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
-  // Mock calendar data
-  const currentDate = new Date()
+  // Local state from localStorage
+  const [selectedMonth, setSelectedMonth] = useState(() => new Date().getMonth())
+  const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear())
+  const [meditatedDates, setMeditatedDates] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem('speakmind_meditation_dates')
+      return raw ? JSON.parse(raw) : []
+    } catch {
+      return []
+    }
+  })
+  const [shields, setShields] = useState<number>(() => {
+    const raw = localStorage.getItem('speakmind_shields')
+    return raw ? Number(raw) || 0 : 0
+  })
+
+  const today = useMemo(() => new Date(), [])
+  const todayKey = useMemo(() => new Date().toISOString().slice(0, 10), []) // YYYY-MM-DD
+  const dateSet = useMemo(() => new Set<string>(meditatedDates), [meditatedDates])
+
+  const save = (dates: string[], shieldsVal: number) => {
+    localStorage.setItem('speakmind_meditation_dates', JSON.stringify(dates))
+    localStorage.setItem('speakmind_shields', String(shieldsVal))
+  }
+
+  const markTodayMeditated = () => {
+    if (dateSet.has(todayKey)) return
+    const updated = Array.from(new Set([...meditatedDates, todayKey])).sort()
+    setMeditatedDates(updated)
+    save(updated, shields)
+  }
+
+  const computeStreak = (): number => {
+    let streak = 0
+    const d = new Date()
+    while (true) {
+      const key = d.toISOString().slice(0, 10)
+      if (dateSet.has(key)) {
+        streak += 1
+        d.setDate(d.getDate() - 1)
+      } else {
+        break
+      }
+    }
+    return streak
+  }
+
+  const currentDate = new Date(selectedYear, selectedMonth, 1)
   const currentMonth = currentDate.getMonth()
   const currentYear = currentDate.getFullYear()
-  
-  // Days with meditation sessions (mock data) - highlight day 5 (today)
-  const meditationDays = [1, 3, 5, 8, 10, 12, 15, 18, 20, 22, 25, 28]
   
   const getDaysInMonth = (month: number, year: number) => {
     return new Date(year, month + 1, 0).getDate()
@@ -33,6 +77,10 @@ export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
   const daysInMonth = getDaysInMonth(currentMonth, currentYear)
   const firstDay = getFirstDayOfMonth(currentMonth, currentYear)
 
+  const monthLabel = new Date(currentYear, currentMonth, 1).toLocaleString(undefined, { month: 'long', year: 'numeric' })
+  const streak = computeStreak()
+  const totalDaysMeditated = meditatedDates.length
+
   const renderCalendar = () => {
     const days = []
     
@@ -43,18 +91,15 @@ export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
     
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const hasMeditation = meditationDays.includes(day)
-      const isToday = day === 5 // Set day 5 as today to match screenshot
+      const dateKey = new Date(currentYear, currentMonth, day).toISOString().slice(0, 10)
+      const hasMeditation = dateSet.has(dateKey)
+      const isToday = dateKey === todayKey
       
       days.push(
         <div
           key={day}
           className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium ${
-            isToday
-              ? 'bg-purple-500 text-white'
-              : hasMeditation
-              ? 'bg-gray-100 text-gray-700'
-              : 'text-gray-400'
+            isToday ? 'bg-purple-500 text-white' : hasMeditation ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'text-gray-400'
           }`}
         >
           {day}
@@ -76,7 +121,7 @@ export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
           <IoChevronBack className="w-6 h-6 text-gray-700" />
         </button>
         <div className="text-center">
-          <h1 className="text-lg font-semibold text-gray-900">1 Day Streak</h1>
+          <h1 className="text-lg font-semibold text-gray-900">{streak} Day Streak</h1>
           <p className="text-sm text-gray-500">Keep building your momentum</p>
         </div>
         <div className="w-10"></div>
@@ -107,7 +152,7 @@ export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
                 <span className="text-yellow-600 text-xl">📅</span>
               </div>
               <div className="text-sm text-gray-600 mb-1">Days Meditated</div>
-              <div className="text-3xl font-bold text-gray-900">2</div>
+              <div className="text-3xl font-bold text-gray-900">{totalDaysMeditated}</div>
             </div>
           </div>
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
@@ -116,7 +161,7 @@ export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
                 <span className="text-pink-600 text-xl">🛡️</span>
               </div>
               <div className="text-sm text-gray-600 mb-1">Shields Used</div>
-              <div className="text-3xl font-bold text-gray-900">1</div>
+              <div className="text-3xl font-bold text-gray-900">{shields}</div>
             </div>
           </div>
         </div>
@@ -124,13 +169,21 @@ export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
         {/* Calendar */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <button className="text-gray-400">
+            <button className="text-gray-400" onClick={() => {
+              const prev = new Date(currentYear, currentMonth - 1, 1)
+              setSelectedMonth(prev.getMonth())
+              setSelectedYear(prev.getFullYear())
+            }}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h3 className="font-medium text-gray-900">September 2025</h3>
-            <button className="text-gray-400">
+            <h3 className="font-medium text-gray-900">{monthLabel}</h3>
+            <button className="text-gray-400" onClick={() => {
+              const next = new Date(currentYear, currentMonth + 1, 1)
+              setSelectedMonth(next.getMonth())
+              setSelectedYear(next.getFullYear())
+            }}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -146,6 +199,36 @@ export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
           <div className="grid grid-cols-7 gap-1">
             {renderCalendar()}
           </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3">
+          <button
+            onClick={markTodayMeditated}
+            disabled={dateSet.has(todayKey)}
+            className={`flex-1 py-3 rounded-2xl font-medium text-sm ${dateSet.has(todayKey) ? 'bg-gray-300 text-white cursor-not-allowed' : 'bg-purple-500 text-white hover:bg-purple-600'}`}
+          >
+            {dateSet.has(todayKey) ? 'Today Logged' : 'Mark Today as Meditated'}
+          </button>
+          <button
+            onClick={() => {
+              const useShield = !dateSet.has(todayKey) && shields > 0
+              if (useShield) {
+                const newShields = shields - 1
+                setShields(newShields)
+                save(meditatedDates, newShields)
+                alert('Shield used to protect your streak today!')
+              } else {
+                const newShields = shields + 1
+                setShields(newShields)
+                save(meditatedDates, newShields)
+                alert('You earned a shield! Use it on a tough day to protect your streak.')
+              }
+            }}
+            className="px-4 py-3 bg-white border border-purple-200 text-purple-700 rounded-2xl font-medium text-sm"
+          >
+            {shields > 0 ? `Shields: ${shields}` : 'Get Shield'}
+          </button>
         </div>
       </div>
     </div>
