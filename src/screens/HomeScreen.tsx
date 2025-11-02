@@ -280,6 +280,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                     src={session.image}
                     alt={session.title}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
                 </div>
@@ -374,6 +375,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                     src={videoSuggestions[currentVideoIndex].thumbnails?.high?.url || videoSuggestions[currentVideoIndex].thumbnails?.medium?.url}
                     alt={videoSuggestions[currentVideoIndex].title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                   />
                   
                   {/* Gradient Overlay */}
@@ -426,6 +428,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                         src={video.thumbnails?.medium?.url || video.thumbnails?.default?.url}
                         alt={video.title}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                       {index === currentVideoIndex && (
                         <div className="absolute inset-0 border-2 border-purple-500 rounded-xl" />

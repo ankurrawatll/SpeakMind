@@ -72,4 +72,6 @@ export const ExerciseLayout = ({
   );
 };
 
+export default ExerciseLayout;
+
 // DailyProgressBar component removed - implement this separately if needed

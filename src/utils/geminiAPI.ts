@@ -1,23 +1,8 @@
 // Gemini AI API integration utility
 // This file handles all interactions with Google's Gemini AI API
+// API keys are protected via serverless function
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
-
-// Multiple Gemini API endpoints to try in case one doesn't work
-// Prioritizing newer models (2.5) with fallbacks to 2.0 and 1.5 families
-const GEMINI_ENDPOINTS = [
-  // Latest Gemini 2.5 models (v1)
-  'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent',
-  'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent',
-  'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent',
-  // Gemini 2.0 models (v1 and v1beta)
-  'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-001:generateContent',
-  'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent',
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent',
-  // Gemini 1.5 models (v1beta fallbacks)
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent'
-]
+import { USE_SERVERLESS } from '../config/apiConfig'
 
 export interface GeminiResponse {
   success: boolean
@@ -31,6 +16,43 @@ export interface GeminiResponse {
  * @returns Promise<GeminiResponse>
  */
 export const callGeminiAPI = async (question: string): Promise<GeminiResponse> => {
+  if (USE_SERVERLESS) {
+    // Call serverless function (API key is protected)
+    try {
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        return data
+      } else {
+        return {
+          success: false,
+          error: 'Failed to get AI response. Please try again.'
+        }
+      }
+    } catch (error) {
+      console.error('Error calling Gemini API:', error)
+      return {
+        success: true,
+        text: getFallbackResponse(question)
+      }
+    }
+  } else {
+    // Direct API call (for local development only - exposes API key)
+    return callGeminiAPIDirect(question)
+  }
+}
+
+// Direct API call (only for local development)
+const callGeminiAPIDirect = async (question: string): Promise<GeminiResponse> => {
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
+
   if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here' || GEMINI_API_KEY === 'your-gemini-api-key') {
     return {
       success: false,
@@ -38,13 +60,12 @@ export const callGeminiAPI = async (question: string): Promise<GeminiResponse> =
     }
   }
 
-  // Validate API key format
-  if (!GEMINI_API_KEY.startsWith('AIza')) {
-    return {
-      success: false,
-      error: 'Invalid Gemini API key format. Please check your API key in the .env file.'
-    }
-  }
+  const GEMINI_ENDPOINTS = [
+    'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent',
+    'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent',
+    'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+  ]
 
   const requestBody = {
     contents: [{
@@ -56,12 +77,10 @@ Keep your response warm, encouraging, practical, and limited to 2-3 paragraphs. 
     }]
   }
 
-  // Try each endpoint until one works
   for (let i = 0; i < GEMINI_ENDPOINTS.length; i++) {
     const endpoint = GEMINI_ENDPOINTS[i]
     
     try {
-      console.log(`Trying endpoint ${i + 1}: ${endpoint}`)
       const response = await fetch(`${endpoint}?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: {
@@ -70,11 +89,8 @@ Keep your response warm, encouraging, practical, and limited to 2-3 paragraphs. 
         body: JSON.stringify(requestBody)
       })
 
-      console.log(`Response status: ${response.status}`)
-      
       if (response.ok) {
         const data = await response.json()
-        console.log('API Response:', data)
         
         if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
           return {
@@ -82,23 +98,15 @@ Keep your response warm, encouraging, practical, and limited to 2-3 paragraphs. 
             text: data.candidates[0].content.parts[0].text
           }
         }
-      } else {
-        const errorText = await response.text()
-        console.log(`Endpoint ${i + 1} failed with status: ${response.status}, error: ${errorText}`)
-        
-        // If this is the last endpoint, provide a fallback response
-        if (i === GEMINI_ENDPOINTS.length - 1) {
-          // Return a helpful fallback response instead of an error
-          return {
-            success: true,
-            text: getFallbackResponse(question)
-          }
+      }
+      
+      if (i === GEMINI_ENDPOINTS.length - 1) {
+        return {
+          success: true,
+          text: getFallbackResponse(question)
         }
       }
     } catch (error) {
-      console.log(`Endpoint ${i + 1} failed with error:`, error)
-      
-      // If this is the last endpoint, provide a fallback response
       if (i === GEMINI_ENDPOINTS.length - 1) {
         return {
           success: true,
@@ -108,7 +116,6 @@ Keep your response warm, encouraging, practical, and limited to 2-3 paragraphs. 
     }
   }
 
-  // Final fallback
   return {
     success: true,
     text: getFallbackResponse(question)
@@ -146,6 +153,13 @@ const getFallbackResponse = (question: string): string => {
  * Test if Gemini API key is working with a simple request
  */
 export const testGeminiAPI = async (): Promise<{success: boolean, error?: string}> => {
+  // Testing is not available when using serverless functions
+  if (USE_SERVERLESS) {
+    return { success: true, error: 'API key testing not available in serverless mode' }
+  }
+
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
+  
   try {
     console.log('Testing Gemini API with key:', GEMINI_API_KEY?.substring(0, 10) + '...')
     

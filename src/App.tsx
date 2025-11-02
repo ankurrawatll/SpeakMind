@@ -1,32 +1,45 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import AuthScreen from './screens/AuthScreen'
-import UserOnboardingScreen from './screens/UserOnboardingScreen'
-import HomeScreen from './screens/HomeScreen'
-import MeditationScreen from './screens/MeditationScreen'
-import JournalScreen from './screens/JournalScreen'
-import EmotionalReleaseScreen from './screens/EmotionalReleaseScreen'
-import AskQuestionScreen from './screens/AskQuestionScreen'
-import StreaksScreen from './screens/StreaksScreen'
-import MeditationTimerScreen from './screens/MeditationTimerScreen'
-import AICoachScreen from './screens/AICoachScreen'
-import MidnightRelaxationScreen from './screens/MidnightRelaxationScreen'
-import ProfileScreen from './screens/ProfileScreen'
-import SharingScreen from './screens/SharingScreen'
-import MindCoachScreen from './screens/MindCoachScreen'
-import VedicCalmScreen from './screens/VedicCalmScreen'
-import WisdomGitaScreen from './screens/WisdomGitaScreen'
-import MidnightLaunderetteScreen from './screens/MidnightLaunderetteScreen'
-import ExploreScreen from './screens/ExploreScreen'
-import ConversationScreen from './screens/ConversationScreen'
-import EEGBrainHealthScreen from './screens/EEGBrainHealthScreen'
 import BottomNavigation from './components/BottomNavigation'
-// Exercise components
-import QuickCalm from './components/exercises/QuickCalm'
-import StretchAndFocus from './components/exercises/StretchAndFocus'
-import MindBodySync from './components/exercises/MindBodySync'
-import ReflectionJournal from './components/exercises/ReflectionJournal'
-import { ExerciseLayout } from './components/exercises/ExerciseLayout'
+
+// Lazy load all screens for better performance and code splitting
+const AuthScreen = lazy(() => import('./screens/AuthScreen'))
+const UserOnboardingScreen = lazy(() => import('./screens/UserOnboardingScreen'))
+const HomeScreen = lazy(() => import('./screens/HomeScreen'))
+const MeditationScreen = lazy(() => import('./screens/MeditationScreen'))
+const JournalScreen = lazy(() => import('./screens/JournalScreen'))
+const EmotionalReleaseScreen = lazy(() => import('./screens/EmotionalReleaseScreen'))
+const AskQuestionScreen = lazy(() => import('./screens/AskQuestionScreen'))
+const StreaksScreen = lazy(() => import('./screens/StreaksScreen'))
+const MeditationTimerScreen = lazy(() => import('./screens/MeditationTimerScreen'))
+const AICoachScreen = lazy(() => import('./screens/AICoachScreen'))
+const MidnightRelaxationScreen = lazy(() => import('./screens/MidnightRelaxationScreen'))
+const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
+const SharingScreen = lazy(() => import('./screens/SharingScreen'))
+const MindCoachScreen = lazy(() => import('./screens/MindCoachScreen'))
+const VedicCalmScreen = lazy(() => import('./screens/VedicCalmScreen'))
+const WisdomGitaScreen = lazy(() => import('./screens/WisdomGitaScreen'))
+const MidnightLaunderetteScreen = lazy(() => import('./screens/MidnightLaunderetteScreen'))
+const ExploreScreen = lazy(() => import('./screens/ExploreScreen'))
+const ConversationScreen = lazy(() => import('./screens/ConversationScreen'))
+const EEGBrainHealthScreen = lazy(() => import('./screens/EEGBrainHealthScreen'))
+
+// Lazy load exercise components
+const QuickCalm = lazy(() => import('./components/exercises/QuickCalm'))
+const StretchAndFocus = lazy(() => import('./components/exercises/StretchAndFocus'))
+const MindBodySync = lazy(() => import('./components/exercises/MindBodySync'))
+const ReflectionJournal = lazy(() => import('./components/exercises/ReflectionJournal'))
+const ExerciseLayout = lazy(() => import('./components/exercises/ExerciseLayout'))
+
+// Loading component for Suspense fallback
+const LoadingScreen = () => (
+  <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 flex items-center justify-center">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+      <p className="text-purple-600 font-medium">Loading...</p>
+    </div>
+  </div>
+)
 
 export type Screen = 
   | 'auth'
@@ -209,7 +222,9 @@ const AppContent = () => {
 
   return (
     <div className="mobile-container min-h-screen overflow-auto">
-      {renderScreen()}
+      <Suspense fallback={<LoadingScreen />}>
+        {renderScreen()}
+      </Suspense>
       {showBottomNav && (
         <BottomNavigation 
           currentScreen={currentScreen} 

@@ -146,6 +146,7 @@ export default function ExploreScreen({ onNavigate }: ExploreScreenProps) {
                   src={`https://i.ytimg.com/vi/${video.id}/maxresdefault.jpg`}
                   alt={video.title}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
               </div>
