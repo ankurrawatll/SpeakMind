@@ -33,8 +33,6 @@ const firebaseConfig = {
 })()
 
 // Initialize Firebase
-console.log("Current site:", window.location.origin);
-console.log("Firebase Auth Domain:", import.meta.env.VITE_FIREBASE_AUTH_DOMAIN);
 const app = initializeApp(firebaseConfig)
 
 // Initialize Firebase Authentication and get a reference to the service
