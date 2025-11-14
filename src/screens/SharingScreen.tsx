@@ -6,6 +6,8 @@ import type { Screen } from '../App'
 import { IoChevronBack } from 'react-icons/io5'
 import { getUserLocation, formatDistance, type UserLocation } from '../utils/geolocation'
 import { fetchWellnessEvents, type ScrapedEvent } from '../utils/eventsAPI'
+import { fetchAllPlaces, type Place, type PlacesAPIResponse } from '../utils/placesAPI'
+import { getLocalitiesForCity } from '../utils/localityData'
 
 interface SharingScreenProps {
   onNavigate: (screen: Screen) => void
@@ -250,6 +252,14 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null)
   const [locationError, setLocationError] = useState<string | null>(null)
 
+  // Locality and places data
+  const [selectedLocality, setSelectedLocality] = useState<string>('')
+  const [availableLocalities, setAvailableLocalities] = useState<string[]>([])
+  const [yogaCenters, setYogaCenters] = useState<Place[]>([])
+  const [religiousPlaces, setReligiousPlaces] = useState<Place[]>([])
+  const [meditationOrgs, setMeditationOrgs] = useState<Place[]>([])
+  const [isLoadingPlaces, setIsLoadingPlaces] = useState(false)
+
   const [conversations] = useState<ChatConversation[]>(MOCK_CONVERSATIONS)
   const [forumPosts, setForumPosts] = useState<ForumPost[]>(MOCK_POSTS)
 
@@ -381,6 +391,45 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
         })
     }
   }, [activeTab, selectedCity, userLocation])
+
+  // Update available localities when city changes
+  useEffect(() => {
+    const localities = getLocalitiesForCity(selectedCity)
+    setAvailableLocalities(localities)
+    // Set first locality as default
+    if (localities.length > 0) {
+      setSelectedLocality(localities[0])
+    }
+  }, [selectedCity])
+
+  // Fetch places when locality changes
+  useEffect(() => {
+    if (activeTab === 'events' && selectedLocality) {
+      console.log(`Fetching places for ${selectedCity}/${selectedLocality}`)
+      setIsLoadingPlaces(true)
+
+      fetchAllPlaces(selectedCity, selectedLocality, userLocation?.latitude, userLocation?.longitude)
+        .then((result) => {
+          console.log('Fetched places:', {
+            yoga: result.yoga.count,
+            religious: result.religious.count,
+            meditation: result.meditation.count,
+          })
+          setYogaCenters(result.yoga.success ? result.yoga.places : [])
+          setReligiousPlaces(result.religious.success ? result.religious.places : [])
+          setMeditationOrgs(result.meditation.success ? result.meditation.places : [])
+        })
+        .catch((error) => {
+          console.error('Error fetching places:', error)
+          setYogaCenters([])
+          setReligiousPlaces([])
+          setMeditationOrgs([])
+        })
+        .finally(() => {
+          setIsLoadingPlaces(false)
+        })
+    }
+  }, [activeTab, selectedLocality, selectedCity, userLocation])
 
   const handleCreateEvent = async () => {
     if (!currentUser) {
@@ -811,6 +860,32 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
               </select>
             </div>
 
+            {/* Locality Selector */}
+            {availableLocalities.length > 0 && (
+              <div className="mb-4 bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-4">
+                <label className="block text-gray-900 text-sm font-semibold mb-2">🏘️ Select Locality</label>
+                <select
+                  value={selectedLocality}
+                  onChange={(e) => setSelectedLocality(e.target.value)}
+                  className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+                  style={{
+                    backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%23374151\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3E%3C/svg%3E")',
+                    backgroundPosition: 'right 0.5rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em',
+                    paddingRight: '2.5rem',
+                    appearance: 'none'
+                  }}
+                >
+                  {availableLocalities.map((locality) => (
+                    <option key={locality} value={locality} className="bg-white text-gray-900">
+                      {locality}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {/* Location Status */}
             {locationError && (
               <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
@@ -892,6 +967,158 @@ export default function SharingScreen({ onNavigate }: SharingScreenProps) {
                         </div>
                       </div>
                     </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Loading Places State */}
+            {isLoadingPlaces && (
+              <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-2xl p-8 text-center mb-6">
+                <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                <p className="text-gray-600 text-sm">Finding wellness places in {selectedLocality}...</p>
+              </div>
+            )}
+
+            {/* Yoga & Meditation Centers Section */}
+            {!isLoadingPlaces && yogaCenters.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3 px-1">
+                  🧘 Yoga & Meditation Centers
+                </h3>
+                <div className="space-y-3">
+                  {yogaCenters.map((place, index) => (
+                    <div
+                      key={`yoga-${index}`}
+                      className="block bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl p-4"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-semibold text-gray-900 flex-1 pr-2">{place.name}</h4>
+                      </div>
+
+                      <div className="space-y-1.5 text-sm">
+                        <div className="flex items-start text-gray-700">
+                          <span className="mr-2">📍</span>
+                          <span className="flex-1">{place.address}</span>
+                        </div>
+
+                        {place.distance && (
+                          <div className="flex items-center text-blue-600 font-medium">
+                            <span className="mr-2">🚶</span>
+                            <span>{formatDistance(place.distance)}</span>
+                          </div>
+                        )}
+
+                        {place.website && (
+                          <div className="flex items-start pt-2">
+                            <a
+                              href={place.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-600 font-medium hover:underline"
+                            >
+                              Visit Website →
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Religious Places Section */}
+            {!isLoadingPlaces && religiousPlaces.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3 px-1">
+                  🕉️ Religious Places
+                </h3>
+                <div className="space-y-3">
+                  {religiousPlaces.map((place, index) => (
+                    <div
+                      key={`religious-${index}`}
+                      className="block bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-2xl p-4"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-semibold text-gray-900 flex-1 pr-2">{place.name}</h4>
+                      </div>
+
+                      <div className="space-y-1.5 text-sm">
+                        <div className="flex items-start text-gray-700">
+                          <span className="mr-2">📍</span>
+                          <span className="flex-1">{place.address}</span>
+                        </div>
+
+                        {place.distance && (
+                          <div className="flex items-center text-orange-600 font-medium">
+                            <span className="mr-2">🚶</span>
+                            <span>{formatDistance(place.distance)}</span>
+                          </div>
+                        )}
+
+                        {place.website && (
+                          <div className="flex items-start pt-2">
+                            <a
+                              href={place.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-orange-600 font-medium hover:underline"
+                            >
+                              Visit Website →
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Meditation Organizations Section */}
+            {!isLoadingPlaces && meditationOrgs.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3 px-1">
+                  ✨ Meditation Organizations
+                </h3>
+                <div className="space-y-3">
+                  {meditationOrgs.map((place, index) => (
+                    <div
+                      key={`meditation-${index}`}
+                      className="block bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-2xl p-4"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-semibold text-gray-900 flex-1 pr-2">{place.name}</h4>
+                      </div>
+
+                      <div className="space-y-1.5 text-sm">
+                        <div className="flex items-start text-gray-700">
+                          <span className="mr-2">📍</span>
+                          <span className="flex-1">{place.address}</span>
+                        </div>
+
+                        {place.distance && (
+                          <div className="flex items-center text-pink-600 font-medium">
+                            <span className="mr-2">🚶</span>
+                            <span>{formatDistance(place.distance)}</span>
+                          </div>
+                        )}
+
+                        {place.website && (
+                          <div className="flex items-start pt-2">
+                            <a
+                              href={place.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-pink-600 font-medium hover:underline"
+                            >
+                              Visit Website →
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
