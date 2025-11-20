@@ -1,0 +1,157 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function to validate timestamp
+    function isValidTimestamp(timestamp) {
+      return timestamp is timestamp;
+    }
+    
+    // Users Collection - User Profiles
+    match /users/{userId} {
+      // Users can read their own profile
+      allow read: if isOwner(userId);
+      
+      // Users can create their own profile (on signup)
+      allow create: if isOwner(userId)
+        && request.resource.data.uid == userId
+        && request.resource.data.email is string
+        && request.resource.data.displayName is string;
+      
+      // Users can update their own profile
+      allow update: if isOwner(userId)
+        && request.resource.data.uid == userId;
+      
+      // Users cannot delete their profile (use Firebase Auth for account deletion)
+      allow delete: if false;
+    }
+    
+    // User Stats Collection
+    match /userStats/{userId} {
+      // Users can read their own stats
+      allow read: if isOwner(userId);
+      
+      // Users can create their own stats
+      allow create: if isOwner(userId)
+        && request.resource.data.userId == userId
+        && request.resource.data.totalSessions is int
+        && request.resource.data.totalMinutes is int;
+      
+      // Users can update their own stats
+      allow update: if isOwner(userId)
+        && request.resource.data.userId == userId;
+      
+      // Users cannot delete their stats
+      allow delete: if false;
+    }
+    
+    // Meditation Sessions Collection
+    match /meditationSessions/{sessionId} {
+      // Users can read their own sessions
+      allow read: if isAuthenticated() 
+        && resource.data.userId == request.auth.uid;
+      
+      // Users can create their own sessions
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.duration is int
+        && request.resource.data.duration > 0
+        && request.resource.data.duration <= 120
+        && request.resource.data.type in ['guided', 'timer', 'breathing', 'exercise'];
+      
+      // Users can update their own sessions (e.g., add notes)
+      allow update: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+      
+      // Users can delete their own sessions
+      allow delete: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+    }
+    
+    // Journal Entries Collection
+    match /journalEntries/{entryId} {
+      // Users can read their own journal entries
+      allow read: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+      
+      // Users can create their own journal entries
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.content.size() <= 10000;
+      
+      // Users can update their own journal entries
+      allow update: if isAuthenticated()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid;
+      
+      // Users can delete their own journal entries
+      allow delete: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+    }
+    
+    // Events Collection Rules (existing)
+    match /events/{eventId} {
+      // Anyone can read events (even non-authenticated users)
+      allow read: if true;
+      
+      // Only authenticated users can create events
+      // Ensure the creatorId matches the authenticated user
+      allow create: if isAuthenticated()
+        && request.resource.data.creatorId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.address is string
+        && request.resource.data.city is string
+        && request.resource.data.dateTime is timestamp
+        && request.resource.data.createdAt is timestamp;
+      
+      // Only the creator can update their own events
+      allow update: if isAuthenticated()
+        && resource.data.creatorId == request.auth.uid
+        && request.resource.data.creatorId == request.auth.uid;
+      
+      // Only the creator can delete their own events
+      allow delete: if isAuthenticated()
+        && resource.data.creatorId == request.auth.uid;
+    }
+    
+    // User Context Collection (for AI conversation history)
+    match /userContext/{userId} {
+      // Users can read their own context
+      allow read: if isOwner(userId);
+      
+      // Users can create/update their own context
+      allow create, update: if isOwner(userId)
+        && request.resource.data.userId == userId;
+      
+      // Users can delete their own context
+      allow delete: if isOwner(userId);
+    }
+    
+    // Exercise Progress Collection
+    match /exerciseProgress/{userId} {
+      // Users can read their own progress
+      allow read: if isOwner(userId);
+      
+      // Users can create/update their own progress
+      allow create, update: if isOwner(userId)
+        && request.resource.data.userId == userId;
+      
+      // Users can delete their own progress
+      allow delete: if isOwner(userId);
+    }
+  }
+}
