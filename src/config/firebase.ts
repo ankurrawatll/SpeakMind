@@ -13,8 +13,8 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 }
 
-// Basic runtime validation for clearer local setup errors
-;(() => {
+// Basic runtime validation for clearer local setup errors (development only)
+if (import.meta.env.DEV) {
   const missing: string[] = []
   const entries = Object.entries(firebaseConfig) as Array<[string, string | undefined]>
   for (const [key, value] of entries) {
@@ -30,7 +30,7 @@ const firebaseConfig = {
     // eslint-disable-next-line no-console
     console.warn('[Firebase] apiKey looks invalid (does not start with AIza). Check VITE_FIREBASE_API_KEY')
   }
-})()
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)

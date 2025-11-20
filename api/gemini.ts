@@ -2,6 +2,22 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY
 
+interface GeminiResponse {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{
+        text?: string
+      }>
+    }
+  }>
+}
+
+interface ApiResponse {
+  success: boolean
+  text?: string
+  error?: string
+}
+
 // Multiple Gemini API endpoints to try in case one doesn't work
 const GEMINI_ENDPOINTS = [
   'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent',
@@ -58,37 +74,45 @@ Keep your response warm, encouraging, practical, and limited to 2-3 paragraphs. 
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json() as GeminiResponse
         
         if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-          return res.status(200).json({
+          const apiResponse: ApiResponse = {
             success: true,
             text: data.candidates[0].content.parts[0].text
-          })
+          }
+          return res.status(200).json(apiResponse)
         }
       }
       
       // If this is the last endpoint, return fallback
       if (i === GEMINI_ENDPOINTS.length - 1) {
-        return res.status(200).json({
+        const fallbackResponse: ApiResponse = {
           success: true,
           text: getFallbackResponse(question)
-        })
+        }
+        return res.status(200).json(fallbackResponse)
       }
     } catch (error) {
-      console.error(`Endpoint ${i + 1} failed:`, error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      console.error(`Endpoint ${i + 1} failed:`, errorMessage)
       
       // If this is the last endpoint, return fallback
       if (i === GEMINI_ENDPOINTS.length - 1) {
-        return res.status(200).json({
+        const fallbackResponse: ApiResponse = {
           success: true,
           text: getFallbackResponse(question)
-        })
+        }
+        return res.status(200).json(fallbackResponse)
       }
     }
   }
 
-  return res.status(500).json({ error: 'All endpoints failed' })
+  const errorResponse: ApiResponse = {
+    success: false,
+    error: 'All endpoints failed'
+  }
+  return res.status(500).json(errorResponse)
 }
 
 function getFallbackResponse(question: string): string {

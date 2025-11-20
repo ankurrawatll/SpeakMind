@@ -2,6 +2,23 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 const YOUTUBE_API_KEY = process.env.VITE_YOUTUBE_API_KEY
 
+interface YouTubeVideo {
+  videoId: string
+  title: string
+  channelTitle: string
+  thumbnails: {
+    default: { url: string; width: number; height: number }
+    medium: { url: string; width: number; height: number }
+    high: { url: string; width: number; height: number }
+  }
+  url: string
+}
+
+interface YouTubeApiResponse {
+  videos?: YouTubeVideo[]
+  error?: string
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -40,10 +57,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const data = await response.json()
 
     if (!data.items || data.items.length === 0) {
-      return res.status(200).json({ videos: [] })
+      const emptyResponse: YouTubeApiResponse = { videos: [] }
+      return res.status(200).json(emptyResponse)
     }
 
-    const videos = data.items.map((item: any) => ({
+    const videos: YouTubeVideo[] = data.items.map((item: any) => ({
       videoId: item.id.videoId,
       title: item.snippet.title,
       channelTitle: item.snippet.channelTitle,
@@ -55,9 +73,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       url: `https://www.youtube.com/watch?v=${item.id.videoId}`
     }))
 
-    return res.status(200).json({ videos })
+    const successResponse: YouTubeApiResponse = { videos }
+    return res.status(200).json(successResponse)
   } catch (error) {
-    console.error('Error fetching YouTube videos:', error)
-    return res.status(500).json({ error: 'Failed to fetch videos' })
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch videos'
+    console.error('Error fetching YouTube videos:', errorMessage)
+    const errorResponse: YouTubeApiResponse = { error: errorMessage }
+    return res.status(500).json(errorResponse)
   }
 }

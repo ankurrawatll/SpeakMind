@@ -1,8 +1,25 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 
 interface AuthScreenProps {
   onAuth: (wasSignup?: boolean, user?: any) => void
+}
+
+// Password strength validation
+const validatePasswordStrength = (password: string): { isValid: boolean; message: string } => {
+  if (password.length < 8) {
+    return { isValid: false, message: 'Password must be at least 8 characters' }
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { isValid: false, message: 'Password must contain at least one uppercase letter' }
+  }
+  if (!/[a-z]/.test(password)) {
+    return { isValid: false, message: 'Password must contain at least one lowercase letter' }
+  }
+  if (!/[0-9]/.test(password)) {
+    return { isValid: false, message: 'Password must contain at least one number' }
+  }
+  return { isValid: true, message: '' }
 }
 
 const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
@@ -12,24 +29,59 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
   const [displayName, setDisplayName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  
+  // Rate limiting: track failed attempts
+  const failedAttemptsRef = useRef(0)
+  const lastAttemptTimeRef = useRef(0)
 
   const { login, signup, loginWithGoogle } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setPasswordError('')
+
+    // Rate limiting check
+    const now = Date.now()
+    const timeSinceLastAttempt = now - lastAttemptTimeRef.current
+    
+    if (failedAttemptsRef.current >= 5 && timeSinceLastAttempt < 60000) {
+      setError('Too many failed attempts. Please wait 1 minute before trying again.')
+      return
+    }
+
+    // Reset failed attempts after 1 minute
+    if (timeSinceLastAttempt > 60000) {
+      failedAttemptsRef.current = 0
+    }
+
+    // Validate password strength for signup
+    if (!isLogin) {
+      const validation = validatePasswordStrength(password)
+      if (!validation.isValid) {
+        setPasswordError(validation.message)
+        return
+      }
+    }
+
     setLoading(true)
+    lastAttemptTimeRef.current = now
 
     try {
       if (isLogin) {
         const result = await login(email, password)
+        failedAttemptsRef.current = 0 // Reset on success
         onAuth(false, result?.user) // This was a login
       } else {
         const result = await signup(email, password, displayName)
+        failedAttemptsRef.current = 0 // Reset on success
         onAuth(true, result?.user) // This was a signup
       }
-    } catch (error: any) {
-      setError(error.message)
+    } catch (error: unknown) {
+      failedAttemptsRef.current++
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -41,11 +93,19 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
 
     try {
       const result = await loginWithGoogle()
-      // For Google login, we'll treat it as a signup if it's a new user
-      // In a real app, you'd check if this is the user's first time
-      onAuth(true, result?.user) // Assuming Google users go through onboarding
-    } catch (error: any) {
-      setError(error.message)
+      
+      // Check if this is a new user by checking the creation time
+      const isNewUser = result?.user?.metadata?.creationTime === result?.user?.metadata?.lastSignInTime
+      
+      // Check if user has completed onboarding
+      const hasCompletedOnboarding = result?.user ? 
+        localStorage.getItem(`speakmind_user_onboarding_${result.user.uid}`) : null
+      
+      // New users or users who haven't completed onboarding should go through it
+      onAuth(isNewUser || !hasCompletedOnboarding, result?.user)
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -124,6 +184,12 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
               </div>
             )}
 
+            {passwordError && (
+              <div className="bg-yellow-500/20 border border-yellow-400/50 rounded-xl p-3 mb-4 backdrop-blur-md">
+                <p className="text-yellow-100 text-sm">{passwordError}</p>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className={`relative transition-all duration-500 ease-in-out ${!isLogin ? 'max-h-20 opacity-100 mb-3' : 'max-h-0 opacity-0 overflow-hidden'}`}>
                 <input
@@ -133,6 +199,8 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
                   onChange={(e) => setDisplayName(e.target.value)}
                   className="w-full px-4 py-3 bg-black/20 border border-white/20 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 backdrop-blur-lg"
                   required={!isLogin}
+                  aria-label="Full Name"
+                  autoComplete="name"
                 />
               </div>
 
@@ -145,19 +213,24 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
                   className="w-full px-4 py-3 bg-black/20 border border-white/20 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 backdrop-blur-lg"
                   required
                   autoComplete="username"
+                  aria-label="Email Address"
                 />
               </div>
 
               <div className="relative">
                 <input
                   type="password"
-                  placeholder="Password"
+                  placeholder={isLogin ? "Password" : "Password (min 8 chars, 1 uppercase, 1 number)"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    setPasswordError('')
+                  }}
                   className="w-full px-4 py-3 bg-black/20 border border-white/20 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition-all duration-200 backdrop-blur-lg"
                   required
-                  minLength={6}
+                  minLength={isLogin ? 6 : 8}
                   autoComplete="current-password"
+                  aria-label="Password"
                 />
               </div>
 
@@ -165,6 +238,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
                 type="submit"
                 disabled={loading}
                 className="w-full bg-white/15 hover:bg-white/25 backdrop-blur-lg text-white py-3 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 shadow-lg border border-white/20 relative overflow-hidden group mt-4"
+                aria-label={isLogin ? 'Sign In' : 'Sign Up'}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700"></div>
                 <span className="relative z-10">
@@ -183,6 +257,7 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
               onClick={handleGoogleLogin}
               disabled={loading}
               className="w-full bg-white/85 backdrop-blur-lg text-gray-800 py-3 rounded-xl font-semibold hover:bg-white/95 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg border border-white/40 relative overflow-hidden group"
+              aria-label="Sign in with Google"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700"></div>
               <svg className="w-5 h-5 relative z-10" viewBox="0 0 24 24">
@@ -196,8 +271,13 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
 
             <div className="text-center mt-6">
               <button
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => {
+                  setIsLogin(!isLogin)
+                  setError('')
+                  setPasswordError('')
+                }}
                 className="text-white/80 hover:text-white transition-colors font-medium"
+                aria-label={isLogin ? "Switch to sign up" : "Switch to sign in"}
               >
                 {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
               </button>

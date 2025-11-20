@@ -137,6 +137,14 @@ async function scrapeDistrict(city: string): Promise<Event[]> {
   return events;
 }
 
+// Sanitize input to prevent injection attacks
+function sanitizeInput(input: string): string {
+  return input
+    .trim()
+    .replace(/[<>\"']/g, '') // Remove potentially dangerous characters
+    .substring(0, 100); // Limit length
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -157,14 +165,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'City parameter is required' });
   }
 
-  try {
-    console.log(`Fetching events for city: ${city}`);
+  // Sanitize city input
+  const sanitizedCity = sanitizeInput(city);
 
-    // Scrape from all sources in parallel
-    const [alleventsData, districtEvents] = await Promise.all([
-      scrapeAllEvents(city),
-      scrapeDistrict(city),
+  try {
+    console.log(`Fetching events for city: ${sanitizedCity}`);
+
+    // Scrape from all sources in parallel with timeout
+    const scrapePromises = Promise.all([
+      scrapeAllEvents(sanitizedCity),
+      scrapeDistrict(sanitizedCity),
     ]);
+
+    // Add timeout to prevent long-running requests
+    const timeoutPromise = new Promise<Event[][]>((_, reject) => 
+      setTimeout(() => reject(new Error('Request timeout')), 30000)
+    );
+
+    const [alleventsData, districtEvents] = await Promise.race([
+      scrapePromises,
+      timeoutPromise
+    ]) as [Event[], Event[]];
 
     // Combine and deduplicate events
     const allEvents = [...alleventsData, ...districtEvents];
@@ -181,19 +202,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Return events with metadata
     return res.status(200).json({
       success: true,
-      city,
+      city: sanitizedCity,
       count: uniqueEvents.length,
       events: uniqueEvents,
       timestamp: new Date().toISOString(),
       sources: ['allevents', 'district'],
     });
 
-  } catch (error: any) {
-    console.error('Error fetching events:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch events';
+    console.error('Error fetching events:', errorMessage);
     return res.status(500).json({
       success: false,
       error: 'Failed to fetch events',
-      message: error.message,
+      message: errorMessage,
     });
   }
 }

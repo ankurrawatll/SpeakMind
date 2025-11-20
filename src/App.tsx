@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import BottomNavigation from './components/BottomNavigation'
+import ErrorBoundary from './components/ErrorBoundary'
 
 // Lazy load all screens for better performance and code splitting
 const AuthScreen = lazy(() => import('./screens/AuthScreen'))
@@ -89,34 +90,6 @@ const AppContent = () => {
     }
   }, [currentUser])
 
-  // Exercise data for proper routing
-  const exerciseData = {
-    'exercise-quick-calm': {
-      title: 'Quick Calm',
-      subtitle: '5-minute breathing exercise',
-      backgroundImage: 'https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
-      overlayColor: 'from-teal-500/90 to-emerald-600/90'
-    },
-    'exercise-stretch-focus': {
-      title: 'Stretch & Focus',
-      subtitle: 'Gentle stretching with mindfulness',
-      backgroundImage: 'https://images.pexels.com/photos/3768918/pexels-photo-3768918.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
-      overlayColor: 'from-amber-500/90 to-orange-600/90'
-    },
-    'exercise-mind-body-sync': {
-      title: 'Mind Body Sync',
-      subtitle: 'Connect your mind and body',
-      backgroundImage: 'https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
-      overlayColor: 'from-indigo-500/90 to-violet-600/90'
-    },
-    'exercise-reflection-journal': {
-      title: 'Reflection Journal',
-      subtitle: 'Write one thought to clear your mind',
-      backgroundImage: 'https://images.pexels.com/photos/5273009/pexels-photo-5273009.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
-      overlayColor: 'from-rose-500/90 to-pink-600/90'
-    }
-  }
-
   useEffect(() => {
     // Only handle the case when user logs out or app first loads
     if (currentUser === null && currentScreen !== 'userOnboarding') {
@@ -201,7 +174,10 @@ const AppContent = () => {
       case 'exercise-reflection-journal':
         return (
           <ExerciseLayout 
-            {...exerciseData['exercise-reflection-journal']}
+            title="Reflection Journal"
+            subtitle="Write one thought to clear your mind"
+            backgroundImage="https://images.pexels.com/photos/5273009/pexels-photo-5273009.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2"
+            overlayColor="from-rose-500/90 to-pink-600/90"
             onBack={() => navigateToScreen('meditation')}
           >
             <ReflectionJournal onNavigate={navigateToScreen} />
@@ -222,9 +198,11 @@ const AppContent = () => {
 
   return (
     <div className="mobile-container min-h-screen overflow-auto">
-      <Suspense fallback={<LoadingScreen />}>
-        {renderScreen()}
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingScreen />}>
+          {renderScreen()}
+        </Suspense>
+      </ErrorBoundary>
       {showBottomNav && (
         <BottomNavigation 
           currentScreen={currentScreen} 
@@ -237,9 +215,11 @@ const AppContent = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 

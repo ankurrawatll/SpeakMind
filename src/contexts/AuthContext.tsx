@@ -8,16 +8,18 @@ import {
   signInWithPopup,
   updateProfile
 } from 'firebase/auth'
-import type { User } from 'firebase/auth'
+import type { User, UserCredential } from 'firebase/auth'
 import { auth } from '../config/firebase'
+
+import type { UserCredential } from 'firebase/auth'
 
 interface AuthContextType {
   currentUser: User | null
   loading: boolean
-  signup: (email: string, password: string, displayName?: string) => Promise<any>
-  login: (email: string, password: string) => Promise<any>
+  signup: (email: string, password: string, displayName?: string) => Promise<UserCredential>
+  login: (email: string, password: string) => Promise<UserCredential>
   logout: () => Promise<void>
-  loginWithGoogle: () => Promise<any>
+  loginWithGoogle: () => Promise<UserCredential>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
