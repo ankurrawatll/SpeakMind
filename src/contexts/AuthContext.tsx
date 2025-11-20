@@ -11,8 +11,6 @@ import {
 import type { User, UserCredential } from 'firebase/auth'
 import { auth } from '../config/firebase'
 
-import type { UserCredential } from 'firebase/auth'
-
 interface AuthContextType {
   currentUser: User | null
   loading: boolean
