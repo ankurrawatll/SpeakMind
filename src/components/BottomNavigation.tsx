@@ -60,16 +60,17 @@ export default function BottomNavigation({ currentScreen, onNavigate }: BottomNa
           animate={{
             width: isHovered ? 'auto' : '60px',
             height: '60px',
-            borderRadius: isHovered ? '24px' : '30px', // slightly different radius for dock vs bubble
+            borderRadius: isHovered ? '24px' : '30px',
           }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           style={{
             boxShadow: "0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1)",
+            willChange: "transform, width, height, border-radius",
           }}
         >
-          {/* Glass Layers - Recreated for motion.div */}
+          {/* Glass Layers */}
           <div
             className="absolute inset-0 z-0 overflow-hidden rounded-inherit"
             style={{
