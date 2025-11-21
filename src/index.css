@@ -34,7 +34,7 @@
 
 @layer components {
   .mobile-container {
-    @apply max-w-md mx-auto min-h-screen relative;
+    @apply w-full min-h-screen relative mx-auto;
   }
   
   .btn-primary {

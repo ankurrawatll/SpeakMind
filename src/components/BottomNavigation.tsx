@@ -53,7 +53,7 @@ export default function BottomNavigation({ currentScreen, onNavigate }: BottomNa
   return (
     <>
       <GlassFilter />
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+      <div className="fixed bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 z-50">
         <motion.div
           className="relative flex items-center justify-center overflow-hidden bg-white/40 backdrop-blur-md border border-white/30 shadow-2xl"
           initial={false}
@@ -122,7 +122,7 @@ export default function BottomNavigation({ currentScreen, onNavigate }: BottomNa
                       onClick={item.onClick}
                     >
                       <item.icon className="text-2xl" />
-                      <span className="text-[10px] font-medium whitespace-nowrap">{item.label}</span>
+                      <span className="text-[10px] md:text-xs font-medium whitespace-nowrap">{item.label}</span>
                     </div>
                   ))}
                 </motion.div>
