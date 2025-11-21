@@ -281,30 +281,22 @@ export default function AskQuestionScreen({ onNavigate }: AskQuestionScreenProps
       </div>
 
       <div className="space-y-6 pb-6">
-        {/* Quick Questions Section */}
+        {/* Voice Session Button */}
         {(!aiResponse || convoHistory.length === 0) && (
           <div className="px-4 pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-gray-900">Quick Questions</h2>
-              <span className="text-xs text-gray-500">{quickQuestions.length} questions</span>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {quickQuestions.map((questionObj, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleQuickQuestion(questionObj)}
-                  className="bg-white/80 backdrop-blur-sm rounded-xl p-3 h-auto min-h-[7rem] flex flex-col justify-between hover:bg-white hover:shadow-md transition-all text-left border border-gray-100"
-                >
-                  <span className="text-gray-800 text-sm font-medium line-clamp-4">{questionObj.question}</span>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-gray-500">Quick</span>
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-purple-600 text-lg">›</span>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <button
+              onClick={() => onNavigate('voiceSession')}
+              className="w-full flex items-center justify-center gap-3 px-6 py-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200"
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+              </svg>
+              <div className="text-left">
+                <div className="font-bold text-lg">Start Voice Session</div>
+                <div className="text-sm text-purple-100">Talk with your AI wellness coach</div>
+              </div>
+            </button>
           </div>
         )}
 

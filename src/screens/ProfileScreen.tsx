@@ -143,14 +143,14 @@ export default function ProfileScreen({ user, onNavigate }: ProfileScreenProps) 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 relative pb-20">
       {/* Header */}
-      <div className="px-4 pt-12 pb-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">Profile</h1>
+      <div className="px-4 md:px-8 lg:px-12 pt-8 md:pt-12 pb-4 md:pb-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between mb-4 md:mb-6">
+          <h1 className="text-lg md:text-xl font-semibold text-gray-900">Profile</h1>
           <button 
             onClick={() => setIsSettingsOpen(true)}
             className="text-gray-600 hover:text-gray-800 transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -158,43 +158,43 @@ export default function ProfileScreen({ user, onNavigate }: ProfileScreenProps) 
         </div>
         
         {/* Profile Card */}
-        <div className="text-center mb-6">
-          <div className="w-20 h-20 bg-orange-200 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
+        <div className="max-w-7xl mx-auto text-center mb-4 md:mb-6">
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-orange-200 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 overflow-hidden">
             <img 
               src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&dpr=2" 
               alt="Profile" 
               className="w-full h-full object-cover"
             />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">
+          <h2 className="text-lg md:text-xl font-semibold text-gray-900 mb-1">
             {currentUser?.displayName || currentUser?.email?.split('@')[0] || user.name}
           </h2>
-          <p className="text-purple-500 font-medium">Level {user.level}</p>
+          <p className="text-purple-500 font-medium text-sm md:text-base">Level {user.level}</p>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-4 gap-2 mb-6 px-4">
-          <div className="bg-yellow-50 rounded-xl p-3 text-center">
-            <div className="text-lg font-bold text-gray-900">{user.streak}</div>
-            <div className="text-xs text-gray-600">Days</div>
+        <div className="max-w-7xl mx-auto grid grid-cols-4 gap-1.5 md:gap-2 mb-4 md:mb-6 px-2 md:px-4">
+          <div className="bg-yellow-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
+            <div className="text-base md:text-lg font-bold text-gray-900">{user.streak}</div>
+            <div className="text-[10px] md:text-xs text-gray-600">Days</div>
           </div>
-          <div className="bg-pink-50 rounded-xl p-3 text-center">
-            <div className="text-lg font-bold text-gray-900">{user.timemeditated}</div>
-            <div className="text-xs text-gray-600">Mins</div>
+          <div className="bg-pink-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
+            <div className="text-base md:text-lg font-bold text-gray-900">{user.timemeditated}</div>
+            <div className="text-[10px] md:text-xs text-gray-600">Mins</div>
           </div>
-          <div className="bg-blue-50 rounded-xl p-3 text-center">
-            <div className="text-lg font-bold text-gray-900">{user.meditations}</div>
-            <div className="text-xs text-gray-600">Sessions</div>
+          <div className="bg-blue-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
+            <div className="text-base md:text-lg font-bold text-gray-900">{user.meditations}</div>
+            <div className="text-[10px] md:text-xs text-gray-600">Sessions</div>
           </div>
-          <div className="bg-green-50 rounded-xl p-3 text-center">
-            <div className="text-lg font-bold text-gray-900">{user.points}</div>
-            <div className="text-xs text-gray-600">Points</div>
+          <div className="bg-green-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
+            <div className="text-base md:text-lg font-bold text-gray-900">{user.points}</div>
+            <div className="text-[10px] md:text-xs text-gray-600">Points</div>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="px-4 mb-4">
-          <div className="flex bg-gray-100 rounded-xl p-1">
+        <div className="max-w-7xl mx-auto px-2 md:px-4 mb-3 md:mb-4">
+          <div className="flex bg-gray-100 rounded-lg md:rounded-xl p-1">
             {[
               { id: 'overview', label: 'Overview', icon: '📊' },
               { id: 'analytics', label: 'Analytics', icon: '📈' },
@@ -203,21 +203,21 @@ export default function ProfileScreen({ user, onNavigate }: ProfileScreenProps) 
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1 md:gap-2 py-1.5 md:py-2 px-2 md:px-3 rounded-lg text-xs md:text-sm font-medium transition-all ${
                   activeTab === tab.id
                     ? 'bg-white text-purple-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-800'
                 }`}
               >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
+                <span className="text-sm md:text-base">{tab.icon}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Tab Content */}
-        <div className="px-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
           {activeTab === 'overview' && (
             <div className="space-y-4">
               {/* Brain Health Summary */}

@@ -98,28 +98,28 @@ export default function ExploreScreen({ onNavigate }: ExploreScreenProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 relative pb-20">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-white/80 backdrop-blur-md border-b border-white/30">
+      <div className="flex items-center justify-between p-3 md:p-4 bg-white/80 backdrop-blur-md border-b border-white/30">
         <button
           onClick={() => onNavigate('home')}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-1.5 md:p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
-          <IoChevronBack className="w-6 h-6 text-gray-700" />
+          <IoChevronBack className="w-5 h-5 md:w-6 md:h-6 text-gray-700" />
         </button>
         <div className="text-center">
-          <h1 className="text-lg font-semibold text-gray-900">Explore All</h1>
-          <p className="text-sm text-gray-500">{videos.length} videos available</p>
+          <h1 className="text-base md:text-lg font-semibold text-gray-900">Explore All</h1>
+          <p className="text-xs md:text-sm text-gray-500">{videos.length} videos available</p>
         </div>
-        <div className="w-10"></div>
+        <div className="w-8 md:w-10"></div>
       </div>
 
       {/* Category Filter */}
-      <div className="p-4">
-        <div className="flex gap-2 overflow-x-auto pb-2">
+      <div className="p-3 md:p-4">
+        <div className="max-w-7xl mx-auto flex gap-1.5 md:gap-2 overflow-x-auto pb-2">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium whitespace-nowrap transition-all ${
                 selectedCategory === category
                   ? 'bg-purple-600 text-white shadow-lg'
                   : 'bg-white/80 text-gray-700 hover:bg-white'
@@ -132,13 +132,13 @@ export default function ExploreScreen({ onNavigate }: ExploreScreenProps) {
       </div>
 
       {/* Video Grid */}
-      <div className="px-4">
-        <div className="grid grid-cols-1 gap-4">
+      <div className="px-3 md:px-4 lg:px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {filteredVideos.map((video) => (
             <div
               key={video.id}
               onClick={() => handleVideoClick(video)}
-              className="relative rounded-2xl overflow-hidden h-32 flex items-end p-4 cursor-pointer shadow-lg group hover:shadow-xl transition-all"
+              className="relative rounded-xl md:rounded-2xl overflow-hidden h-28 md:h-32 lg:h-36 flex items-end p-3 md:p-4 cursor-pointer shadow-lg group hover:shadow-xl transition-all"
             >
               {/* Background Image */}
               <div className="absolute inset-0 z-0">
@@ -155,24 +155,24 @@ export default function ExploreScreen({ onNavigate }: ExploreScreenProps) {
               <div className="relative z-10 w-full">
                 <div className="flex justify-between items-end">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-white text-base font-semibold mb-1 drop-shadow truncate">
+                    <h3 className="text-white text-sm md:text-base font-semibold mb-0.5 md:mb-1 drop-shadow truncate">
                       {video.title}
                     </h3>
-                    <div className="flex items-center gap-2">
-                      <div className={`inline-flex items-center text-[10px] text-white/90 bg-gradient-to-r ${getCategoryColor(video.category)} px-2 py-1 rounded-full`}>
+                    <div className="flex items-center gap-1.5 md:gap-2">
+                      <div className={`inline-flex items-center text-[9px] md:text-[10px] text-white/90 bg-gradient-to-r ${getCategoryColor(video.category)} px-1.5 md:px-2 py-0.5 md:py-1 rounded-full`}>
                         {video.category}
                       </div>
                       {video.isShort && (
-                        <div className="inline-flex items-center text-[10px] text-white/90 bg-white/20 backdrop-blur px-2 py-1 rounded-full">
-                          <IoTimeOutline className="w-3 h-3 mr-1" />
+                        <div className="inline-flex items-center text-[9px] md:text-[10px] text-white/90 bg-white/20 backdrop-blur px-1.5 md:px-2 py-0.5 md:py-1 rounded-full">
+                          <IoTimeOutline className="w-2.5 h-2.5 md:w-3 md:h-3 mr-0.5 md:mr-1" />
                           Short
                         </div>
                       )}
                     </div>
                   </div>
                   {/* Play Button */}
-                  <div className="bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform ml-3 flex-shrink-0">
-                    <IoPlay className="text-purple-800 text-lg ml-0.5" />
+                  <div className="bg-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform ml-2 md:ml-3 flex-shrink-0">
+                    <IoPlay className="text-purple-800 text-base md:text-lg ml-0.5" />
                   </div>
                 </div>
               </div>
@@ -183,12 +183,12 @@ export default function ExploreScreen({ onNavigate }: ExploreScreenProps) {
 
       {/* Empty State */}
       {filteredVideos.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 px-4">
-          <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-4">
-            <IoPlay className="w-8 h-8 text-gray-400" />
+        <div className="flex flex-col items-center justify-center py-8 md:py-12 px-4">
+          <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-200 rounded-full flex items-center justify-center mb-3 md:mb-4">
+            <IoPlay className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">No videos found</h3>
-          <p className="text-gray-500 text-center">Try selecting a different category</p>
+          <h3 className="text-base md:text-lg font-semibold text-gray-700 mb-1 md:mb-2">No videos found</h3>
+          <p className="text-gray-500 text-center text-sm md:text-base">Try selecting a different category</p>
         </div>
       )}
     </div>

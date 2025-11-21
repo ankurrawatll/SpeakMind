@@ -49,6 +49,15 @@ export default {
       boxShadow: {
         'card': '0 4px 20px rgba(157, 124, 243, 0.15)',
         'button': '0 8px 24px rgba(157, 124, 243, 0.3)',
+      },
+      keyframes: {
+        moveBackground: {
+          'from': { backgroundPosition: '0% 0%' },
+          'to': { backgroundPosition: '0% -1000%' },
+        }
+      },
+      animation: {
+        moveBackground: 'moveBackground 60s linear infinite',
       }
     },
   },

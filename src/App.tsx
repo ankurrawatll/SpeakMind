@@ -23,6 +23,7 @@ const WisdomGitaScreen = lazy(() => import('./screens/WisdomGitaScreen'))
 const MidnightLaunderetteScreen = lazy(() => import('./screens/MidnightLaunderetteScreen'))
 const ExploreScreen = lazy(() => import('./screens/ExploreScreen'))
 const ConversationScreen = lazy(() => import('./screens/ConversationScreen'))
+const VoiceSessionScreen = lazy(() => import('./screens/VoiceSessionScreen'))
 const EEGBrainHealthScreen = lazy(() => import('./screens/EEGBrainHealthScreen'))
 
 // Lazy load exercise components
@@ -58,6 +59,7 @@ export type Screen =
   | 'sharing'
   | 'mindCoach'
   | 'conversation'
+  | 'voiceSession'
   | 'exercise-quick-calm'
   | 'exercise-stretch-focus'
   | 'exercise-mind-body-sync'
@@ -195,6 +197,8 @@ const AppContent = () => {
         return <MindCoachScreen onNavigate={navigateToScreen} user={user} />
       case 'conversation':
         return <ConversationScreen onNavigate={navigateToScreen} />
+      case 'voiceSession':
+        return <VoiceSessionScreen onNavigate={navigateToScreen} />
       case 'exercise-quick-calm':
         return <QuickCalm onNavigate={navigateToScreen} />
       case 'exercise-stretch-focus':
@@ -224,7 +228,7 @@ const AppContent = () => {
     }
   }
 
-  const showBottomNav = currentUser && currentScreen !== 'auth' && currentScreen !== 'userOnboarding' && currentScreen !== 'timer' && currentScreen !== 'conversation'
+  const showBottomNav = currentUser && currentScreen !== 'auth' && currentScreen !== 'userOnboarding' && currentScreen !== 'timer' && currentScreen !== 'conversation' && currentScreen !== 'voiceSession'
 
   return (
     <div className="mobile-container min-h-screen overflow-auto">

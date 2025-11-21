@@ -389,43 +389,43 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-4 relative"
+      className="min-h-screen flex items-center justify-center p-3 md:p-4 relative"
       style={{
         background: 'linear-gradient(135deg, #9F6AFF 0%, #FF91E7 100%)'
       }}
     >
       
       <div className="w-full max-w-md relative z-10">
-        <div className="bg-white/6 backdrop-blur-3xl rounded-3xl p-8 shadow-2xl border border-white/12 relative overflow-hidden">
+        <div className="bg-white/6 backdrop-blur-3xl rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-2xl border border-white/12 relative overflow-hidden">
           {/* Glassmorphism accent */}
           <div className="absolute inset-0 bg-gradient-to-br from-white/12 via-transparent to-white/3 pointer-events-none"></div>
           
           <div className="relative z-10">
             {/* Progress bar */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-white/70">Step {currentStep + 1} of {totalSteps}</span>
-                <span className="text-sm text-white/70">{Math.round(((currentStep + 1) / totalSteps) * 100)}%</span>
+            <div className="mb-6 md:mb-8">
+              <div className="flex justify-between items-center mb-1.5 md:mb-2">
+                <span className="text-xs md:text-sm text-white/70">Step {currentStep + 1} of {totalSteps}</span>
+                <span className="text-xs md:text-sm text-white/70">{Math.round(((currentStep + 1) / totalSteps) * 100)}%</span>
               </div>
-              <div className="w-full bg-white/15 rounded-full h-2 backdrop-blur-sm">
+              <div className="w-full bg-white/15 rounded-full h-1.5 md:h-2 backdrop-blur-sm">
                 <div 
-                  className="bg-gradient-to-r from-white/80 to-white/60 h-2 rounded-full transition-all duration-300"
+                  className="bg-gradient-to-r from-white/80 to-white/60 h-1.5 md:h-2 rounded-full transition-all duration-300"
                   style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
                 ></div>
               </div>
             </div>
 
             {/* Step content */}
-            <div className="min-h-[400px] flex flex-col justify-center">
+            <div className="min-h-[350px] md:min-h-[400px] flex flex-col justify-center">
               {renderStep()}
             </div>
 
             {/* Navigation buttons */}
-            <div className="flex gap-4 mt-8">
+            <div className="flex gap-3 md:gap-4 mt-6 md:mt-8">
               {currentStep > 0 && (
                 <button
                   onClick={handleBack}
-                  className="flex-1 bg-white/6 backdrop-blur-lg text-white/90 py-3 rounded-xl font-medium hover:bg-white/12 transition-all duration-200 border border-white/15"
+                  className="flex-1 bg-white/6 backdrop-blur-lg text-white/90 py-2.5 md:py-3 rounded-lg md:rounded-xl text-sm md:text-base font-medium hover:bg-white/12 transition-all duration-200 border border-white/15"
                 >
                   Back
                 </button>
@@ -433,7 +433,7 @@ const UserOnboardingScreen: React.FC<UserOnboardingScreenProps> = ({ onComplete 
               <button
                 onClick={handleNext}
                 disabled={!isStepValid()}
-                className="flex-1 bg-white/12 hover:bg-white/20 backdrop-blur-lg text-white py-3 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border border-white/20 relative overflow-hidden group"
+                className="flex-1 bg-white/12 hover:bg-white/20 backdrop-blur-lg text-white py-2.5 md:py-3 rounded-lg md:rounded-xl text-sm md:text-base font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border border-white/20 relative overflow-hidden group"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700"></div>
                 <span className="relative z-10">
