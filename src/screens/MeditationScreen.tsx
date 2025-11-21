@@ -1,11 +1,12 @@
 // src/screens/MeditationScreen.tsx
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface Exercise {
   id: string;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   category: string;
   duration: number;
   image: string;
@@ -13,55 +14,57 @@ interface Exercise {
   icon: string;
 }
 
-const exercises: Exercise[] = [
-  {
-    id: 'quick-calm',
-    title: 'Quick Calm',
-    description: '5-minute breathing exercise',
-    category: 'breathing',
-    duration: 5,
-    image: 'https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
-    color: 'from-teal-500/90 to-emerald-600/90',
-    icon: '🧘‍♂️',
-  },
-  {
-    id: 'stretch-focus',
-    title: 'Stretch & Focus',
-    description: 'Gentle stretching with mindfulness',
-    category: 'movement',
-    duration: 10,
-    image: 'https://images.pexels.com/photos/3768918/pexels-photo-3768918.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
-    color: 'from-amber-500/90 to-orange-600/90',
-    icon: '🧘‍♀️',
-  },
-  {
-    id: 'mind-body-sync',
-    title: 'Mind Body Sync',
-    description: 'Connect your mind and body',
-    category: 'mindfulness',
-    duration: 15,
-    image: 'https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
-    color: 'from-indigo-500/90 to-violet-600/90',
-    icon: '🎯',
-  },
-  {
-    id: 'reflection-journal',
-    title: 'Reflection Journal',
-    description: 'Write one thought to clear your mind',
-    category: 'reflection',
-    duration: 3,
-    image: 'https://images.pexels.com/photos/6621339/pexels-photo-6621339.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
-    color: 'from-rose-500/90 to-pink-600/90',
-    icon: '📝',
-  },
-];
-
 
 interface MeditationScreenProps {
   onNavigate?: (screen: any) => void;
 }
 
 const MeditationScreen = ({ onNavigate }: MeditationScreenProps = {}) => {
+  const { t } = useLanguage();
+  
+  const exercises: Exercise[] = [
+    {
+      id: 'quick-calm',
+      titleKey: 'meditation.quickCalm',
+      descriptionKey: 'meditation.quickCalmDesc',
+      category: 'breathing',
+      duration: 5,
+      image: 'https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+      color: 'from-teal-500/90 to-emerald-600/90',
+      icon: '🧘‍♂️',
+    },
+    {
+      id: 'stretch-focus',
+      titleKey: 'meditation.stretchFocus',
+      descriptionKey: 'meditation.stretchFocusDesc',
+      category: 'movement',
+      duration: 10,
+      image: 'https://images.pexels.com/photos/3768918/pexels-photo-3768918.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+      color: 'from-amber-500/90 to-orange-600/90',
+      icon: '🧘‍♀️',
+    },
+    {
+      id: 'mind-body-sync',
+      titleKey: 'meditation.mindBodySync',
+      descriptionKey: 'meditation.mindBodySyncDesc',
+      category: 'mindfulness',
+      duration: 15,
+      image: 'https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+      color: 'from-indigo-500/90 to-violet-600/90',
+      icon: '🎯',
+    },
+    {
+      id: 'reflection-journal',
+      titleKey: 'meditation.reflectionJournal',
+      descriptionKey: 'meditation.reflectionJournalDesc',
+      category: 'reflection',
+      duration: 3,
+      image: 'https://images.pexels.com/photos/6621339/pexels-photo-6621339.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&dpr=2',
+      color: 'from-rose-500/90 to-pink-600/90',
+      icon: '📝',
+    },
+  ];
+
   // Load progress from localStorage (for future use)
   useEffect(() => {
     const savedProgress = localStorage.getItem('dailyExerciseProgress');
@@ -93,13 +96,13 @@ const MeditationScreen = ({ onNavigate }: MeditationScreenProps = {}) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 relative pb-20">
-      {/* Content */}
-      <div className="relative">
-        {/* Simple Header */}
-        <div className="px-4 md:px-8 lg:px-12 pt-6 md:pt-8 pb-4 md:pb-6">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="w-8 md:w-10"></div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 text-center">Mindful Moments</h1>
+        {/* Content */}
+        <div className="relative">
+          {/* Simple Header */}
+          <div className="px-4 md:px-8 lg:px-12 pt-6 md:pt-8 pb-4 md:pb-6">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <div className="w-8 md:w-10"></div>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 text-center">{t('meditation.mindfulMoments')}</h1>
             <button
               onClick={() => onNavigate('profile')}
               className="p-1.5 md:p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
@@ -135,15 +138,15 @@ const MeditationScreen = ({ onNavigate }: MeditationScreenProps = {}) => {
               <div className="relative z-10 w-full">
                 <div className="flex justify-between items-end">
                   <div>
-                    <h3 className="text-white text-lg md:text-xl font-semibold mb-0.5 md:mb-1">{exercise.title}</h3>
-                    <p className="text-white/90 text-xs md:text-sm mb-1.5 md:mb-2">{exercise.description}</p>
+                    <h3 className="text-white text-lg md:text-xl font-semibold mb-0.5 md:mb-1">{t(exercise.titleKey)}</h3>
+                    <p className="text-white/90 text-xs md:text-sm mb-1.5 md:mb-2">{t(exercise.descriptionKey)}</p>
                     <div className="flex items-center text-[10px] md:text-xs text-white/80">
                       <div className="bg-white/20 backdrop-blur px-2 md:px-3 py-0.5 md:py-1 rounded-full flex items-center gap-0.5 md:gap-1">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" className="text-white md:w-3 md:h-3">
                           <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                           <polyline points="12,6 12,12 16,14" stroke="currentColor" strokeWidth="2"/>
                         </svg>
-                        <span>{exercise.duration} Min</span>
+                        <span>{exercise.duration} {t('meditation.min')}</span>
                       </div>
                     </div>
                   </div>

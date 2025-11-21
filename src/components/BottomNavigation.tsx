@@ -6,6 +6,7 @@ import { FaBrain } from 'react-icons/fa'
 import { GlassFilter, type DockIcon } from './ui/liquid-glass'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useLanguage } from '../contexts/LanguageContext'
 
 interface BottomNavigationProps {
   currentScreen: Screen
@@ -13,36 +14,37 @@ interface BottomNavigationProps {
 }
 
 export default function BottomNavigation({ currentScreen, onNavigate }: BottomNavigationProps) {
+  const { t } = useLanguage()
   const [isHovered, setIsHovered] = useState(false)
 
   const navItems: DockIcon[] = [
     {
       icon: AiOutlineHome,
-      label: 'Home',
+      label: t('navigation.home'),
       onClick: () => onNavigate('home'),
       isActive: currentScreen === 'home'
     },
     {
       icon: PiFlowerLotusLight,
-      label: 'Meditation',
+      label: t('navigation.meditation'),
       onClick: () => onNavigate('meditation'),
       isActive: currentScreen === 'meditation'
     },
     {
       icon: PiHandsPrayingLight,
-      label: 'Mind Coach',
+      label: t('navigation.mindCoach'),
       onClick: () => onNavigate('mindCoach'),
       isActive: currentScreen === 'mindCoach'
     },
     {
       icon: HiOutlineChatAlt2,
-      label: 'Sharing',
+      label: t('navigation.sharing'),
       onClick: () => onNavigate('sharing'),
       isActive: currentScreen === 'sharing'
     },
     {
       icon: FaBrain,
-      label: 'Brain Health',
+      label: t('navigation.brainHealth'),
       onClick: () => onNavigate('eegBrainHealth'),
       isActive: currentScreen === 'eegBrainHealth'
     },

@@ -3,6 +3,7 @@ import type { Screen } from '../App'
 import EEGMeditationSession from '../components/EEGMeditationSession'
 import EEGAnalysisReport from '../components/EEGAnalysisReport'
 import type { EEGSession } from '../utils/eegService'
+import { useLanguage } from '../contexts/LanguageContext'
 
 interface EEGBrainHealthScreenProps {
   onNavigate: (screen: Screen) => void
@@ -11,6 +12,7 @@ interface EEGBrainHealthScreenProps {
 type ViewState = 'main' | 'session' | 'report'
 
 export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScreenProps) {
+  const { t } = useLanguage()
   const [viewState, setViewState] = useState<ViewState>('main')
   const [selectedDuration, setSelectedDuration] = useState(10) // minutes
   const [completedSession, setCompletedSession] = useState<EEGSession | null>(null)
@@ -63,18 +65,18 @@ export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScree
   // Main view
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 relative pb-20">
-      {/* Header */}
-      <div className="px-4 pt-12 pb-6">
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => onNavigate('home')}
-            className="p-2 rounded-full bg-white/80 backdrop-blur-sm"
-          >
-            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h1 className="text-xl font-semibold text-gray-900">Brain Health</h1>
+        {/* Header */}
+        <div className="px-4 pt-12 pb-6">
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => onNavigate('home')}
+              className="p-2 rounded-full bg-white/80 backdrop-blur-sm"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h1 className="text-xl font-semibold text-gray-900">{t('brainHealth.title')}</h1>
           <button
             onClick={() => onNavigate('profile')}
             className="p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
@@ -95,9 +97,9 @@ export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScree
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-yellow-900 mb-1">EEG Feature Available on Localhost Only</h3>
+                <h3 className="font-semibold text-yellow-900 mb-1">{t('brainHealth.eegLocalhostTitle')}</h3>
                 <p className="text-sm text-yellow-700">
-                  EEG meditation sessions require a direct connection to your EEG device, which is only available when running the app on localhost. Please run the app locally to use this feature.
+                  {t('brainHealth.eegLocalhostDesc')}
                 </p>
               </div>
             </div>
@@ -108,35 +110,35 @@ export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScree
         <div className="mb-6 p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100">
           <div className="text-center mb-6">
             <div className="text-6xl mb-4">🧘‍♀️</div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">EEG Meditation Session</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">{t('brainHealth.eegMeditationSession')}</h2>
             <p className="text-gray-600">
-              Connect your EEG device and experience guided meditation with real-time brain wave monitoring and AI-powered insights.
+              {t('brainHealth.connectDevice')}
             </p>
           </div>
 
           {/* How It Works */}
           <div className="space-y-3 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3">How It Works:</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">{t('brainHealth.howItWorks')}</h3>
             <div className="space-y-2 text-sm text-gray-700">
               <div className="flex items-start gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold text-xs">1</span>
-                <span>Connect your EEG headband to your device</span>
+                <span>{t('brainHealth.step1')}</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold text-xs">2</span>
-                <span>Place the headband comfortably on your head</span>
+                <span>{t('brainHealth.step2')}</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold text-xs">3</span>
-                <span>Start your meditation session with calming music</span>
+                <span>{t('brainHealth.step3')}</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold text-xs">4</span>
-                <span>Watch real-time brain wave visualizations</span>
+                <span>{t('brainHealth.step4')}</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold text-xs">5</span>
-                <span>Receive AI-powered analysis after completion</span>
+                <span>{t('brainHealth.step5')}</span>
               </div>
             </div>
           </div>
@@ -144,7 +146,7 @@ export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScree
 
         {/* Duration Selector */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Session Duration</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('brainHealth.selectDuration')}</h3>
           <div className="flex flex-wrap gap-3">
             {[5, 10, 15, 20, 30].map((duration) => (
               <button
@@ -156,7 +158,7 @@ export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScree
                     : 'bg-white/80 backdrop-blur-sm text-gray-700 border border-gray-200'
                 }`}
               >
-                {duration} min
+                {duration} {t('meditation.min')}
               </button>
             ))}
           </div>
@@ -173,14 +175,14 @@ export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScree
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >
-            {isLocalhost ? 'Start EEG Meditation Session' : 'EEG Available on Localhost Only'}
+            {isLocalhost ? t('brainHealth.startSession') : t('brainHealth.eegAvailableLocalhost')}
           </button>
           
           <button
             onClick={() => onNavigate('meditation')}
             className="w-full py-3 bg-white/80 backdrop-blur-sm text-gray-700 font-medium rounded-2xl border border-gray-200 hover:bg-white transition-all"
           >
-            Regular Meditation (No EEG)
+            {t('brainHealth.regularMeditation')}
           </button>
         </div>
       </div>

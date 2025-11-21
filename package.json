@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "npm install --include=dev && tsc --noEmit && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-translations": "node scripts/generate-translations.js"
   },
   "dependencies": {
     "@google/genai": "^1.30.0",
@@ -29,6 +30,7 @@
     "@vercel/node": "^5.5.3",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.14",
+    "dotenv": "^16.6.1",
     "eslint": "^9.33.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^5.2.0",

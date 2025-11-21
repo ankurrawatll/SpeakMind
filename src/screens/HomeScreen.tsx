@@ -3,6 +3,7 @@ import { IoPlay } from 'react-icons/io5'
 import type { Screen } from '../App'
 import { recommendVideos, type VideoSuggestion } from '../utils/youtubeAI'
 import { getContextualSearchQuery } from '../utils/userContext'
+import { useLanguage } from '../contexts/LanguageContext'
 
 // Import mood images from public folder
 import calmImg from '/Homescreen/Calm.gif'
@@ -24,66 +25,29 @@ interface HomeScreenProps {
 
 type MoodValue = 'calm' | 'relax' | 'focus' | 'anxious' | null
 
-// Mood to search query mapping
-const moodToQuery: Record<Exclude<MoodValue, null>, string> = {
-  calm: 'calming meditation music peaceful relaxation nature sounds calm songs ambient music',
-  relax: 'relaxing music yoga meditation gentle music stress relief spa music chill songs',
-  focus: 'focus music meditation concentration study music deep focus binaural beats lofi',
-  anxious: 'anxiety relief music calming songs breathing meditation peaceful music stress relief'
-}
-
-const moodPrompts = {
-  calm: "You're feeling calm today 🌊",
-  relax: "You're feeling relaxed 😌",
-  focus: "You're feeling focused 🎯",
-  anxious: "You're feeling anxious 😰"
-}
-
-const moods = [
-  { emoji: calmImg, label: 'Calm', value: 'calm' },
-  { emoji: relaxImg, label: 'Relax', value: 'relax' },
-  { emoji: focusImg, label: 'Focus', value: 'focus' },
-  { emoji: anxiousImg, label: 'Anxious', value: 'anxious' },
-]
-
-const aiCoachSessionsData = [
-  {
-    id: 'midnight-relax',
-    title: 'Midnight & Relaxation',
-    image: 'https://images.pexels.com/photos/18554368/pexels-photo-18554368.jpeg?auto=compress&cs=tinysrgb&w=400',
-    category: 'Sleep',
-    target: 'midnightRelaxation' as const
-  },
-  {
-    id: 'vedic-calm',
-    title: 'Vedic Calm',
-    image: 'https://images.pexels.com/photos/15327651/pexels-photo-15327651.jpeg?auto=compress&cs=tinysrgb&w=400',
-    category: 'Philosophy',
-    target: 'vedicCalm' as const
-  },
-  {
-    id: 'midnight-launderette',
-    title: 'Midnight Launderette',
-    image: 'https://images.pexels.com/photos/3125171/pexels-photo-3125171.jpeg?auto=compress&cs=tinysrgb&w=400',
-    category: 'Focus',
-    target: 'midnightLaunderette' as const
-  },
-  {
-    id: 'wisdom-gita',
-    title: 'Wisdom of the Gita',
-    image: 'https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg?auto=compress&cs=tinysrgb&w=400',
-    category: 'Insights',
-    target: 'wisdomGita' as const
-  }
-]
-
 export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
+  const { t } = useLanguage()
   const [isStreakExpanded, setIsStreakExpanded] = useState(false)
   const [selectedMood, setSelectedMood] = useState<MoodValue>(null)
   const [videoSuggestions, setVideoSuggestions] = useState<VideoSuggestion[]>([])
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
   const [isLoadingVideos, setIsLoadingVideos] = useState(false)
   const [videoSourceContext, setVideoSourceContext] = useState<'context' | 'mood' | 'default'>('default')
+
+  // Mood to search query mapping
+  const moodToQuery: Record<Exclude<MoodValue, null>, string> = {
+    calm: 'calming meditation music peaceful relaxation nature sounds calm songs ambient music',
+    relax: 'relaxing music yoga meditation gentle music stress relief spa music chill songs',
+    focus: 'focus music meditation concentration study music deep focus binaural beats lofi',
+    anxious: 'anxiety relief music calming songs breathing meditation peaceful music stress relief'
+  }
+
+  const moodPrompts = {
+    calm: "You're feeling calm today 🌊",
+    relax: "You're feeling relaxed 😌",
+    focus: "You're feeling focused 🎯",
+    anxious: "You're feeling anxious 😰"
+  }
 
   // Fetch videos when mood changes or on initial load
   useEffect(() => {
@@ -92,10 +56,10 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
       try {
         let query: string
         let source: 'context' | 'mood' | 'default'
-
+        
         // Priority 1: Use context from chatbot conversations (if available)
         const contextQuery = getContextualSearchQuery()
-
+        
         if (contextQuery) {
           // User has shared problems in chatbot - use that context
           query = contextQuery
@@ -110,9 +74,9 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
           query = 'meditation music mindfulness relaxation guided meditation calm music peaceful songs ambient sounds'
           source = 'default'
         }
-
+        
         setVideoSourceContext(source)
-
+        
         const videos = await recommendVideos(query, '', 6) // Fetch 6 videos
         setVideoSuggestions(videos)
         setCurrentVideoIndex(0)
@@ -138,15 +102,53 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
     return () => clearInterval(interval)
   }, [videoSuggestions])
 
+  const moods = [
+    { emoji: calmImg, label: t('home.calm'), value: 'calm' },
+    { emoji: relaxImg, label: t('home.relax'), value: 'relax' },
+    { emoji: focusImg, label: t('home.focus'), value: 'focus' },
+    { emoji: anxiousImg, label: t('home.anxious'), value: 'anxious' },
+  ]
+
+  const aiCoachSessions = [
+    {
+      id: 'midnight-relax',
+      titleKey: 'home.sessions.midnightRelaxation',
+      image: 'https://images.pexels.com/photos/18554368/pexels-photo-18554368.jpeg',
+      categoryKey: 'home.sessions.categorySleep',
+      onClick: () => onNavigate('midnightRelaxation')
+    },
+    {
+      id: 'vedic-calm',
+      titleKey: 'home.sessions.vedicCalm',
+      image: 'https://images.pexels.com/photos/15327651/pexels-photo-15327651.jpeg',
+      categoryKey: 'home.sessions.categoryPhilosophy',
+      onClick: () => onNavigate('vedicCalm')
+    },
+    {
+      id: 'midnight-launderette',
+      titleKey: 'home.sessions.midnightLaunderette',
+      image: 'https://images.pexels.com/photos/3125171/pexels-photo-3125171.jpeg',
+      categoryKey: 'home.sessions.categoryFocus',
+      onClick: () => onNavigate('midnightLaunderette')
+    },
+    {
+      id: 'wisdom-gita',
+      titleKey: 'home.sessions.wisdomGita',
+      image: 'https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg',
+      categoryKey: 'home.sessions.categoryInsights',
+      onClick: () => onNavigate('wisdomGita')
+    }
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 pb-20">
-      {/* Header with Greeting and Streak Flame */}
-      <div className="px-4 md:px-8 lg:px-12 pt-8 md:pt-12 lg:pt-16 pb-4 md:pb-6">
-        <div className="max-w-7xl mx-auto flex items-start justify-between">
-          <div className="text-gray-900">
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-1 md:mb-2">Hi {user?.name || 'Guest'}</h1>
-            <p className="text-gray-700 text-sm md:text-base">How are you feeling today?</p>
-          </div>
+        {/* Header with Greeting and Streak Flame */}
+        <div className="px-4 md:px-8 lg:px-12 pt-8 md:pt-12 lg:pt-16 pb-4 md:pb-6">
+          <div className="max-w-7xl mx-auto flex items-start justify-between">
+            <div className="text-gray-900">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-1 md:mb-2">{t('home.hi')} {user?.name || 'Guest'}</h1>
+              <p className="text-gray-700 text-sm md:text-base">{t('home.howAreYouFeeling')}</p>
+            </div>
 
           {/* Streak Flame Icon */}
           <div className="flex items-center gap-2 md:gap-3">
@@ -182,8 +184,8 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
               <div className="flex items-center gap-2 md:gap-3">
                 <span className="text-2xl md:text-3xl">🔥</span>
                 <div>
-                  <h3 className="text-base md:text-lg font-semibold">{user.streak} Day Streak</h3>
-                  <p className="text-white/90 text-xs md:text-sm">Miracle moment in 2 days!</p>
+                  <h3 className="text-base md:text-lg font-semibold">{user.streak} {t('home.dayStreak')}</h3>
+                  <p className="text-white/90 text-xs md:text-sm">{t('home.miracleMoment')} 2 {t('home.days')}!</p>
                 </div>
               </div>
               <button
@@ -193,7 +195,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                   onNavigate('streaks')
                 }}
               >
-                <span className="text-xs md:text-sm">View Details →</span>
+                <span className="text-xs md:text-sm">{t('home.viewDetails')} →</span>
               </button>
             </div>
           </div>
@@ -224,103 +226,104 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                     </div>
                     <span className={`text-[10px] md:text-xs font-medium ${selectedMood === mood.value ? 'text-purple-600' : 'text-gray-700'
                       }`}>{mood.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Expandable Banner */}
-            <div
-              className={`transition-all duration-300 ease-out overflow-hidden ${selectedMood ? 'max-h-32' : 'max-h-0'
-                }`}
-            >
-              {selectedMood && (
-                <div
-                  className="bg-gradient-to-r from-purple-500 via-purple-400 to-pink-400 p-4 md:p-6 cursor-pointer hover:from-purple-600 hover:via-purple-500 hover:to-pink-500 transition-all"
-                  onClick={() => onNavigate('askQuestion')}
-                >
-                  <p className="text-white font-medium text-center mb-1 md:mb-2 text-sm md:text-base">
-                    {moodPrompts[selectedMood]}
-                  </p>
-                  <p className="text-white/90 text-xs md:text-sm text-center font-medium">
-                    Tap to share your thoughts →
-                  </p>
-                </div>
-              )}
+                </button>
+              ))}
             </div>
           </div>
+
+          {/* Expandable Banner */}
+          <div 
+            className={`transition-all duration-300 ease-out overflow-hidden ${
+              selectedMood ? 'max-h-32' : 'max-h-0'
+            }`}
+          >
+            {selectedMood && (
+              <div
+                className="bg-gradient-to-r from-purple-500 via-purple-400 to-pink-400 p-4 md:p-6 cursor-pointer hover:from-purple-600 hover:via-purple-500 hover:to-pink-500 transition-all"
+                onClick={() => onNavigate('askQuestion')}
+              >
+                <p className="text-white font-medium text-center mb-1 md:mb-2 text-sm md:text-base">
+                  {moodPrompts[selectedMood]}
+                </p>
+                <p className="text-white/90 text-xs md:text-sm text-center font-medium">
+                  {t('home.tapToShare')}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
 
           {/* AI Coach Sessions - Responsive Grid */}
           <div className="mb-4 md:mb-6">
             <div className="px-1 flex items-center justify-between mb-2 md:mb-3">
-              <h3 className="text-base md:text-lg font-semibold text-gray-900">Curated Sessions</h3>
+              <h3 className="text-base md:text-lg font-semibold text-gray-900">{t('home.curatedSessions')}</h3>
               <button
                 className="text-purple-600 text-xs md:text-sm font-medium flex items-center"
                 onClick={() => onNavigate('explore')}
               >
-                <span>Explore</span>
+                <span>{t('home.explore')}</span>
                 <span className="ml-1">→</span>
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
-              {aiCoachSessionsData.map((session) => (
+              {aiCoachSessions.map((session) => (
                 <div
                   key={session.id}
-                  onClick={() => onNavigate(session.target as Screen)}
+                  onClick={session.onClick}
                   className="relative rounded-xl md:rounded-2xl overflow-hidden h-24 md:h-28 lg:h-32 flex items-end p-2 md:p-3 cursor-pointer shadow-lg group hover:shadow-xl transition-shadow"
                 >
-                  {/* Background Image */}
-                  <div className="absolute inset-0 z-0">
-                    <img
-                      src={session.image}
-                      alt={session.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
-                  </div>
+                {/* Background Image */}
+                <div className="absolute inset-0 z-0">
+                  <img
+                    src={session.image}
+                    alt={t(session.titleKey)}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
+                </div>
 
-                  {/* Content */}
-                  <div className="relative z-10 w-full">
-                    <div className="flex justify-between items-end">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-white text-xs md:text-sm font-semibold mb-0.5 md:mb-1 drop-shadow truncate">{session.title}</h4>
-                        <div className="inline-flex items-center text-[9px] md:text-[10px] text-white/90 bg-white/15 backdrop-blur px-1.5 md:px-2 py-0.5 rounded-full border border-white/20">
-                          {session.category}
-                        </div>
+                {/* Content */}
+                <div className="relative z-10 w-full">
+                  <div className="flex justify-between items-end">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-white text-xs md:text-sm font-semibold mb-0.5 md:mb-1 drop-shadow truncate">{t(session.titleKey)}</h4>
+                      <div className="inline-flex items-center text-[9px] md:text-[10px] text-white/90 bg-white/15 backdrop-blur px-1.5 md:px-2 py-0.5 rounded-full border border-white/20">
+                        {t(session.categoryKey)}
                       </div>
-                      {/* Play Button */}
-                      <div className="bg-white rounded-full w-7 h-7 md:w-8 md:h-8 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform ml-2 flex-shrink-0">
-                        <svg
-                          width="10"
-                          height="10"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          className="text-purple-800 ml-0.5 md:w-3 md:h-3"
-                        >
-                          <path
-                            d="M8 5v14l11-7z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                      </div>
+                    </div>
+                    {/* Play Button */}
+                    <div className="bg-white rounded-full w-7 h-7 md:w-8 md:h-8 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform ml-2 flex-shrink-0">
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        className="text-purple-800 ml-0.5 md:w-3 md:h-3"
+                      >
+                        <path 
+                          d="M8 5v14l11-7z" 
+                          fill="currentColor"
+                        />
+                      </svg>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
+        </div>
 
           {/* YouTube Video Recommendations - Rolling Thumbnails */}
           <div className="mb-4 md:mb-6">
             <div className="px-1 flex items-center justify-between mb-2 md:mb-3">
               <h3 className="text-sm md:text-base lg:text-lg font-semibold text-gray-900">
-                {videoSourceContext === 'context' && '✨ Personalized for You'}
+                {videoSourceContext === 'context' && `✨ ${t('home.personalizedForYou')}`}
                 {videoSourceContext === 'mood' && selectedMood &&
                   `${selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)} Music & Videos`
                 }
-                {videoSourceContext === 'default' && 'Meditation Music & Videos'}
+                {videoSourceContext === 'default' && t('home.meditationMusic')}
               </h3>
               {videoSuggestions.length > 0 && (
                 <div className="flex items-center gap-1 md:gap-2">
@@ -349,8 +352,8 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                   <div className="w-10 h-10 md:w-12 md:h-12 border-3 md:border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
                   <p className="text-purple-600 font-medium text-xs md:text-sm lg:text-base text-center">
                     {videoSourceContext === 'context'
-                      ? 'Finding videos based on your conversations...'
-                      : 'Finding perfect videos for you...'
+                      ? t('home.findingVideosContext')
+                      : t('home.findingVideos')
                     }
                   </p>
                 </div>
@@ -395,14 +398,14 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
 
                   {/* YouTube Logo Badge */}
                   <div className="absolute top-2 md:top-4 right-2 md:right-4 bg-red-600 text-white px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg text-[10px] md:text-xs font-bold shadow-lg">
-                    YouTube
+                    {t('home.youtube')}
                   </div>
 
                   {/* Personalized Badge */}
                   {videoSourceContext === 'context' && (
                     <div className="absolute top-2 md:top-4 left-2 md:left-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg text-[10px] md:text-xs font-bold shadow-lg flex items-center gap-0.5 md:gap-1">
                       <span>✨</span>
-                      <span>For You</span>
+                      <span>{t('home.forYou')}</span>
                     </div>
                   )}
                 </div>
@@ -437,9 +440,9 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
             {!isLoadingVideos && videoSuggestions.length === 0 && (
               <div className="relative rounded-2xl md:rounded-3xl overflow-hidden h-40 md:h-52 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                 <div className="text-center px-4 md:px-6">
-                  <p className="text-gray-600 font-medium mb-1 md:mb-2 text-sm md:text-base">No videos found</p>
+                  <p className="text-gray-600 font-medium mb-1 md:mb-2 text-sm md:text-base">{t('home.noVideosFound')}</p>
                   <p className="text-gray-500 text-xs md:text-sm">
-                    Please check your YouTube API configuration
+                    {t('home.checkYouTubeConfig')}
                   </p>
                 </div>
               </div>
@@ -447,6 +450,8 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
           </div>
 
         </div>
+
+        
       </div>
     </div>
   )

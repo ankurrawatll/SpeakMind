@@ -2,6 +2,7 @@ import { useAuth } from '../contexts/AuthContext'
 import type { Screen } from '../App'
 import { useState, useEffect } from 'react'
 import SettingsModal from '../components/SettingsModal'
+import LanguageWrapper from '../components/LanguageWrapper'
 
 interface ProfileScreenProps {
   onNavigate: (screen: Screen) => void
@@ -141,9 +142,10 @@ export default function ProfileScreen({ user, onNavigate }: ProfileScreenProps) 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 relative pb-20">
-      {/* Header */}
-      <div className="px-4 md:px-8 lg:px-12 pt-8 md:pt-12 pb-4 md:pb-6">
+    <LanguageWrapper>
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 relative pb-20">
+        {/* Header */}
+        <div className="px-4 md:px-8 lg:px-12 pt-8 md:pt-12 pb-4 md:pb-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between mb-4 md:mb-6">
           <h1 className="text-lg md:text-xl font-semibold text-gray-900">Profile</h1>
           <button 
@@ -497,5 +499,6 @@ export default function ProfileScreen({ user, onNavigate }: ProfileScreenProps) 
         onNavigate={onNavigate}
       />
     </div>
+    </LanguageWrapper>
   )
 }
