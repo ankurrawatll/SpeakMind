@@ -91,28 +91,58 @@ const AppContent = () => {
   }, [currentUser])
 
   useEffect(() => {
-    // Only handle the case when user logs out or app first loads
-    if (currentUser === null && currentScreen !== 'userOnboarding') {
-      setCurrentScreen('auth')
+    // Only handle automatic navigation when user state changes
+    // Don't interfere with manual navigation (like during login/signup flow)
+    if (!currentUser) {
+      // User logged out - go to auth screen
+      if (currentScreen !== 'auth' && currentScreen !== 'userOnboarding') {
+        setCurrentScreen('auth')
+      }
+      return
     }
-    // For login/signup, we handle navigation immediately in handleAuthComplete
-    // to avoid delays from Firebase auth state changes
+
+    // User is logged in - check if we need to navigate
+    // Only auto-navigate if we're on auth screen (page refresh scenario)
+    if (currentScreen === 'auth') {
+      const onboardingKey = `speakmind_user_onboarding_${currentUser.uid}`
+      const hasCompletedOnboarding = localStorage.getItem(onboardingKey)
+
+      if (hasCompletedOnboarding) {
+        // User has completed onboarding before - go to home
+        setCurrentScreen('home')
+      } else {
+        // First time user - show onboarding
+        setCurrentScreen('userOnboarding')
+      }
+    }
+    // For login/signup flows, handleAuthComplete handles navigation
+    // so we don't interfere here
   }, [currentUser])
 
   const handleAuthComplete = (wasSignup: boolean = false, user?: any) => {
+    if (!user) return
     
-    // Immediately navigate based on signup status to avoid delay
+    // Check if user has completed onboarding (for both signup and login)
+    const onboardingKey = `speakmind_user_onboarding_${user.uid}`
+    const hasCompletedOnboarding = localStorage.getItem(onboardingKey)
+    
     if (wasSignup) {
-      // New user - check if they need onboarding
-      const completedUserOnboarding = user ? localStorage.getItem(`speakmind_user_onboarding_${user.uid}`) : null
-      if (!completedUserOnboarding) {
+      // New user signup - check if they need onboarding
+      if (!hasCompletedOnboarding) {
         setCurrentScreen('userOnboarding')
       } else {
         setCurrentScreen('home')
       }
     } else {
-      // Existing user - go directly to home
-      setCurrentScreen('home')
+      // Existing user login - check onboarding status
+      // If they've completed onboarding before, go to home
+      // If not (shouldn't happen for existing users, but handle it), show onboarding
+      if (hasCompletedOnboarding) {
+        setCurrentScreen('home')
+      } else {
+        // First time login (shouldn't normally happen, but handle gracefully)
+        setCurrentScreen('userOnboarding')
+      }
     }
   }
 

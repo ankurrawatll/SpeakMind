@@ -93,16 +93,22 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuth }) => {
 
     try {
       const result = await loginWithGoogle()
-      
-      // Check if this is a new user by checking the creation time
-      const isNewUser = result?.user?.metadata?.creationTime === result?.user?.metadata?.lastSignInTime
-      
-      // Check if user has completed onboarding
-      const hasCompletedOnboarding = result?.user ? 
-        localStorage.getItem(`speakmind_user_onboarding_${result.user.uid}`) : null
-      
-      // New users or users who haven't completed onboarding should go through it
-      onAuth(isNewUser || !hasCompletedOnboarding, result?.user)
+
+      if (result?.user) {
+        // Check if this is a new user based on account metadata
+        const userMetadata = result.user.metadata
+        const isNewUser =
+          userMetadata?.creationTime && userMetadata?.lastSignInTime
+            ? userMetadata.creationTime === userMetadata.lastSignInTime
+            : false
+
+        // Check if user has previously completed onboarding
+        const onboardingKey = `speakmind_user_onboarding_${result.user.uid}`
+        const hasCompletedOnboarding = localStorage.getItem(onboardingKey)
+
+        // New users or users who haven't completed onboarding should go through it
+        onAuth(isNewUser || !hasCompletedOnboarding, result.user)
+      }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred'
       setError(errorMessage)
