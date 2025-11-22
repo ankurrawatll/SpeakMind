@@ -7,6 +7,7 @@ import { GlassFilter, type DockIcon } from './ui/liquid-glass'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useTheme } from '../contexts/ThemeContext'
 
 interface BottomNavigationProps {
   currentScreen: Screen
@@ -15,6 +16,7 @@ interface BottomNavigationProps {
 
 export default function BottomNavigation({ currentScreen, onNavigate }: BottomNavigationProps) {
   const { t } = useLanguage()
+  const { colors } = useTheme()
   const [isHovered, setIsHovered] = useState(false)
 
   const navItems: DockIcon[] = [
@@ -57,7 +59,7 @@ export default function BottomNavigation({ currentScreen, onNavigate }: BottomNa
       <GlassFilter />
       <div className="fixed bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 z-50">
         <motion.div
-          className="relative flex items-center justify-center overflow-hidden bg-white/40 backdrop-blur-md border border-white/30 shadow-2xl"
+          className="relative flex items-center justify-center overflow-hidden bg-white/40 dark:bg-dark-card/40 backdrop-blur-md border border-white/30 dark:border-dark-border/30 shadow-2xl"
           initial={false}
           animate={{
             width: isHovered ? 'auto' : '60px',
@@ -105,7 +107,10 @@ export default function BottomNavigation({ currentScreen, onNavigate }: BottomNa
                   transition={{ duration: 0.2 }}
                   className="flex items-center justify-center w-full h-full"
                 >
-                  <activeItem.icon className="text-2xl text-purple-700" />
+                  <activeItem.icon 
+                    className="text-2xl"
+                    style={{ color: colors.primary }}
+                  />
                 </motion.div>
               ) : (
                 <motion.div
@@ -119,8 +124,19 @@ export default function BottomNavigation({ currentScreen, onNavigate }: BottomNa
                   {navItems.map((item, index) => (
                     <div
                       key={index}
-                      className={`flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 hover:scale-110 p-1 rounded-xl ${item.isActive ? "text-purple-700" : "text-gray-700 hover:text-purple-900"
+                      className={`flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-300 hover:scale-110 p-1 rounded-xl ${item.isActive ? "" : "text-gray-700 dark:text-dark-text-secondary"
                         }`}
+                      style={item.isActive ? { color: colors.primary } : undefined}
+                      onMouseEnter={(e) => {
+                        if (!item.isActive) {
+                          e.currentTarget.style.color = colors.primary
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!item.isActive) {
+                          e.currentTarget.style.color = ''
+                        }
+                      }}
                       onClick={item.onClick}
                     >
                       <item.icon className="text-2xl" />

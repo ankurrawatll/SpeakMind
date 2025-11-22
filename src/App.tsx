@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/LanguageContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import BottomNavigation from './components/BottomNavigation'
 import ErrorBoundary from './components/ErrorBoundary'
 
@@ -251,11 +252,13 @@ const AppContent = () => {
 function App() {
   return (
     <ErrorBoundary>
-      <LanguageProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-      </LanguageProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   )
 }

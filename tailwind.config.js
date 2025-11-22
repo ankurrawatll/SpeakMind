@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class', // Enable class-based dark mode
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -19,14 +20,28 @@ export default {
           'purple-orange': 'linear-gradient(135deg, #9D7CF3 0%, #FF9A76 100%)',
         },
         dark: {
-          bg: '#1A1A2E',
+          bg: '#0F0F1E',
+          'bg-secondary': '#1A1A2E',
           card: '#16213E',
+          'card-hover': '#1E2746',
           text: '#EEEEFF',
+          'text-secondary': '#B8B8D1',
+          border: '#2A2A3E',
         },
         light: {
           bg: '#F8F9FF',
+          'bg-secondary': '#FFFFFF',
           card: '#FFFFFF',
+          'card-hover': '#F5F5FF',
           text: '#1A1A2E',
+          'text-secondary': '#4A4A6A',
+          border: '#E5E5F0',
+        },
+        // Dynamic theme colors (will be set via CSS variables)
+        theme: {
+          primary: 'var(--theme-primary)',
+          secondary: 'var(--theme-secondary)',
+          accent: 'var(--theme-accent)',
         }
       },
       fontFamily: {

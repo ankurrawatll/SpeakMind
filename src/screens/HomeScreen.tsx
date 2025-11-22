@@ -4,6 +4,7 @@ import type { Screen } from '../App'
 import { recommendVideos, type VideoSuggestion } from '../utils/youtubeAI'
 import { getContextualSearchQuery } from '../utils/userContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useTheme } from '../contexts/ThemeContext'
 
 // Import mood images from public folder
 import calmImg from '/Homescreen/Calm.gif'
@@ -27,6 +28,7 @@ type MoodValue = 'calm' | 'relax' | 'focus' | 'anxious' | null
 
 export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
   const { t } = useLanguage()
+  const { colors } = useTheme()
   const [isStreakExpanded, setIsStreakExpanded] = useState(false)
   const [selectedMood, setSelectedMood] = useState<MoodValue>(null)
   const [videoSuggestions, setVideoSuggestions] = useState<VideoSuggestion[]>([])
@@ -141,28 +143,31 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:from-dark-bg dark:via-dark-bg-secondary dark:to-dark-bg pb-20 transition-colors duration-300">
         {/* Header with Greeting and Streak Flame */}
         <div className="px-4 md:px-8 lg:px-12 pt-8 md:pt-12 lg:pt-16 pb-4 md:pb-6">
           <div className="max-w-7xl mx-auto flex items-start justify-between">
-            <div className="text-gray-900">
+            <div className="text-gray-900 dark:text-dark-text">
               <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold mb-1 md:mb-2">{t('home.hi')} {user?.name || 'Guest'}</h1>
-              <p className="text-gray-700 text-sm md:text-base">{t('home.howAreYouFeeling')}</p>
+              <p className="text-gray-700 dark:text-dark-text-secondary text-sm md:text-base">{t('home.howAreYouFeeling')}</p>
             </div>
 
           {/* Streak Flame Icon */}
           <div className="flex items-center gap-2 md:gap-3">
             <button
               onClick={() => onNavigate('profile')}
-              className="p-1.5 md:p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
+              className="p-1.5 md:p-2 rounded-full bg-white/80 dark:bg-dark-card/80 backdrop-blur-sm hover:bg-white dark:hover:bg-dark-card transition-colors"
             >
-              <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-600 dark:text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </button>
             <button
               onClick={() => setIsStreakExpanded(!isStreakExpanded)}
-              className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              style={{
+                background: `linear-gradient(135deg, ${colors.gradientFrom} 0%, ${colors.gradientTo} 100%)`
+              }}
             >
               <span className="text-xl md:text-2xl">🔥</span>
               <div className="absolute -bottom-1 -right-1 bg-white rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center shadow-md">
@@ -179,7 +184,12 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
           }`}
       >
         <div className="px-4 md:px-8 lg:px-12 pb-4 md:pb-6">
-          <div className="max-w-7xl mx-auto bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl md:rounded-2xl p-3 md:p-4 shadow-lg">
+          <div 
+            className="max-w-7xl mx-auto rounded-xl md:rounded-2xl p-3 md:p-4 shadow-lg theme-gradient"
+            style={{
+              background: `linear-gradient(135deg, ${colors.gradientFrom} 0%, ${colors.gradientTo} 100%)`
+            }}
+          >
             <div className="flex items-center justify-between text-white">
               <div className="flex items-center gap-2 md:gap-3">
                 <span className="text-2xl md:text-3xl">🔥</span>
@@ -205,7 +215,7 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
       <div className="px-4 md:px-8 lg:px-12">
         <div className="max-w-7xl mx-auto">
           {/* Integrated Mood Selector & Banner */}
-          <div className="mb-6 md:mb-8 bg-white/40 backdrop-blur-md border border-white/30 rounded-xl md:rounded-2xl shadow overflow-hidden">
+          <div className="mb-6 md:mb-8 bg-white/40 dark:bg-dark-card/40 backdrop-blur-md border border-white/30 dark:border-dark-border/30 rounded-xl md:rounded-2xl shadow overflow-hidden">
             {/* Mood Selector */}
             <div className="p-3 md:p-4">
               <div className="flex justify-between items-center gap-2 md:gap-4">
@@ -216,16 +226,25 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                     className={`flex flex-col items-center space-y-1 md:space-y-2 flex-1 transition-all ${selectedMood === mood.value ? 'scale-110' : selectedMood ? 'opacity-50 scale-95' : ''
                       }`}
                   >
-                    <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden flex items-center justify-center ${selectedMood === mood.value ? 'ring-2 md:ring-4 ring-purple-400' : 'bg-gray-100'
-                      }`}>
+                    <div 
+                      className={`w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden flex items-center justify-center ${selectedMood === mood.value ? 'ring-2 md:ring-4' : 'bg-gray-100 dark:bg-dark-card-hover'
+                      }`}
+                      style={selectedMood === mood.value ? {
+                        '--tw-ring-color': colors.primary,
+                        borderColor: colors.primary
+                      } as React.CSSProperties : undefined}
+                    >
                       <img
                         src={mood.emoji}
                         alt={mood.label}
                         className="w-9 h-9 md:w-12 md:h-12 object-contain"
                       />
                     </div>
-                    <span className={`text-[10px] md:text-xs font-medium ${selectedMood === mood.value ? 'text-purple-600' : 'text-gray-700'
-                      }`}>{mood.label}</span>
+                    <span 
+                      className={`text-[10px] md:text-xs font-medium ${selectedMood === mood.value ? '' : 'text-gray-700 dark:text-dark-text-secondary'
+                      }`}
+                      style={selectedMood === mood.value ? { color: colors.primary } : undefined}
+                    >{mood.label}</span>
                 </button>
               ))}
             </div>
@@ -239,7 +258,10 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
           >
             {selectedMood && (
               <div
-                className="bg-gradient-to-r from-purple-500 via-purple-400 to-pink-400 p-4 md:p-6 cursor-pointer hover:from-purple-600 hover:via-purple-500 hover:to-pink-500 transition-all"
+                className="p-4 md:p-6 cursor-pointer transition-all theme-gradient-hover"
+                style={{
+                  background: `linear-gradient(135deg, ${colors.gradientFrom} 0%, ${colors.gradientTo} 100%)`
+                }}
                 onClick={() => onNavigate('askQuestion')}
               >
                 <p className="text-white font-medium text-center mb-1 md:mb-2 text-sm md:text-base">
@@ -256,9 +278,9 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
           {/* AI Coach Sessions - Responsive Grid */}
           <div className="mb-4 md:mb-6">
             <div className="px-1 flex items-center justify-between mb-2 md:mb-3">
-              <h3 className="text-base md:text-lg font-semibold text-gray-900">{t('home.curatedSessions')}</h3>
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-dark-text">{t('home.curatedSessions')}</h3>
               <button
-                className="text-purple-600 text-xs md:text-sm font-medium flex items-center"
+                className="text-xs md:text-sm font-medium flex items-center theme-text"
                 onClick={() => onNavigate('explore')}
               >
                 <span>{t('home.explore')}</span>
@@ -300,7 +322,8 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                         height="10"
                         viewBox="0 0 24 24"
                         fill="none"
-                        className="text-purple-800 ml-0.5 md:w-3 md:h-3"
+                        className="ml-0.5 md:w-3 md:h-3 theme-text"
+                        style={{ color: colors.primary }}
                       >
                         <path 
                           d="M8 5v14l11-7z" 
@@ -332,9 +355,12 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                       <div
                         key={index}
                         className={`h-1 md:h-1.5 rounded-full transition-all duration-300 ${index === currentVideoIndex % 3
-                            ? 'w-4 md:w-6 bg-purple-600'
-                            : 'w-1 md:w-1.5 bg-purple-300'
+                            ? 'w-4 md:w-6'
+                            : 'w-1 md:w-1.5 opacity-40'
                           }`}
+                        style={{
+                          backgroundColor: index === currentVideoIndex % 3 ? colors.primary : `${colors.primary}40`
+                        }}
                       />
                     ))}
                   </div>
@@ -347,10 +373,24 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
 
             {/* Loading State */}
             {isLoadingVideos && (
-              <div className="relative rounded-2xl md:rounded-3xl overflow-hidden h-40 md:h-52 lg:h-64 bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+              <div 
+                className="relative rounded-2xl md:rounded-3xl overflow-hidden h-40 md:h-52 lg:h-64 flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(135deg, ${colors.gradientFrom}15 0%, ${colors.gradientTo}15 100%)`
+                }}
+              >
                 <div className="flex flex-col items-center gap-2 md:gap-3 px-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 border-3 md:border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-                  <p className="text-purple-600 font-medium text-xs md:text-sm lg:text-base text-center">
+                  <div 
+                    className="w-10 h-10 md:w-12 md:h-12 border-3 md:border-4 rounded-full animate-spin"
+                    style={{
+                      borderColor: `${colors.primary}30`,
+                      borderTopColor: colors.primary
+                    }}
+                  />
+                  <p 
+                    className="font-medium text-xs md:text-sm lg:text-base text-center theme-text"
+                    style={{ color: colors.primary }}
+                  >
                     {videoSourceContext === 'context'
                       ? t('home.findingVideosContext')
                       : t('home.findingVideos')
@@ -382,7 +422,10 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                   {/* Play Button */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-12 h-12 md:w-16 md:h-16 bg-white/95 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:bg-white transition-all duration-300">
-                      <IoPlay className="text-purple-600 text-2xl md:text-3xl ml-0.5 md:ml-1" />
+                      <IoPlay 
+                        className="text-2xl md:text-3xl ml-0.5 md:ml-1 theme-text"
+                        style={{ color: colors.primary }}
+                      />
                     </div>
                   </div>
 
@@ -403,7 +446,12 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
 
                   {/* Personalized Badge */}
                   {videoSourceContext === 'context' && (
-                    <div className="absolute top-2 md:top-4 left-2 md:left-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg text-[10px] md:text-xs font-bold shadow-lg flex items-center gap-0.5 md:gap-1">
+                    <div 
+                      className="absolute top-2 md:top-4 left-2 md:left-4 text-white px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg text-[10px] md:text-xs font-bold shadow-lg flex items-center gap-0.5 md:gap-1 theme-gradient"
+                      style={{
+                        background: `linear-gradient(135deg, ${colors.gradientFrom} 0%, ${colors.gradientTo} 100%)`
+                      }}
+                    >
                       <span>✨</span>
                       <span>{t('home.forYou')}</span>
                     </div>
@@ -417,9 +465,12 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                       key={video.videoId}
                       onClick={() => setCurrentVideoIndex(index)}
                       className={`relative flex-shrink-0 w-24 h-16 md:w-32 md:h-20 rounded-lg md:rounded-xl overflow-hidden transition-all duration-300 ${index === currentVideoIndex
-                          ? 'ring-2 md:ring-3 ring-purple-500 scale-105 shadow-lg'
+                          ? 'ring-2 md:ring-3 scale-105 shadow-lg'
                           : 'opacity-60 hover:opacity-100 hover:scale-105'
                         }`}
+                      style={index === currentVideoIndex ? {
+                        '--tw-ring-color': colors.primary
+                      } as React.CSSProperties : undefined}
                     >
                       <img
                         src={video.thumbnails?.medium?.url || video.thumbnails?.default?.url}
@@ -428,7 +479,10 @@ export default function HomeScreen({ onNavigate, user }: HomeScreenProps) {
                         loading="lazy"
                       />
                       {index === currentVideoIndex && (
-                        <div className="absolute inset-0 border-2 border-purple-500 rounded-lg md:rounded-xl" />
+                        <div 
+                          className="absolute inset-0 border-2 rounded-lg md:rounded-xl"
+                          style={{ borderColor: colors.primary }}
+                        />
                       )}
                     </button>
                   ))}
