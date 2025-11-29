@@ -2,6 +2,11 @@ import type { Screen } from '../App'
 import { IoChevronBack } from 'react-icons/io5'
 import { useEffect, useMemo, useState } from 'react'
 import { useTheme } from '../contexts/ThemeContext'
+import { useAuth } from '../contexts/AuthContext'
+import { getUserStats, addShield, useShield } from '../services/firestore.service'
+import { onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from '../config/firebase'
+import type { UserStats } from '../services/firestore.service'
 
 interface StreaksScreenProps {
   onNavigate: (screen: Screen) => void
@@ -15,53 +20,98 @@ interface StreaksScreenProps {
   }
 }
 
+// Helper function to update user stats in Firebase
+const updateUserStatsData = async (userId: string, updates: Partial<UserStats>) => {
+  const statsRef = doc(db, 'userStats', userId)
+  await updateDoc(statsRef, {
+    ...updates,
+    updatedAt: serverTimestamp()
+  })
+}
+
 export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
   const { colors, isDark } = useTheme()
-  // Local state from localStorage
+  const { currentUser } = useAuth()
   const [selectedMonth, setSelectedMonth] = useState(() => new Date().getMonth())
   const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear())
-  const [meditatedDates, setMeditatedDates] = useState<string[]>(() => {
-    try {
-      const raw = localStorage.getItem('speakmind_meditation_dates')
-      return raw ? JSON.parse(raw) : []
-    } catch {
-      return []
-    }
-  })
-  const [shields, setShields] = useState<number>(() => {
-    const raw = localStorage.getItem('speakmind_shields')
-    return raw ? Number(raw) || 0 : 0
-  })
+  const [userStats, setUserStats] = useState<UserStats | null>(null)
+  const [loading, setLoading] = useState(true)
 
   const today = useMemo(() => new Date(), [])
   const todayKey = useMemo(() => new Date().toISOString().slice(0, 10), []) // YYYY-MM-DD
+  const meditatedDates = useMemo(() => userStats?.meditatedDates || [], [userStats])
+  const shields = useMemo(() => userStats?.shields || 0, [userStats])
   const dateSet = useMemo(() => new Set<string>(meditatedDates), [meditatedDates])
 
-  const save = (dates: string[], shieldsVal: number) => {
-    localStorage.setItem('speakmind_meditation_dates', JSON.stringify(dates))
-    localStorage.setItem('speakmind_shields', String(shieldsVal))
-  }
+  // Load user stats from Firebase
+  useEffect(() => {
+    if (!currentUser) {
+      setLoading(false)
+      return
+    }
 
-  const markTodayMeditated = () => {
-    if (dateSet.has(todayKey)) return
-    const updated = Array.from(new Set([...meditatedDates, todayKey])).sort()
-    setMeditatedDates(updated)
-    save(updated, shields)
+    const loadStats = async () => {
+      try {
+        setLoading(true)
+        const stats = await getUserStats(currentUser.uid)
+        setUserStats(stats)
+      } catch (error) {
+        console.error('Error loading user stats:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadStats()
+
+    // Set up real-time listener
+    const statsRef = doc(db, 'userStats', currentUser.uid)
+    const unsubscribe = onSnapshot(statsRef, (doc) => {
+      if (doc.exists()) {
+        setUserStats(doc.data() as UserStats)
+      }
+    })
+
+    return () => unsubscribe()
+  }, [currentUser])
+
+  const markTodayMeditated = async () => {
+    if (!currentUser || !userStats || dateSet.has(todayKey)) return
+
+    try {
+      const updated = Array.from(new Set([...meditatedDates, todayKey])).sort()
+      
+      // Calculate new streak
+      let currentStreak = 1
+      const sortedDates = updated.sort()
+      for (let i = sortedDates.length - 1; i > 0; i--) {
+        const current = new Date(sortedDates[i])
+        const previous = new Date(sortedDates[i - 1])
+        const diffDays = Math.floor((current.getTime() - previous.getTime()) / (1000 * 60 * 60 * 24))
+        if (diffDays === 1) {
+          currentStreak++
+        } else {
+          break
+        }
+      }
+
+      const longestStreak = Math.max(userStats.longestStreak || 0, currentStreak)
+
+      await updateUserStatsData(currentUser.uid, {
+        meditatedDates: updated,
+        lastMeditationDate: todayKey,
+        currentStreak,
+        longestStreak
+      })
+    } catch (error) {
+      console.error('Error marking today as meditated:', error)
+      alert('Failed to update. Please try again.')
+    }
   }
 
   const computeStreak = (): number => {
-    let streak = 0
-    const d = new Date()
-    while (true) {
-      const key = d.toISOString().slice(0, 10)
-      if (dateSet.has(key)) {
-        streak += 1
-        d.setDate(d.getDate() - 1)
-      } else {
-        break
-      }
-    }
-    return streak
+    if (!userStats) return 0
+    return userStats.currentStreak || 0
   }
 
   const currentDate = new Date(selectedYear, selectedMonth, 1)
@@ -232,18 +282,30 @@ export default function StreaksScreen({ onNavigate }: StreaksScreenProps) {
             {dateSet.has(todayKey) ? 'Today Logged' : 'Mark Today as Meditated'}
           </button>
           <button
-            onClick={() => {
+            onClick={async () => {
+              if (!currentUser || !userStats) return
+              
               const useShield = !dateSet.has(todayKey) && shields > 0
               if (useShield) {
-                const newShields = shields - 1
-                setShields(newShields)
-                save(meditatedDates, newShields)
-                alert('Shield used to protect your streak today!')
+                try {
+                  const success = await useShield(currentUser.uid)
+                  if (success) {
+                    // Mark today as meditated when using shield
+                    await markTodayMeditated()
+                    alert('Shield used to protect your streak today!')
+                  }
+                } catch (error) {
+                  console.error('Error using shield:', error)
+                  alert('Failed to use shield. Please try again.')
+                }
               } else {
-                const newShields = shields + 1
-                setShields(newShields)
-                save(meditatedDates, newShields)
-                alert('You earned a shield! Use it on a tough day to protect your streak.')
+                try {
+                  await addShield(currentUser.uid)
+                  alert('You earned a shield! Use it on a tough day to protect your streak.')
+                } catch (error) {
+                  console.error('Error adding shield:', error)
+                  alert('Failed to add shield. Please try again.')
+                }
               }
             }}
             className="px-4 py-3 bg-white dark:bg-dark-card border border-purple-200 dark:border-purple-700/50 text-purple-700 dark:text-purple-300 rounded-2xl font-medium text-sm hover:bg-gray-50 dark:hover:bg-dark-card-hover transition-colors"

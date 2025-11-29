@@ -152,18 +152,29 @@ export const getUserMeditationSessions = async (
 ): Promise<MeditationSession[]> => {
   try {
     const sessionsRef = collection(db, 'meditationSessions')
+    // Query only by userId to avoid composite index requirement
+    // We'll sort in memory instead
     const q = query(
       sessionsRef,
       where('userId', '==', userId),
-      orderBy('completedAt', 'desc'),
-      limit(limitCount)
+      limit(100) // Fetch more than needed, then sort and limit
     )
 
     const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map(doc => ({
+    const sessions = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as MeditationSession[]
+    
+    // Sort by completedAt in memory (descending - most recent first)
+    sessions.sort((a, b) => {
+      const aTime = a.completedAt?.toMillis?.() || (a.completedAt as any)?.seconds * 1000 || 0
+      const bTime = b.completedAt?.toMillis?.() || (b.completedAt as any)?.seconds * 1000 || 0
+      return bTime - aTime
+    })
+    
+    // Return only the requested limit
+    return sessions.slice(0, limitCount)
   } catch (error) {
     console.error('Error getting meditation sessions:', error)
     throw error
@@ -197,18 +208,29 @@ export const getUserJournalEntries = async (
 ): Promise<JournalEntry[]> => {
   try {
     const journalRef = collection(db, 'journalEntries')
+    // Query only by userId to avoid composite index requirement
+    // We'll sort in memory instead
     const q = query(
       journalRef,
       where('userId', '==', userId),
-      orderBy('createdAt', 'desc'),
-      limit(limitCount)
+      limit(100) // Fetch more than needed, then sort and limit
     )
 
     const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map(doc => ({
+    const entries = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as JournalEntry[]
+    
+    // Sort by createdAt in memory (descending - most recent first)
+    entries.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis?.() || (a.createdAt as any)?.seconds * 1000 || 0
+      const bTime = b.createdAt?.toMillis?.() || (b.createdAt as any)?.seconds * 1000 || 0
+      return bTime - aTime
+    })
+    
+    // Return only the requested limit
+    return entries.slice(0, limitCount)
   } catch (error) {
     console.error('Error getting journal entries:', error)
     throw error

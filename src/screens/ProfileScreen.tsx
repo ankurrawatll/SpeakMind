@@ -1,9 +1,12 @@
 import { useAuth } from '../contexts/AuthContext'
 import type { Screen } from '../App'
-import { useState, lazy, Suspense } from 'react'
+import { useState, lazy, Suspense, useEffect, useMemo } from 'react'
 const SettingsModal = lazy(() => import('../components/SettingsModal'))
 import LanguageWrapper from '../components/LanguageWrapper'
 import ThemeToggle from '../components/ThemeToggle'
+import { getUserStats, getUserMeditationSessions, type UserStats, type MeditationSession as FirebaseMeditationSession } from '../services/firestore.service'
+import { onSnapshot, doc } from 'firebase/firestore'
+import { db } from '../config/firebase'
 
 interface ProfileScreenProps {
   onNavigate: (screen: Screen) => void
@@ -78,8 +81,11 @@ export default function ProfileScreen({ user, onNavigate }: ProfileScreenProps) 
   const { currentUser, logout } = useAuth()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'achievements'>('overview')
+  const [userStats, setUserStats] = useState<UserStats | null>(null)
+  const [recentSessions, setRecentSessions] = useState<MeditationSession[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Mock brain health data
+  // Mock brain health data (can be connected to EEG data later)
   const [brainHealthMetrics] = useState<BrainHealthMetrics>({
     focus: 78,
     stress: 22,
@@ -99,40 +105,202 @@ export default function ProfileScreen({ user, onNavigate }: ProfileScreenProps) 
     { date: 'Sun', focus: 78, stress: 22, relaxation: 85, sleepQuality: 72 }
   ])
 
-  // Mock meditation session data
-  const [recentSessions] = useState<MeditationSession[]>([
-    { id: '1', date: '2024-01-15', duration: 20, type: 'Mindfulness', mood: 'Calm', satisfaction: 9 },
-    { id: '2', date: '2024-01-14', duration: 15, type: 'Breathing', mood: 'Focused', satisfaction: 8 },
-    { id: '3', date: '2024-01-13', duration: 25, type: 'Body Scan', mood: 'Relaxed', satisfaction: 9 },
-    { id: '4', date: '2024-01-12', duration: 10, type: 'Quick Calm', mood: 'Anxious', satisfaction: 6 },
-    { id: '5', date: '2024-01-11', duration: 30, type: 'Loving Kindness', mood: 'Peaceful', satisfaction: 10 }
-  ])
+  // Fetch user stats and sessions from Firebase
+  useEffect(() => {
+    if (!currentUser) {
+      setLoading(false)
+      return
+    }
 
-  // Mock monthly progress data
-  const [monthlyProgress] = useState<MonthlyProgress[]>([
-    { month: 'Oct', totalMinutes: 180, sessions: 12, averageMood: 7.5, streakDays: 8 },
-    { month: 'Nov', totalMinutes: 240, sessions: 16, averageMood: 8.2, streakDays: 12 },
-    { month: 'Dec', totalMinutes: 320, sessions: 20, averageMood: 8.8, streakDays: 15 },
-    { month: 'Jan', totalMinutes: 280, sessions: 18, averageMood: 8.5, streakDays: 14 }
-  ])
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        const [stats, sessions] = await Promise.all([
+          getUserStats(currentUser.uid),
+          getUserMeditationSessions(currentUser.uid, 10)
+        ])
+        
+        setUserStats(stats)
+        
+        // Convert Firebase sessions to display format
+        const formattedSessions: MeditationSession[] = sessions.map(session => ({
+          id: session.id || '',
+          date: session.completedAt?.toDate?.()?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+          duration: session.duration,
+          type: session.type.charAt(0).toUpperCase() + session.type.slice(1),
+          mood: session.mood || 'Calm',
+          satisfaction: 8 // Default, can be added to session later
+        }))
+        setRecentSessions(formattedSessions)
+      } catch (error) {
+        console.error('Error loading profile data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  // Mock achievements data
-  const [achievements] = useState<Achievement[]>([
-    { id: '1', title: 'First Steps', description: 'Complete your first meditation session', icon: '🌱', category: 'meditation', unlocked: true, progress: 1, maxProgress: 1, rarity: 'common', unlockedAt: '2024-01-01' },
-    { id: '2', title: 'Week Warrior', description: 'Meditate for 7 consecutive days', icon: '🔥', category: 'streak', unlocked: true, progress: 7, maxProgress: 7, rarity: 'common', unlockedAt: '2024-01-07' },
-    { id: '3', title: 'Mind Master', description: 'Achieve 80% focus score for 5 days', icon: '🧠', category: 'brain', unlocked: true, progress: 5, maxProgress: 5, rarity: 'rare', unlockedAt: '2024-01-10' },
-    { id: '4', title: 'Zen Master', description: 'Complete 100 meditation sessions', icon: '🧘‍♀️', category: 'meditation', unlocked: false, progress: 18, maxProgress: 100, rarity: 'epic' },
-    { id: '5', title: 'Social Butterfly', description: 'Connect with 10 friends', icon: '👥', category: 'social', unlocked: false, progress: 3, maxProgress: 10, rarity: 'rare' },
-    { id: '6', title: 'Brain Optimizer', description: 'Maintain 90% brain health for 30 days', icon: '⚡', category: 'brain', unlocked: false, progress: 12, maxProgress: 30, rarity: 'legendary' }
-  ])
+    loadData()
 
-  // Mock progress milestones
-  const [milestones] = useState<ProgressMilestone[]>([
-    { id: '1', title: 'Meditation Minutes', description: 'Total time meditated', target: 1000, current: 280, unit: 'minutes', category: 'meditation' },
-    { id: '2', title: 'Perfect Sessions', description: 'Sessions rated 10/10', target: 50, current: 12, unit: 'sessions', category: 'quality' },
-    { id: '3', title: 'Focus Mastery', description: 'Days with 90%+ focus', target: 30, current: 8, unit: 'days', category: 'brain' },
-    { id: '4', title: 'Community Helper', description: 'Help others in community', target: 25, current: 5, unit: 'helps', category: 'social' }
-  ])
+    // Set up real-time listener for user stats
+    const statsRef = doc(db, 'userStats', currentUser.uid)
+    const unsubscribe = onSnapshot(statsRef, (doc) => {
+      if (doc.exists()) {
+        setUserStats(doc.data() as UserStats)
+      }
+    })
+
+    return () => unsubscribe()
+  }, [currentUser])
+
+  // Calculate monthly progress from real sessions
+  const monthlyProgress = useMemo(() => {
+    if (!recentSessions.length) return []
+    
+    const monthMap = new Map<string, { totalMinutes: number; sessions: number }>()
+    
+    recentSessions.forEach(session => {
+      const date = new Date(session.date)
+      const monthKey = date.toLocaleString('default', { month: 'short' })
+      const existing = monthMap.get(monthKey) || { totalMinutes: 0, sessions: 0 }
+      monthMap.set(monthKey, {
+        totalMinutes: existing.totalMinutes + session.duration,
+        sessions: existing.sessions + 1
+      })
+    })
+
+    return Array.from(monthMap.entries()).map(([month, data]) => ({
+      month,
+      totalMinutes: data.totalMinutes,
+      sessions: data.sessions,
+      averageMood: 8.0, // Can calculate from mood data later
+      streakDays: userStats?.currentStreak || 0
+    })).slice(0, 4)
+  }, [recentSessions, userStats])
+
+  // Calculate achievements from real stats
+  const achievements = useMemo(() => {
+    if (!userStats) return []
+    
+    const totalSessions = userStats.totalSessions
+    const currentStreak = userStats.currentStreak
+    const totalMinutes = userStats.totalMinutes
+    
+    return [
+      { 
+        id: '1', 
+        title: 'First Steps', 
+        description: 'Complete your first meditation session', 
+        icon: '🌱', 
+        category: 'meditation' as const, 
+        unlocked: totalSessions >= 1, 
+        progress: Math.min(totalSessions, 1), 
+        maxProgress: 1, 
+        rarity: 'common' as const,
+        unlockedAt: totalSessions >= 1 ? userStats.lastMeditationDate : undefined
+      },
+      { 
+        id: '2', 
+        title: 'Week Warrior', 
+        description: 'Meditate for 7 consecutive days', 
+        icon: '🔥', 
+        category: 'streak' as const, 
+        unlocked: currentStreak >= 7, 
+        progress: Math.min(currentStreak, 7), 
+        maxProgress: 7, 
+        rarity: 'common' as const,
+        unlockedAt: currentStreak >= 7 ? userStats.lastMeditationDate : undefined
+      },
+      { 
+        id: '3', 
+        title: 'Mind Master', 
+        description: 'Achieve 80% focus score for 5 days', 
+        icon: '🧠', 
+        category: 'brain' as const, 
+        unlocked: false, 
+        progress: 0, 
+        maxProgress: 5, 
+        rarity: 'rare' as const
+      },
+      { 
+        id: '4', 
+        title: 'Zen Master', 
+        description: 'Complete 100 meditation sessions', 
+        icon: '🧘‍♀️', 
+        category: 'meditation' as const, 
+        unlocked: totalSessions >= 100, 
+        progress: Math.min(totalSessions, 100), 
+        maxProgress: 100, 
+        rarity: 'epic' as const,
+        unlockedAt: totalSessions >= 100 ? userStats.lastMeditationDate : undefined
+      },
+      { 
+        id: '5', 
+        title: 'Social Butterfly', 
+        description: 'Connect with 10 friends', 
+        icon: '👥', 
+        category: 'social' as const, 
+        unlocked: false, 
+        progress: 0, 
+        maxProgress: 10, 
+        rarity: 'rare' as const
+      },
+      { 
+        id: '6', 
+        title: 'Brain Optimizer', 
+        description: 'Maintain 90% brain health for 30 days', 
+        icon: '⚡', 
+        category: 'brain' as const, 
+        unlocked: false, 
+        progress: 0, 
+        maxProgress: 30, 
+        rarity: 'legendary' as const
+      }
+    ]
+  }, [userStats])
+
+  // Calculate progress milestones from real stats
+  const milestones = useMemo(() => {
+    if (!userStats) return []
+    
+    return [
+      { 
+        id: '1', 
+        title: 'Meditation Minutes', 
+        description: 'Total time meditated', 
+        target: 1000, 
+        current: userStats.totalMinutes, 
+        unit: 'minutes', 
+        category: 'meditation' 
+      },
+      { 
+        id: '2', 
+        title: 'Perfect Sessions', 
+        description: 'Sessions rated 10/10', 
+        target: 50, 
+        current: 0, // Can track satisfaction later
+        unit: 'sessions', 
+        category: 'quality' 
+      },
+      { 
+        id: '3', 
+        title: 'Focus Mastery', 
+        description: 'Days with 90%+ focus', 
+        target: 30, 
+        current: 0, // Can track from EEG data later
+        unit: 'days', 
+        category: 'brain' 
+      },
+      { 
+        id: '4', 
+        title: 'Community Helper', 
+        description: 'Help others in community', 
+        target: 25, 
+        current: 0, // Can track from forum interactions later
+        unit: 'helps', 
+        category: 'social' 
+      }
+    ]
+  }, [userStats])
 
   // Get stored user data
   const getUserData = () => {
@@ -191,28 +359,49 @@ export default function ProfileScreen({ user, onNavigate }: ProfileScreenProps) 
             <h2 className="text-lg md:text-xl font-semibold text-gray-900 mb-1">
               {currentUser?.displayName || currentUser?.email?.split('@')[0] || user.name}
             </h2>
-            <p className="text-purple-500 font-medium text-sm md:text-base">Level {user.level}</p>
+            <p className="text-purple-500 font-medium text-sm md:text-base">
+              Level {userStats?.level || user.level}
+            </p>
           </div>
 
           {/* Quick Stats */}
-          <div className="max-w-7xl mx-auto grid grid-cols-4 gap-1.5 md:gap-2 mb-4 md:mb-6 px-2 md:px-4">
-            <div className="bg-yellow-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
-              <div className="text-base md:text-lg font-bold text-gray-900">{user.streak}</div>
-              <div className="text-[10px] md:text-xs text-gray-600">Days</div>
+          {loading ? (
+            <div className="max-w-7xl mx-auto grid grid-cols-4 gap-1.5 md:gap-2 mb-4 md:mb-6 px-2 md:px-4">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="bg-gray-100 rounded-lg md:rounded-xl p-2 md:p-3 text-center animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded mb-1"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                </div>
+              ))}
             </div>
-            <div className="bg-pink-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
-              <div className="text-base md:text-lg font-bold text-gray-900">{user.timemeditated}</div>
-              <div className="text-[10px] md:text-xs text-gray-600">Mins</div>
+          ) : (
+            <div className="max-w-7xl mx-auto grid grid-cols-4 gap-1.5 md:gap-2 mb-4 md:mb-6 px-2 md:px-4">
+              <div className="bg-yellow-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
+                <div className="text-base md:text-lg font-bold text-gray-900">
+                  {userStats?.currentStreak || user.streak}
+                </div>
+                <div className="text-[10px] md:text-xs text-gray-600">Days</div>
+              </div>
+              <div className="bg-pink-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
+                <div className="text-base md:text-lg font-bold text-gray-900">
+                  {userStats?.totalMinutes || user.timemeditated}
+                </div>
+                <div className="text-[10px] md:text-xs text-gray-600">Mins</div>
+              </div>
+              <div className="bg-blue-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
+                <div className="text-base md:text-lg font-bold text-gray-900">
+                  {userStats?.totalSessions || user.meditations}
+                </div>
+                <div className="text-[10px] md:text-xs text-gray-600">Sessions</div>
+              </div>
+              <div className="bg-green-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
+                <div className="text-base md:text-lg font-bold text-gray-900">
+                  {userStats?.points || user.points}
+                </div>
+                <div className="text-[10px] md:text-xs text-gray-600">Points</div>
+              </div>
             </div>
-            <div className="bg-blue-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
-              <div className="text-base md:text-lg font-bold text-gray-900">{user.meditations}</div>
-              <div className="text-[10px] md:text-xs text-gray-600">Sessions</div>
-            </div>
-            <div className="bg-green-50 rounded-lg md:rounded-xl p-2 md:p-3 text-center">
-              <div className="text-base md:text-lg font-bold text-gray-900">{user.points}</div>
-              <div className="text-[10px] md:text-xs text-gray-600">Points</div>
-            </div>
-          </div>
+          )}
 
           {/* Tab Navigation */}
           <div className="max-w-7xl mx-auto px-2 md:px-4 mb-3 md:mb-4">
