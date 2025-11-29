@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import type { Screen } from '../App'
 const EEGMeditationSession = lazy(() => import('../components/EEGMeditationSession'))
 const EEGAnalysisReport = lazy(() => import('../components/EEGAnalysisReport'))
@@ -10,7 +10,13 @@ interface EEGBrainHealthScreenProps {
   onNavigate: (screen: Screen) => void
 }
 
-type ViewState = 'main' | 'session' | 'report'
+type ViewState = 'main' | 'session' | 'report' | 'history'
+
+interface EEGSessionHistoryItem {
+  id: string
+  session: EEGSession
+  aiAnalysis: string
+}
 
 export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScreenProps) {
   const { t } = useLanguage()
@@ -19,6 +25,7 @@ export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScree
   const [selectedDuration, setSelectedDuration] = useState(10) // minutes
   const [completedSession, setCompletedSession] = useState<EEGSession | null>(null)
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null)
+  const [sessionHistory, setSessionHistory] = useState<EEGSessionHistoryItem[]>([])
 
   const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 
@@ -29,6 +36,23 @@ export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScree
   const handleSessionComplete = (session: EEGSession, analysis: string) => {
     setCompletedSession(session)
     setAiAnalysis(analysis)
+    // Persist in local history so user can show previous reports without rerunning hardware
+    const historyItem: EEGSessionHistoryItem = {
+      id: session.id,
+      session,
+      aiAnalysis: analysis
+    }
+    setSessionHistory(prev => {
+      const next = [historyItem, ...prev].slice(0, 20) // keep last 20 sessions
+      try {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem('eegSessionHistory', JSON.stringify(next))
+        }
+      } catch {
+        // Ignore storage errors; history is a convenience feature
+      }
+      return next
+    })
     setViewState('report')
   }
 
@@ -41,6 +65,21 @@ export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScree
     setCompletedSession(null)
     setAiAnalysis(null)
   }
+
+  // Load any stored history on first mount
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return
+      const raw = window.localStorage.getItem('eegSessionHistory')
+      if (!raw) return
+      const parsed = JSON.parse(raw) as EEGSessionHistoryItem[]
+      if (Array.isArray(parsed)) {
+        setSessionHistory(parsed)
+      }
+    } catch {
+      // If parsing fails, just start with empty history
+    }
+  }, [])
 
   // Show session component
   if (viewState === 'session') {
@@ -79,6 +118,67 @@ export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScree
           onClose={handleReportClose}
         />
       </Suspense>
+    )
+  }
+
+  // Show standalone history list (no EEG connection required)
+  if (viewState === 'history') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:from-dark-bg dark:via-dark-bg-secondary dark:to-dark-bg pb-20 px-4 pt-12 transition-colors duration-300">
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => setViewState('main')}
+            className="p-2 rounded-full bg-white/80 dark:bg-dark-card/80 backdrop-blur-sm"
+          >
+            <svg className="w-6 h-6 text-gray-600 dark:text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-dark-text">EEG Session History</h1>
+          <div className="w-10" />
+        </div>
+
+        {sessionHistory.length === 0 ? (
+          <div className="mt-12 p-6 text-center bg-white/80 dark:bg-dark-card/80 rounded-2xl border border-dashed border-gray-200 dark:border-dark-border">
+            <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+              No EEG sessions stored yet. Run a session once on localhost to create reports you can reuse later.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {sessionHistory.map((item) => {
+              const startedAt = new Date(item.session.startTime)
+              const durationMinutes = Math.floor(item.session.duration / 60)
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setCompletedSession(item.session)
+                    setAiAnalysis(item.aiAnalysis)
+                    setViewState('report')
+                  }}
+                  className="w-full text-left p-4 rounded-2xl bg-white/80 dark:bg-dark-card/80 border border-gray-100 dark:border-dark-border hover:bg-white dark:hover:bg-dark-card transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="font-semibold text-gray-900 dark:text-dark-text">
+                      Session on {startedAt.toLocaleDateString()} at {startedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    <span className="text-xs text-gray-500 dark:text-dark-text-secondary">
+                      {durationMinutes} min
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-dark-text-secondary mb-1">
+                    Data points: {item.session.dataPoints.length}
+                  </p>
+                  <p className="text-sm text-gray-700 dark:text-dark-text-secondary line-clamp-2">
+                    {item.aiAnalysis}
+                  </p>
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
     )
   }
 
@@ -232,7 +332,18 @@ export default function EEGBrainHealthScreen({ onNavigate }: EEGBrainHealthScree
           >
             {t('brainHealth.regularMeditation')}
           </button>
+
+          {sessionHistory.length > 0 && (
+            <button
+              onClick={() => setViewState('history')}
+              className="w-full py-3 bg-white/80 backdrop-blur-sm text-gray-700 font-medium rounded-2xl border border-gray-200 hover:bg-white transition-all"
+            >
+              View EEG session history
+            </button>
+          )}
         </div>
+
+        {/* EEG Play Lab - future features */}
 
         {/* EEG Play Lab - future features */}
         <div className="mt-8 space-y-3">

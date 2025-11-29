@@ -255,34 +255,39 @@ export default function EEGMeditationSession({
     const sleepQuality = Math.min(100, Math.max(0, (avgTheta / (avgBeta + 1)) * 60))
 
     // Create prompt for AI analysis
-    const prompt = `Analyze this EEG meditation session data and provide a concise, structured summary.
+    // NOTE: We "translate" the EEG numbers into clear, structured context for Gemini
+    // so it can reason clinically instead of generating generic mindfulness content.
+    const prompt = `You are a clinical neurologist writing a brief EEG-based meditation report.
+You receive quantitative EEG summary values and normalized indices from 0–100.
+Do not role‑play as the user. Do not use emojis or bullet points or asterisks.
 
-Session Duration: ${Math.floor(session.duration / 60)} minutes
-Data Points Recorded: ${session.dataPoints.length}
+Patient meditation EEG summary:
+Session duration (minutes): ${Math.floor(session.duration / 60)}
+Data points recorded: ${session.dataPoints.length}
 
-Average Brain Wave Levels:
-- Alpha (8-13 Hz): ${avgAlpha.toFixed(2)}μV - Associated with relaxed awareness and meditation
-- Beta (13-30 Hz): ${avgBeta.toFixed(2)}μV - Associated with active concentration and alertness
-- Theta (4-8 Hz): ${avgTheta.toFixed(2)}μV - Associated with deep relaxation and creativity
-- Delta (0.5-4 Hz): ${avgDelta.toFixed(2)}μV - Associated with deep sleep
-- Gamma (30-100 Hz): ${avgGamma.toFixed(2)}μV - Associated with high-level processing
+Average band amplitudes (microvolts, higher = stronger activity):
+Alpha (8–13 Hz, calm wakefulness): ${avgAlpha.toFixed(2)}
+Beta (13–30 Hz, mental effort/stress): ${avgBeta.toFixed(2)}
+Theta (4–8 Hz, drowsy/relaxed): ${avgTheta.toFixed(2)}
+Delta (0.5–4 Hz, deep sleep/slow waves): ${avgDelta.toFixed(2)}
+Gamma (30–100 Hz, complex processing): ${avgGamma.toFixed(2)}
 
-Calculated Metrics:
-- Focus Level: ${focus.toFixed(0)}%
-- Stress Level: ${stress.toFixed(0)}%
-- Relaxation Level: ${relaxation.toFixed(0)}%
-- Sleep Quality Indicator: ${sleepQuality.toFixed(0)}%
+Derived clinical-style indices (0–100):
+Focus index: ${focus.toFixed(0)}
+Stress load index: ${stress.toFixed(0)}
+Calm/relaxation index: ${relaxation.toFixed(0)}
+Restorative/sleep‑like pattern index: ${sleepQuality.toFixed(0)}
 
-Please provide your response in this exact format, keeping it short and easy to scan:
+Write your answer in three labelled sections, plain text only:
+1) Clinical summary: 2–3 short sentences describing alertness, stress and calmness.
+2) Brain activity profile: 3–4 short sentences interpreting the indices using medical language.
+3) Treatment and home plan: 3–5 short sentences including lifestyle and breathing exercises.
 
-1. Session Snapshot (2–3 short sentences)
-2. Brain State Highlights (3–5 bullet points, max 12 words each)
-3. Recommendations (3–5 bullet points, max 12 words each)
-
-Hard limits:
-- Max 220 words total
-- No long paragraphs, keep it punchy and visual
-- Warm, encouraging, mindfulness-focused tone`
+Style constraints:
+- Tone like a hospital doctor: objective, non‑personal, professional, no coaching tone.
+- Be concise, under 160 words, with compact sentences.
+- You may mention that any medication changes must be decided with a psychiatrist or physician.
+- Do not say you are not a doctor; simply give cautious, generic clinical-style guidance.`
 
     try {
       const response = await callGeminiAPI(prompt)
@@ -304,23 +309,28 @@ Hard limits:
     relaxation: number,
     sleepQuality: number
   ): string => {
-    return `Your ${Math.floor(session.duration / 60)}-minute meditation session has been completed!
+    const durationMinutes = Math.floor(session.duration / 60)
+    const focusText =
+      focus >= 70 ? 'good sustained attention'
+        : focus >= 50 ? 'moderate attention with some fluctuation'
+        : 'reduced sustained attention during the recording'
+    const stressText =
+      stress <= 30 ? 'low physiological stress load'
+        : stress <= 60 ? 'moderate stress activation'
+        : 'elevated stress activation'
+    const relaxationText =
+      relaxation >= 70 ? 'strong calming and relaxation pattern'
+        : relaxation >= 50 ? 'partial relaxation response'
+        : 'limited relaxation response'
+    const sleepText =
+      sleepQuality >= 70 ? 'patterns consistent with good restorative potential'
+        : 'no clear deep‑sleep pattern in this short session'
 
-**Session Summary:**
-- Duration: ${Math.floor(session.duration / 60)} minutes
-- Data Points Recorded: ${session.dataPoints.length}
+    return `Clinical summary: This ${durationMinutes}-minute EEG meditation session shows ${focusText} with ${stressText}. Relaxation markers indicate ${relaxationText}. Deep-sleep related activity suggests ${sleepText}.
 
-**Your Brain State:**
-- Focus Level: ${focus.toFixed(0)}% - ${focus >= 70 ? 'Excellent focus!' : focus >= 50 ? 'Good focus' : 'Room for improvement'}
-- Stress Level: ${stress.toFixed(0)}% - ${stress <= 30 ? 'Very low stress - great!' : stress <= 60 ? 'Moderate stress' : 'Consider more relaxation techniques'}
-- Relaxation Level: ${relaxation.toFixed(0)}% - ${relaxation >= 70 ? 'Deeply relaxed!' : 'Could be more relaxed'}
-- Sleep Quality Indicator: ${sleepQuality.toFixed(0)}% - ${sleepQuality >= 70 ? 'Healthy patterns' : 'Consider improving sleep hygiene'}
+Brain activity profile: Focus index ${focus.toFixed(0)} and calm index ${relaxation.toFixed(0)} reflect overall balance between beta and alpha rhythms. Stress index ${stress.toFixed(0)} suggests the level of sympathetic arousal during the session. Restorative index ${sleepQuality.toFixed(0)} is interpreted only as a supportive marker, not as a diagnostic sleep study.
 
-**Recommendations:**
-${focus < 50 ? '- Try focus meditation exercises to improve concentration\n' : ''}${stress > 60 ? '- Practice deep breathing techniques to reduce stress\n' : ''}${relaxation < 60 ? '- Extend your meditation sessions for deeper relaxation\n' : ''}- Continue regular practice to see long-term benefits
-- Track your progress over time to observe improvements
-
-Keep up the great work on your mindfulness journey! 🧘‍♀️✨`
+Treatment and home plan: Continue daily breathing or body-scan practice for 10–15 minutes in a quiet setting. If stress or anxiety symptoms remain high, discuss with a psychiatrist or physician about psychological therapies and, if needed, medication options; do not change medicines without supervision. Maintain regular sleep schedule, limited caffeine late in the day, and gentle evening stretching. Repeat sessions and compare reports over time to document progress.`
   }
 
   const formatTime = (seconds: number) => {
