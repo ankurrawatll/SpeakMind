@@ -15,6 +15,9 @@
 </div>
 
 ---
+## live link 
+https://speakmind-azure.vercel.app/ (best use on phone)
+
 
 ## 📖 Overview
 
